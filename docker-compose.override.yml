@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  core-api:
+    volumes:
+      - ./backend/core-api:/app
+    command: air -c .air.toml
+    ports:
+      - "8080:8080"
+
+  analytics-api:
+    volumes:
+      - ./backend/analytics-api:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+
+  dashboard:
+    build:
+      target: builder
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend/dashboard/src:/app/src
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api

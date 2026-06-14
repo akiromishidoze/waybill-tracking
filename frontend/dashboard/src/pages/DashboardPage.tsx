@@ -67,7 +67,7 @@ export default function DashboardPage() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis domain={[80, 100]} />
-            <Tooltip />
+            <Tooltip cursor={false} />
             <Bar dataKey="sla" fill="#2563eb" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

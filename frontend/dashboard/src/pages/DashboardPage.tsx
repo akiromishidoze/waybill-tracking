@@ -18,15 +18,7 @@ export default function DashboardPage() {
     refetchInterval: 30000,
   })
 
-  const slaData = [
-    { name: 'Mon', sla: 95 },
-    { name: 'Tue', sla: 97 },
-    { name: 'Wed', sla: 93 },
-    { name: 'Thu', sla: 98 },
-    { name: 'Fri', sla: 96 },
-    { name: 'Sat', sla: 91 },
-    { name: 'Sun', sla: 88 },
-  ]
+  const slaData: Array<{ name: string; sla: number }> = []
 
   return (
     <div>

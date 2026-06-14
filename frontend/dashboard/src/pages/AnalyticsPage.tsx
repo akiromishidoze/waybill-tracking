@@ -1,25 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
 import { analyticsService } from '@/services/api'
 
-const monthlyData = [
-  { month: 'Jan', shipments: 420, sla: 95 },
-  { month: 'Feb', shipments: 380, sla: 96 },
-  { month: 'Mar', shipments: 510, sla: 94 },
-  { month: 'Apr', shipments: 470, sla: 97 },
-  { month: 'May', shipments: 540, sla: 93 },
-  { month: 'Jun', shipments: 620, sla: 95 },
-]
+const monthlyData: Array<{ month: string; shipments: number; sla: number }> = []
 
-const statusDist = [
-  { name: 'Delivered', value: 1240, color: '#16a34a' },
-  { name: 'In Transit', value: 380, color: '#d97706' },
-  { name: 'Pending', value: 210, color: '#6b7280' },
-  { name: 'Failed', value: 45, color: '#dc2626' },
-]
+const statusDist: Array<{ name: string; value: number; color: string }> = []
 
 export default function AnalyticsPage() {
   const { data: stats } = useQuery({

@@ -79,6 +79,34 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
+func MeHandler(db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, _ := c.Get("userID")
+		email, _ := c.Get("email")
+		name, _ := c.Get("userName")
+		role, _ := c.Get("role")
+
+		var company sql.NullString
+		err := db.QueryRow(c, `SELECT company FROM users WHERE id=$1`, userID).Scan(&company)
+		if err != nil {
+			company = sql.NullString{Valid: false}
+		}
+
+		co := ""
+		if company.Valid {
+			co = company.String
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"id":      userID,
+			"email":   email,
+			"name":    name,
+			"role":    role,
+			"company": co,
+		})
+	}
+}
+
 func LoginHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req loginRequest

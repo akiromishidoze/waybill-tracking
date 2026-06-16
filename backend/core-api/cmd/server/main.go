@@ -58,6 +58,7 @@ func main() {
 		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
+			protected.GET("/auth/me", handlers.MeHandler(db))
 			protected.GET("/waybills", waybillHandler.List)
 			protected.GET("/waybills/:id", waybillHandler.Get)
 			protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)

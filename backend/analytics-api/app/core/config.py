@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     SENDGRID_KEY: str = ""
     TWILIO_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
+    REPORT_EMAIL: str = "ops@waybilltracking.com"
 
     class Config:
         env_file = ".env"

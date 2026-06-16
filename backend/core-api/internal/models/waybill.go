@@ -73,3 +73,28 @@ type StatusUpdateRequest struct {
 	Location string        `json:"location"`
 	Remark   *string       `json:"remark,omitempty"`
 }
+
+var validTransitions = map[WaybillStatus][]WaybillStatus{
+	StatusCreated:         {StatusPickedUp, StatusCancelled},
+	StatusPickedUp:        {StatusInTransit, StatusCancelled, StatusReturned},
+	StatusInTransit:       {StatusAtSortingCenter, StatusOutForDelivery, StatusCancelled, StatusReturned},
+	StatusAtSortingCenter: {StatusInTransit, StatusOutForDelivery, StatusCancelled, StatusReturned},
+	StatusOutForDelivery:  {StatusDelivered, StatusFailedDelivery, StatusCancelled, StatusReturned},
+	StatusFailedDelivery:  {StatusOutForDelivery, StatusCancelled, StatusReturned},
+	StatusDelivered:       {},
+	StatusReturned:        {},
+	StatusCancelled:       {},
+}
+
+func IsValidTransition(from, to WaybillStatus) bool {
+	allowed, ok := validTransitions[from]
+	if !ok {
+		return false
+	}
+	for _, s := range allowed {
+		if s == to {
+			return true
+		}
+	}
+	return false
+}

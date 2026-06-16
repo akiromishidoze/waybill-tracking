@@ -105,6 +105,13 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
+	if !models.IsValidTransition(wb.Status, req.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid status transition from " + string(wb.Status) + " to " + string(req.Status),
+		})
+		return
+	}
+
 	event := models.ScanEvent{
 		ID:        uuid.New().String(),
 		WaybillID: id,

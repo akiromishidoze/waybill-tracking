@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { Package, BarChart3, LayoutDashboard, LogOut } from 'lucide-react'
+import { useAuthStore } from '@/store/auth'
 import s from '@/styles/components.module.css'
 
 const navItems = [
@@ -10,9 +11,10 @@ const navItems = [
 
 export default function Layout() {
   const navigate = useNavigate()
+  const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
+    logout()
     navigate('/login')
   }
 

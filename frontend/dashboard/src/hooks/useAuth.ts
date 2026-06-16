@@ -1,26 +1,15 @@
-import { useState, useEffect } from 'react'
-import type { User } from '@/types/waybill'
-import { authService } from '@/services/api'
+import { useEffect } from 'react'
+import { useAuthStore } from '@/store/auth'
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const token = useAuthStore((s) => s.token)
+  const user = useAuthStore((s) => s.user)
+  const loading = useAuthStore((s) => s.loading)
+  const loadUser = useAuthStore((s) => s.loadUser)
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      setLoading(false)
-      return
-    }
-    authService
-      .me()
-      .then((res) => setUser(res.data))
-      .catch((err) => {
-        console.error('auth me failed', err)
-        localStorage.removeItem('access_token')
-      })
-      .finally(() => setLoading(false))
-  }, [])
+    loadUser()
+  }, [loadUser])
 
-  return { user, loading }
+  return { user, loading, token }
 }

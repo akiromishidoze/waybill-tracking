@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { Waybill, ScanEvent, User, DashboardStats } from '@/types/waybill'
+import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -7,7 +8,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
+  const token = useAuthStore.getState().token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -18,7 +19,7 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('access_token')
+      useAuthStore.getState().logout()
       window.location.href = '/login'
     }
     return Promise.reject(err)

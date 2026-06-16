@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/core-api/migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -126,6 +126,8 @@ services:
       - "443:443"
     volumes:
       - ./infrastructure/docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infrastructure/docker/nginx/certs:/etc/nginx/certs:ro
+      - certbot_www:/var/www/certbot:ro
     depends_on:
       - core-api
       - analytics-api
@@ -159,3 +161,4 @@ volumes:
   es_data:
   prometheus_data:
   grafana_data:
+  certbot_www:

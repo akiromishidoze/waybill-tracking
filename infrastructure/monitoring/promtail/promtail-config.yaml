@@ -1,0 +1,127 @@
+server:
+  http_listen_port: 9080
+  log_level: warn
+
+positions:
+  # Persists read positions so Promtail doesn't re-ship logs after restart
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+
+  # ── Docker container logs (via Docker socket) ────────────────────────────────
+  - job_name: docker-containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+    relabel_configs:
+      # Use the container name as the "service" label
+      - source_labels: [__meta_docker_container_name]
+        regex: "/?(.*)"
+        target_label: service
+
+      # Carry through the Docker Compose service name
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: compose_service
+
+      # Drop containers that have opted-out of log collection
+      - source_labels: [__meta_docker_container_label_logging]
+        regex: "false"
+        action: drop
+
+      # Keep the full container ID for correlation
+      - source_labels: [__meta_docker_container_id]
+        target_label: container_id
+
+    pipeline_stages:
+
+      # ── Core API (Go) — structured JSON logs ──────────────────────────────────
+      - match:
+          selector: '{compose_service="core-api"}'
+          stages:
+            - json:
+                expressions:
+                  level: level
+                  msg: msg
+                  request_id: request_id
+                  method: method
+                  path: path
+                  status: status
+                  latency: latency_ms
+                  error: error
+            - labels:
+                level:
+                method:
+                path:
+                status:
+            - template:
+                source: level
+                template: '{{ ToLower .Value }}'
+            - output:
+                source: msg
+
+      # ── Analytics API (Python FastAPI) — JSON logs ─────────────────────────────
+      - match:
+          selector: '{compose_service="analytics-api"}'
+          stages:
+            - json:
+                expressions:
+                  level: levelname
+                  msg: message
+                  request_id: request_id
+                  path: path
+                  status: status_code
+            - labels:
+                level:
+                path:
+                status:
+            - output:
+                source: msg
+
+      # ── Celery Worker — plain text logs ──────────────────────────────────────
+      - match:
+          selector: '{compose_service="celery-worker"}'
+          stages:
+            - regex:
+                expression: '^\[(?P<timestamp>[^\]]+)\] (?P<level>[A-Z]+)/(?P<process>\w+) (?P<msg>.*)$'
+            - labels:
+                level:
+                process:
+            - output:
+                source: msg
+
+      # ── Nginx — access log parsing ─────────────────────────────────────────────
+      - match:
+          selector: '{compose_service="nginx"}'
+          stages:
+            - regex:
+                expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) \S+" (?P<status>\d+) (?P<body_bytes_sent>\d+)'
+            - labels:
+                method:
+                status:
+            - output:
+                source: path
+
+      # ── PostgreSQL logs ────────────────────────────────────────────────────────
+      - match:
+          selector: '{compose_service="postgres"}'
+          stages:
+            - regex:
+                expression: '(?P<level>LOG|WARNING|ERROR|FATAL|PANIC|DETAIL|HINT|CONTEXT|STATEMENT|QUERY):\s+(?P<msg>.*)'
+            - labels:
+                level:
+            - output:
+                source: msg
+
+      # ── Generic fallback — all other containers ────────────────────────────────
+      - match:
+          selector: '{compose_service!~"core-api|analytics-api|celery-worker|nginx|postgres"}'
+          stages:
+            - json:
+                expressions:
+                  level: level
+                  msg: message
+            - labels:
+                level:

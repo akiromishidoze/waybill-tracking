@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -63,10 +64,12 @@ func main() {
 		c.Next()
 	})
 
+	authLimit := middleware.RateLimitMiddleware(rdb, 20, time.Minute)
+
 	api := r.Group("/api")
 	{
-		api.POST("/auth/login", handlers.LoginHandler(cfg.JWTSecret, db))
-		api.POST("/auth/register", handlers.RegisterHandler(cfg.JWTSecret, db))
+		api.POST("/auth/login", authLimit, handlers.LoginHandler(cfg.JWTSecret, db))
+		api.POST("/auth/register", authLimit, handlers.RegisterHandler(cfg.JWTSecret, db))
 
 		public := api.Group("")
 		public.GET("/track/:trackingNumber", waybillHandler.Track)

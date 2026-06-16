@@ -50,8 +50,9 @@ func main() {
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers)
 
-	r := gin.Default()
-
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(middleware.RequestLogger())
 	r.Use(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		allowed := false

@@ -27,9 +27,17 @@ func main() {
 	}
 	defer db.Close()
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: cfg.RedisURL,
-	})
+	redisOpts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatalf("failed to parse redis url: %v", err)
+	}
+	rdb := redis.NewClient(redisOpts)
+
+	redisCtx, redisCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer redisCancel()
+	if err := rdb.Ping(redisCtx).Err(); err != nil {
+		log.Fatalf("failed to connect to redis: %v", err)
+	}
 
 	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers)
 	defer kafkaProducer.Close()

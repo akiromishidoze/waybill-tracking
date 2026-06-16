@@ -68,12 +68,15 @@ services:
       PORT: "8080"
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/waybill?sslmode=disable"
       REDIS_URL: "redis://redis:6379/0"
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
       KAFKA_BROKERS: "kafka:9092"
       JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      elasticsearch:
         condition: service_started
       kafka:
         condition: service_started

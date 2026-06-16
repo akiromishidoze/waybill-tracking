@@ -9,6 +9,7 @@ type Config struct {
 	Port            string
 	DatabaseURL     string
 	RedisURL        string
+	ElasticsearchURL string
 	KafkaBrokers    string
 	KafkaTopic      string
 	JWTSecret       string
@@ -20,16 +21,17 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		Port:            getEnv("PORT", "8080"),
-		DatabaseURL:     getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
-		RedisURL:        getEnv("REDIS_URL", "redis://localhost:6379/0"),
-		KafkaBrokers:    getEnv("KAFKA_BROKERS", "localhost:9092"),
-		KafkaTopic:      getEnv("KAFKA_TOPIC", "waybill-events"),
-		JWTSecret:       getEnv("JWT_SECRET", "change-me-in-production"),
-		TwilioSID:       getEnv("TWILIO_SID", ""),
-		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),
-		SendGridKey:     getEnv("SENDGRID_KEY", ""),
-		AllowedOrigins:  getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
+		Port:             getEnv("PORT", "8080"),
+		DatabaseURL:      getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
+		RedisURL:         getEnv("REDIS_URL", "redis://localhost:6379/0"),
+		ElasticsearchURL: getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
+		KafkaBrokers:     getEnv("KAFKA_BROKERS", "localhost:9092"),
+		KafkaTopic:       getEnv("KAFKA_TOPIC", "waybill-events"),
+		JWTSecret:        getEnv("JWT_SECRET", "change-me-in-production"),
+		TwilioSID:        getEnv("TWILIO_SID", ""),
+		TwilioAuthToken:  getEnv("TWILIO_AUTH_TOKEN", ""),
+		SendGridKey:      getEnv("SENDGRID_KEY", ""),
+		AllowedOrigins:   getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 }
 

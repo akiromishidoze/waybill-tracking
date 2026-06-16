@@ -10,16 +10,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
+	es "github.com/waybill-tracking/core-api/internal/elastic"
 )
 
 type HealthHandler struct {
 	db     *pgxpool.Pool
 	rdb    *redis.Client
 	broker string
+	es     *es.Client
 }
 
-func NewHealthHandler(db *pgxpool.Pool, rdb *redis.Client, broker string) *HealthHandler {
-	return &HealthHandler{db: db, rdb: rdb, broker: broker}
+func NewHealthHandler(db *pgxpool.Pool, rdb *redis.Client, broker string, ec *es.Client) *HealthHandler {
+	return &HealthHandler{db: db, rdb: rdb, broker: broker, es: ec}
 }
 
 func (h *HealthHandler) Check(c *gin.Context) {
@@ -65,6 +67,13 @@ func (h *HealthHandler) Check(c *gin.Context) {
 	} else {
 		checks["kafka"] = gin.H{"status": "down", "error": lastErr.Error()}
 		status = http.StatusServiceUnavailable
+	}
+
+	if err := h.es.Ping(ctx); err != nil {
+		checks["elasticsearch"] = gin.H{"status": "down", "error": err.Error()}
+		status = http.StatusServiceUnavailable
+	} else {
+		checks["elasticsearch"] = gin.H{"status": "up"}
 	}
 
 	checks["status"] = "ok"

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	es "github.com/waybill-tracking/core-api/internal/elastic"
 	"github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
@@ -17,10 +18,11 @@ type WaybillHandler struct {
 	repo          *repository.WaybillRepository
 	kafkaProducer *kafka.Producer
 	wsHub         *ws.Hub
+	esClient      *es.Client
 }
 
-func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub) *WaybillHandler {
-	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub}
+func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client) *WaybillHandler {
+	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec}
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
@@ -100,6 +102,10 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 		log.Printf("kafka publish error: %v", err)
 	}
 
+	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
+		log.Printf("elasticsearch index error: %v", err)
+	}
+
 	c.JSON(http.StatusCreated, wb)
 }
 
@@ -146,6 +152,10 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+
+	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
+		log.Printf("elasticsearch index error: %v", err)
+	}
 
 	c.JSON(http.StatusOK, wb)
 }

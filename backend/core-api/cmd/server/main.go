@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
+	es "github.com/waybill-tracking/core-api/internal/elastic"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
@@ -39,16 +40,21 @@ func main() {
 		log.Fatalf("failed to connect to redis: %v", err)
 	}
 
+	esClient := es.NewClient(cfg.ElasticsearchURL)
+	if err := esClient.Ping(context.Background()); err != nil {
+		log.Printf("elasticsearch not reachable: %v", err)
+	}
+
 	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer kafkaProducer.Close()
 
 	wsHub := ws.NewHub()
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub)
+	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient)
 	courierHandler := handlers.NewCourierHandler(waybillRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
-	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers)
+	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	r := gin.New()
 	r.Use(gin.Recovery())

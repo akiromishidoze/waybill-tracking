@@ -2,10 +2,10 @@
 set -euo pipefail
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
-info()  { echo -e "${CYAN}[INFO]${NC}  $*"; }
-ok()    { echo -e "${GREEN}[OK]${NC}    $*"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
-err()   { echo -e "${RED}[ERR]${NC}   $*" >&2; }
+info() { echo -e "${CYAN}[INFO]${NC} $*"; }
+ok() { echo -e "${GREEN}[OK]${NC} $*"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+err() { echo -e "${RED}[ERR]${NC} $ *" >&2; }
 
 REPO_URL="https://github.com/akiromishidoze/waybill-tracking.git"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/waybill-tracking}"
@@ -17,7 +17,7 @@ check_command() {
   if ! command -v "$1" &>/dev/null; then
     err "$1 is not installed."
     case "$(uname -s)" in
-      Linux*)  warn "Install with: sudo apt install $1  (or your distro's package manager)" ;;
+      Linux*) warn "Install with: sudo apt install $1 (or your distro's package manager)" ;;
       Darwin*) warn "Install with: brew install $1" ;;
     esac
     exit 1
@@ -38,17 +38,18 @@ else
   err "docker compose plugin not found. Install Docker Desktop or docker-compose-plugin."
   exit 1
 fi
+
 ok "Prerequisites met: docker, git, $DC"
 
 if [ -d "$INSTALL_DIR/.git" ]; then
   warn "Directory $INSTALL_DIR already contains a git repo."
-  read -rp "  Use existing repo and pull latest? [Y/n] " yn
+  read -rp "Use existing repo and pull latest? [Y/n] " yn
   case "${yn,,}" in
     n|no) info "Using existing repo as-is." ;;
     *) cd "$INSTALL_DIR" && git pull --ff-only && ok "Pulled latest." ;;
   esac
 else
-  info "Cloning into $INSTALL_DIR ..."
+  info "Cloning into $INSTALL_DIR"
   git clone "$REPO_URL" "$INSTALL_DIR"
   ok "Repository cloned."
 fi
@@ -65,28 +66,29 @@ if [ -f .env ]; then
   warn ".env file already exists — backing up to .env.bak"
   cp .env .env.bak
 fi
+
 cp "$TMP_ENV" .env
 ok "JWT_SECRET generated and written to .env"
 
-info "Pulling images and building services ..."
+info "Pulling images and building services"
 $DC pull --quiet 2>/dev/null || true
 $DC build --quiet 2>/dev/null || true
-info "Starting all services in detached mode ..."
+info "Starting all services in detached mode"
 $DC up -d
 
-info "Waiting for services to become healthy ..."
+info "Waiting for services to become healthy"
 MAX_RETRIES=30
 for i in $(seq 1 $MAX_RETRIES); do
   sleep 3
   HEALTHY=true
   for svc in postgres core-api analytics-api dashboard; do
     status=$($DC ps --format json "$svc" 2>/dev/null | python3 -c "
-import sys,json
-try:
-  d=json.load(sys.stdin)
-  if isinstance(d,list): d=d[0]
-  print(d.get('Health','') or d.get('Status',''))
-except: print('')
+      import sys,json
+      try:
+        d=json.load(sys.stdin)
+        if isinstance(d,list): d=d[0]
+        print(d.get('Health','') or d.get('Status',''))
+      except: print('')
 " 2>/dev/null || echo "")
     case "$status" in
       *healthy*|*running*|*Up*) ;;
@@ -100,16 +102,16 @@ done
 echo ""
 info "=== Setup Complete ==="
 echo ""
-echo -e "  ${CYAN}Dashboard${NC}      http://localhost:5173"
-echo -e "  ${CYAN}Core API${NC}       http://localhost:8080/health"
-echo -e "  ${CYAN}Analytics API${NC}  http://localhost:8000/health"
-echo -e "  ${CYAN}Postgres${NC}       localhost:5432 (user: postgres, password: postgres)"
-echo -e "  ${CYAN}Redis${NC}          localhost:6379"
-echo -e "  ${CYAN}Elasticsearch${NC}  http://localhost:9200"
-echo -e "  ${CYAN}Prometheus${NC}     http://localhost:9090"
-echo -e "  ${CYAN}Grafana${NC}        http://localhost:3001 (admin / admin)"
+echo -e "${CYAN}Dashboard${NC}http://localhost:5173"
+echo -e "${CYAN}Core API${NC}http://localhost:8080/health"
+echo -e "${CYAN}Analytics API${NC}http://localhost:8000/health"
+echo -e "${CYAN}Postgres${NC}localhost:5432 (user: postgres, password: postgres)"
+echo -e "${CYAN}Redis${NC}localhost:6379"
+echo -e "${CYAN}Elasticsearch${NC}http://localhost:9200"
+echo -e "${CYAN}Prometheus${NC}http://localhost:9090"
+echo -e "${CYAN}Grafana${NC}http://localhost:3001 (admin / admin)"
 echo ""
 ok "Waybill Tracking is running!"
 echo ""
-echo "Run  cd $INSTALL_DIR && docker compose logs -f  to follow logs."
-echo "Run  docker compose down  to stop all services."
+echo "Run cd $INSTALL_DIR && docker compose logs -f to follow logs."
+echo "Run docker compose down to stop all services."

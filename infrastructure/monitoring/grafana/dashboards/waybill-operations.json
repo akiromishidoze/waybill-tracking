@@ -1,28 +1,91 @@
 {
   "__inputs": [],
   "__requires": [
-    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "11.0.0" },
-    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
-    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
-    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" },
-    { "type": "panel", "id": "piechart", "name": "Pie chart", "version": "" },
-    { "type": "panel", "id": "table", "name": "Table", "version": "" }
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
   ],
   "title": "Waybill — Operations",
   "uid": "waybill-operations",
   "description": "Waybill-level metrics: scan events, status transitions, courier throughput, and Kafka pipeline lag.",
   "version": 1,
-  "tags": ["waybill", "production", "operations"],
+  "tags": [
+    "waybill",
+    "production",
+    "operations"
+  ],
   "schemaVersion": 39,
   "timezone": "browser",
   "editable": true,
   "graphTooltip": 1,
   "refresh": "30s",
-  "time": { "from": "now-6h", "to": "now" },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timepicker": {
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
-    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
   },
   "templating": {
     "list": [
@@ -31,12 +94,27 @@
         "label": "Interval",
         "type": "interval",
         "options": [
-          { "text": "1m", "value": "1m" },
-          { "text": "5m", "value": "5m" },
-          { "text": "15m", "value": "15m" },
-          { "text": "1h", "value": "1h" }
+          {
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "text": "15m",
+            "value": "15m"
+          },
+          {
+            "text": "1h",
+            "value": "1h"
+          }
         ],
-        "current": { "text": "5m", "value": "5m" },
+        "current": {
+          "text": "5m",
+          "value": "5m"
+        },
         "auto": false
       },
       {
@@ -44,16 +122,43 @@
         "label": "Waybill Status",
         "type": "custom",
         "options": [
-          { "text": "All", "value": ".*" },
-          { "text": "created", "value": "created" },
-          { "text": "picked_up", "value": "picked_up" },
-          { "text": "in_transit", "value": "in_transit" },
-          { "text": "out_for_delivery", "value": "out_for_delivery" },
-          { "text": "delivered", "value": "delivered" },
-          { "text": "failed_delivery", "value": "failed_delivery" },
-          { "text": "returned", "value": "returned" }
+          {
+            "text": "All",
+            "value": ".*"
+          },
+          {
+            "text": "created",
+            "value": "created"
+          },
+          {
+            "text": "picked_up",
+            "value": "picked_up"
+          },
+          {
+            "text": "in_transit",
+            "value": "in_transit"
+          },
+          {
+            "text": "out_for_delivery",
+            "value": "out_for_delivery"
+          },
+          {
+            "text": "delivered",
+            "value": "delivered"
+          },
+          {
+            "text": "failed_delivery",
+            "value": "failed_delivery"
+          },
+          {
+            "text": "returned",
+            "value": "returned"
+          }
         ],
-        "current": { "text": "All", "value": ".*" },
+        "current": {
+          "text": "All",
+          "value": ".*"
+        },
         "includeAll": true,
         "allValue": ".*",
         "multi": false
@@ -65,7 +170,12 @@
       "id": 100,
       "title": "Waybill KPIs",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -74,24 +184,48 @@
       "id": 1,
       "title": "Waybills Created (total)",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "waybill_created_total", "legendFormat": "Created", "instant": true }
+        {
+          "expr": "waybill_created_total",
+          "legendFormat": "Created",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "blue", "value": null }]
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "area",
         "textMode": "auto"
@@ -101,8 +235,16 @@
       "id": 2,
       "title": "Delivered Today",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "increase(waybill_status_transitions_total{to_status=\"delivered\"}[24h])",
@@ -113,16 +255,28 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "area",
         "textMode": "auto"
@@ -132,8 +286,16 @@
       "id": 3,
       "title": "Failed Deliveries Today",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "increase(waybill_status_transitions_total{to_status=\"failed_delivery\"}[24h])",
@@ -144,16 +306,36 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 20 }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "area",
         "textMode": "auto"
@@ -163,8 +345,16 @@
       "id": 4,
       "title": "Scan Events / sec",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(waybill_scan_events_total[$interval]))",
@@ -174,16 +364,28 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "blue", "value": null }]
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "area",
         "textMode": "auto"
@@ -193,8 +395,16 @@
       "id": 5,
       "title": "Delivery Success Rate",
       "type": "gauge",
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "100 * increase(waybill_status_transitions_total{to_status=\"delivered\"}[24h]) / (increase(waybill_status_transitions_total{to_status=\"delivered\"}[24h]) + increase(waybill_status_transitions_total{to_status=\"failed_delivery\"}[24h]))",
@@ -209,17 +419,33 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "yellow", "value": 80 },
-              { "color": "green", "value": 95 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 95
+              }
             ]
           },
-          "color": { "mode": "thresholds" }
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       }
@@ -228,24 +454,48 @@
       "id": 6,
       "title": "Active Couriers",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "waybill_active_couriers", "legendFormat": "Couriers", "instant": true }
+        {
+          "expr": "waybill_active_couriers",
+          "legendFormat": "Couriers",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "purple", "value": null }]
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "none",
         "textMode": "auto"
@@ -255,7 +505,12 @@
       "id": 200,
       "title": "Scan & Status Events",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -264,8 +519,16 @@
       "id": 10,
       "title": "Scan Event Rate by Location",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(waybill_scan_events_total[$interval])) by (location)",
@@ -275,22 +538,46 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "right" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 11,
       "title": "Status Transition Rate",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(waybill_status_transitions_total[$interval])) by (from_status, to_status)",
@@ -300,22 +587,46 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "right" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 12,
       "title": "Waybill Status Distribution (last 24h)",
       "type": "piechart",
-      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(increase(waybill_status_transitions_total[$interval])) by (to_status)",
@@ -324,22 +635,49 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short", "color": { "mode": "palette-classic" } },
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["sum"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "values": false
+        },
         "pieType": "pie",
-        "legend": { "displayMode": "table", "placement": "right", "values": ["percent", "value"] },
-        "tooltip": { "mode": "multi" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "percent",
+            "value"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
       "id": 13,
       "title": "Waybill Create Rate",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "rate(waybill_created_total[$interval])",
@@ -349,22 +687,45 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "fixed", "fixedColor": "blue" },
-          "custom": { "lineWidth": 2, "fillOpacity": 15 }
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
       }
     },
     {
       "id": 14,
       "title": "Failed Delivery Rate",
       "type": "timeseries",
-      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "rate(waybill_status_transitions_total{to_status=\"failed_delivery\"}[$interval])",
@@ -374,21 +735,41 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "fixed", "fixedColor": "red" },
-          "custom": { "lineWidth": 2, "fillOpacity": 15 }
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "red"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 15
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
       }
     },
     {
       "id": 300,
       "title": "Kafka Pipeline",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -397,8 +778,16 @@
       "id": 20,
       "title": "Kafka Consumer Lag by Topic",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(kafka_consumergroup_lag) by (topic)",
@@ -408,26 +797,62 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          },
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 5000 }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
           }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 21,
       "title": "Kafka Message Produce Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(kafka_producer_record_send_total[$interval])) by (topic)",
@@ -437,21 +862,42 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 400,
       "title": "Courier Activity",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -460,8 +906,16 @@
       "id": 30,
       "title": "Assignments per Courier (last 1h)",
       "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "topk(20, sum(increase(waybill_courier_assignments_total[$interval])) by (courier_id))",
@@ -471,33 +925,64 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short" },
+        "defaults": {
+          "unit": "short"
+        },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Value" },
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
             "properties": [
-              { "id": "displayName", "value": "Assignments" },
+              {
+                "id": "displayName",
+                "value": "Assignments"
+              },
               {
                 "id": "custom.displayMode",
                 "value": "lcd-gauge"
               },
-              { "id": "color", "value": { "mode": "continuous-GrYlRd" } },
-              { "id": "min", "value": 0 }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
             ]
           }
         ]
       },
       "options": {
-        "sortBy": [{ "displayName": "Assignments", "desc": true }],
-        "footer": { "show": false }
+        "sortBy": [
+          {
+            "displayName": "Assignments",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
       }
     },
     {
       "id": 31,
       "title": "Courier Scan Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(waybill_scan_events_total[$interval])) by (courier_id)",
@@ -507,14 +992,30 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "right" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     }
   ]

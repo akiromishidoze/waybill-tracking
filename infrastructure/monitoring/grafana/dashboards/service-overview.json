@@ -1,27 +1,85 @@
 {
   "__inputs": [],
   "__requires": [
-    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "11.0.0" },
-    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
-    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
-    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" },
-    { "type": "panel", "id": "table", "name": "Table", "version": "" }
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
   ],
   "title": "Waybill — Service Overview",
   "uid": "waybill-service-overview",
   "description": "High-level health and traffic dashboard for all Waybill Tracking services.",
   "version": 2,
-  "tags": ["waybill", "production", "overview"],
+  "tags": [
+    "waybill",
+    "production",
+    "overview"
+  ],
   "schemaVersion": 39,
   "timezone": "browser",
   "editable": true,
   "graphTooltip": 1,
   "refresh": "30s",
-  "time": { "from": "now-6h", "to": "now" },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timepicker": {
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
-    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
   },
   "templating": {
     "list": [
@@ -29,7 +87,10 @@
         "name": "job",
         "label": "Service",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "query": "label_values(up, job)",
         "refresh": 2,
         "multi": false,
@@ -42,12 +103,27 @@
         "label": "Interval",
         "type": "interval",
         "options": [
-          { "text": "1m", "value": "1m" },
-          { "text": "5m", "value": "5m" },
-          { "text": "15m", "value": "15m" },
-          { "text": "1h", "value": "1h" }
+          {
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "text": "15m",
+            "value": "15m"
+          },
+          {
+            "text": "1h",
+            "value": "1h"
+          }
         ],
-        "current": { "text": "5m", "value": "5m" },
+        "current": {
+          "text": "5m",
+          "value": "5m"
+        },
         "auto": false
       }
     ]
@@ -57,7 +133,12 @@
       "id": 100,
       "title": "",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -66,27 +147,69 @@
       "id": 1,
       "title": "Core API — Up",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "up{job=\"core-api\"}", "legendFormat": "Core API", "instant": true }
+        {
+          "expr": "up{job=\"core-api\"}",
+          "legendFormat": "Core API",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "unit": "none",
           "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 }, "1": { "text": "UP", "color": "green", "index": 1 } } }
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
           ]
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "orientation": "auto",
         "textMode": "auto",
         "graphMode": "none",
@@ -97,27 +220,69 @@
       "id": 2,
       "title": "Analytics API — Up",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "up{job=\"analytics-api\"}", "legendFormat": "Analytics API", "instant": true }
+        {
+          "expr": "up{job=\"analytics-api\"}",
+          "legendFormat": "Analytics API",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "unit": "none",
           "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 }, "1": { "text": "UP", "color": "green", "index": 1 } } }
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
           ]
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "orientation": "auto",
         "textMode": "auto",
         "graphMode": "none",
@@ -128,27 +293,69 @@
       "id": 3,
       "title": "PostgreSQL — Up",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "up{job=\"postgres\"}", "legendFormat": "PostgreSQL", "instant": true }
+        {
+          "expr": "up{job=\"postgres\"}",
+          "legendFormat": "PostgreSQL",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "unit": "none",
           "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 }, "1": { "text": "UP", "color": "green", "index": 1 } } }
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
           ]
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "orientation": "auto",
         "textMode": "auto",
         "graphMode": "none",
@@ -159,27 +366,69 @@
       "id": 4,
       "title": "Kafka — Up",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "up{job=\"kafka\"}", "legendFormat": "Kafka", "instant": true }
+        {
+          "expr": "up{job=\"kafka\"}",
+          "legendFormat": "Kafka",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "unit": "none",
           "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 }, "1": { "text": "UP", "color": "green", "index": 1 } } }
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
           ]
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "orientation": "auto",
         "textMode": "auto",
         "graphMode": "none",
@@ -190,8 +439,16 @@
       "id": 5,
       "title": "Global Error Rate (5xx %)",
       "type": "gauge",
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "100 * sum(rate(http_requests_total{status=~\"5..\"}[$interval])) / sum(rate(http_requests_total[$interval]))",
@@ -206,17 +463,33 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 5 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
             ]
           },
-          "color": { "mode": "thresholds" }
+          "color": {
+            "mode": "thresholds"
+          }
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       }
@@ -225,24 +498,52 @@
       "id": 6,
       "title": "Active Firing Alerts",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "Firing Alerts", "instant": true }
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "Firing Alerts",
+          "instant": true
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "unit": "short"
         },
         "overrides": []
       },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "none",
         "textMode": "auto"
@@ -252,7 +553,12 @@
       "id": 200,
       "title": "Core API",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -261,30 +567,66 @@
       "id": 10,
       "title": "Core API — Request Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "sum(rate(http_requests_total{job=\"core-api\"}[$interval])) by (method, path)", "legendFormat": "{{method}} {{path}}" }
+        {
+          "expr": "sum(rate(http_requests_total{job=\"core-api\"}[$interval])) by (method, path)",
+          "legendFormat": "{{method}} {{path}}"
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "gradientMode": "none" }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none"
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 11,
       "title": "Core API — Latency P50 / P95 / P99",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"core-api\"}[$interval])) by (le))",
@@ -302,58 +644,144 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 12,
       "title": "Core API — HTTP Status Breakdown",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"2..\"}[$interval]))", "legendFormat": "2xx OK" },
-        { "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"4..\"}[$interval]))", "legendFormat": "4xx Client Error" },
-        { "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"5..\"}[$interval]))", "legendFormat": "5xx Server Error" }
+        {
+          "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"2..\"}[$interval]))",
+          "legendFormat": "2xx OK"
+        },
+        {
+          "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"4..\"}[$interval]))",
+          "legendFormat": "4xx Client Error"
+        },
+        {
+          "expr": "sum(rate(http_requests_total{job=\"core-api\",status=~\"5..\"}[$interval]))",
+          "legendFormat": "5xx Server Error"
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "2xx OK" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "2xx OK"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
           },
           {
-            "matcher": { "id": "byName", "options": "4xx Client Error" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "4xx Client Error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
           },
           {
-            "matcher": { "id": "byName", "options": "5xx Server Error" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "5xx Server Error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 300,
       "title": "Analytics API",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -362,30 +790,65 @@
       "id": 20,
       "title": "Analytics API — Request Rate",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "sum(rate(http_requests_total{job=\"analytics-api\"}[$interval])) by (method, path)", "legendFormat": "{{method}} {{path}}" }
+        {
+          "expr": "sum(rate(http_requests_total{job=\"analytics-api\"}[$interval])) by (method, path)",
+          "legendFormat": "{{method}} {{path}}"
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 21,
       "title": "Analytics API — Latency P50 / P95 / P99",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"analytics-api\"}[$interval])) by (le))",
@@ -403,58 +866,144 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 5 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 5
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 22,
       "title": "Analytics API — HTTP Status Breakdown",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"2..\"}[$interval]))", "legendFormat": "2xx OK" },
-        { "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"4..\"}[$interval]))", "legendFormat": "4xx Client Error" },
-        { "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"5..\"}[$interval]))", "legendFormat": "5xx Server Error" }
+        {
+          "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"2..\"}[$interval]))",
+          "legendFormat": "2xx OK"
+        },
+        {
+          "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"4..\"}[$interval]))",
+          "legendFormat": "4xx Client Error"
+        },
+        {
+          "expr": "sum(rate(http_requests_total{job=\"analytics-api\",status=~\"5..\"}[$interval]))",
+          "legendFormat": "5xx Server Error"
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "2xx OK" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "2xx OK"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
           },
           {
-            "matcher": { "id": "byName", "options": "4xx Client Error" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "4xx Client Error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
           },
           {
-            "matcher": { "id": "byName", "options": "5xx Server Error" },
-            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+            "matcher": {
+              "id": "byName",
+              "options": "5xx Server Error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
       "options": {
-        "legend": { "calcs": ["mean", "max", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
       "id": 400,
       "title": "Active Alerts",
       "type": "row",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
       "collapsed": false,
       "panels": [],
       "options": {}
@@ -463,8 +1012,16 @@
       "id": 30,
       "title": "Currently Firing Alerts",
       "type": "table",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "ALERTS{alertstate=\"firing\"}",
@@ -474,32 +1031,59 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "color": { "mode": "thresholds" } },
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          }
+        },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "alertstate" },
+            "matcher": {
+              "id": "byName",
+              "options": "alertstate"
+            },
             "properties": [
-              { "id": "custom.displayMode", "value": "color-text" },
               {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [{ "color": "red", "value": null }]
-                }
-              }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "severity" },
-            "properties": [
-              { "id": "custom.displayMode", "value": "color-background" },
+                "id": "custom.displayMode",
+                "value": "color-text"
+              },
               {
                 "id": "thresholds",
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "yellow", "value": null },
-                    { "color": "red", "value": 1 }
+                    {
+                      "color": "red",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "yellow",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
                   ]
                 }
               }
@@ -508,8 +1092,15 @@
         ]
       },
       "options": {
-        "sortBy": [{ "displayName": "Time", "desc": true }],
-        "footer": { "show": false }
+        "sortBy": [
+          {
+            "displayName": "Time",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false
+        }
       }
     }
   ]

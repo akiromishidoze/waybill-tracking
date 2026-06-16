@@ -10,18 +10,18 @@
 
 $Host.UI.RawUI.ForegroundColor = $null  # reset
 
-$InfoColor  = 'Cyan'
-$OkColor    = 'Green'
-$WarnColor  = 'Yellow'
-$ErrColor   = 'Red'
+$InfoColor = 'Cyan'
+$OkColor = 'Green'
+$WarnColor = 'Yellow'
+$ErrColor = 'Red'
 
-function info  { Write-Host "[INFO]  $args" -ForegroundColor $InfoColor }
-function ok    { Write-Host "[OK]    $args" -ForegroundColor $OkColor }
-function warn  { Write-Host "[WARN]  $args" -ForegroundColor $WarnColor }
-function err   { Write-Host "[ERR]   $args" -ForegroundColor $ErrColor; exit 1 }
+function info { Write-Host "[INFO] $args" -ForegroundColor $InfoColor }
+function ok { Write-Host "[OK] $args" -ForegroundColor $OkColor }
+function warn { Write-Host "[WARN] $args" -ForegroundColor $WarnColor }
+function err { Write-Host "[ERR] $args" -ForegroundColor $ErrColor; exit 1 }
 
-$RepoUrl     = 'https://github.com/akiromishidoze/waybill-tracking.git'
-$InstallDir  = if ($env:INSTALL_DIR) { $env:INSTALL_DIR } else { Join-Path $HOME 'waybill-tracking' }
+$RepoUrl = 'https://github.com/akiromishidoze/waybill-tracking.git'
+$InstallDir = if ($env:INSTALL_DIR) { $env:INSTALL_DIR } else { Join-Path $HOME 'waybill-tracking' }
 
 info '--- Waybill Tracking Installer ---'
 Write-Host
@@ -40,7 +40,7 @@ ok 'Prerequisites met: Docker, Git, Docker Compose'
 # --- Clone / update ---
 if (Test-Path (Join-Path $InstallDir '.git')) {
   warn "Directory $InstallDir already contains a git repo."
-  $yn = Read-Host '  Use existing repo and pull latest? [Y/n]'
+  $yn = Read-Host 'Use existing repo and pull latest? [Y/n]'
   if ($yn -notin 'n','N','no','No') {
     Push-Location $InstallDir
     git pull --ff-only
@@ -97,23 +97,24 @@ for ($i = 0; $i -lt $maxRetries; $i++) {
   }
   if ($healthy) { break }
 }
+
 if (-not $healthy) { warn 'Some services may still be starting (timeout).' }
 
 Write-Host
 info '=== Setup Complete ==='
 Write-Host
-Write-Host "  Dashboard      http://localhost:5173"    -ForegroundColor Cyan
-Write-Host "  Core API       http://localhost:8080/health" -ForegroundColor Cyan
-Write-Host "  Analytics API  http://localhost:8000/health" -ForegroundColor Cyan
-Write-Host "  Postgres       localhost:5432 (user: postgres, password: postgres)" -ForegroundColor Cyan
-Write-Host "  Redis          localhost:6379"           -ForegroundColor Cyan
-Write-Host "  Elasticsearch  http://localhost:9200"    -ForegroundColor Cyan
-Write-Host "  Prometheus     http://localhost:9090"    -ForegroundColor Cyan
-Write-Host "  Grafana        http://localhost:3001 (admin / admin)" -ForegroundColor Cyan
+Write-Host "Dashboard http://localhost:5173" -ForegroundColor Cyan
+Write-Host "Core API http://localhost:8080/health" -ForegroundColor Cyan
+Write-Host "Analytics API http://localhost:8000/health" -ForegroundColor Cyan
+Write-Host "Postgres localhost:5432 (user: postgres, password: postgres)" -ForegroundColor Cyan
+Write-Host "Redis localhost:6379" -ForegroundColor Cyan
+Write-Host "Elasticsearch http://localhost:9200" -ForegroundColor Cyan
+Write-Host "Prometheus http://localhost:9090" -ForegroundColor Cyan
+Write-Host "Grafana http://localhost:3001 (admin / admin)" -ForegroundColor Cyan
 Write-Host
 ok 'Waybill Tracking is running!'
 Write-Host
-Write-Host "Run  cd $InstallDir; $dcCmd logs -f  to follow logs."
-Write-Host "Run  $dcCmd down  to stop all services."
+Write-Host "Run cd $InstallDir; $dcCmd logs -f to follow logs."
+Write-Host "Run $dcCmd down to stop all services."
 
 Pop-Location

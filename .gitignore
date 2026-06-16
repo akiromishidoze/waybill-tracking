@@ -13,9 +13,3 @@ venv/
 *.log
 .DS_Store
 coverage/
-flutter/.dart_tool/
-flutter/.packages
-flutter/build/
-flutter/.flutter-plugins
-*.g.dart
-*.freezed.dart

@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.schedules import crontab
 from app.core.config import settings
 
 celery_app = Celery(
@@ -16,4 +17,14 @@ celery_app.conf.update(
     task_track_started=True,
     task_acks_late=True,
     worker_prefetch_multiplier=1,
+    beat_schedule={
+        "generate-daily-report": {
+            "task": "app.workers.tasks.generate_daily_report",
+            "schedule": crontab(hour=6, minute=0),
+        },
+        "scan-for-anomalies": {
+            "task": "app.workers.tasks.scan_for_anomalies",
+            "schedule": crontab(minute="*/30"),
+        },
+    },
 )

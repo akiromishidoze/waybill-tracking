@@ -140,3 +140,64 @@ def generate_daily_report():
             )
     except Exception as e:
         logger.error("Failed to generate daily report: %s", e)
+
+
+@celery_app.task
+def scan_for_anomalies():
+    logger.info("Scanning for anomalies")
+
+    async def _run():
+        async with async_session() as session:
+            result = await session.execute(text("""
+                SELECT id, tracking_number, shipper_name, status,
+                       created_at, updated_at
+                FROM waybills
+                WHERE status NOT IN ('DELIVERED','CANCELLED','RETURNED')
+                  AND updated_at < NOW() - INTERVAL '3 days'
+                ORDER BY updated_at ASC
+            """))
+            return result.mappings().all()
+
+    try:
+        anomalies = asyncio.run(_run())
+
+        if not anomalies:
+            logger.info("No anomalies detected")
+            return
+
+        logger.warning(
+            "Detected %d stuck shipments", len(anomalies),
+        )
+
+        for a in anomalies:
+            logger.warning(
+                "Stuck shipment: %s (%s) - %s since %s",
+                a["tracking_number"], a["status"],
+                a["shipper_name"], a["updated_at"],
+            )
+
+        if settings.SENDGRID_KEY:
+            items = "".join(
+                f"<li>{a['tracking_number']} — {a['status']} — "
+                f"{a['shipper_name']} (updated {a['updated_at']})</li>"
+                for a in anomalies
+            )
+            message = Mail(
+                from_email="noreply@waybilltracking.com",
+                to_emails=settings.REPORT_EMAIL,
+                subject=(
+                    f"Anomaly Alert: {len(anomalies)} Stuck Shipments "
+                    f"- {datetime.now().date()}"
+                ),
+                html_content=(
+                    f"<p>The following shipments have been stuck for over 3 days:</p>"
+                    f"<ul>{items}</ul>"
+                ),
+            )
+            sg = SendGridAPIClient(settings.SENDGRID_KEY)
+            sg.send(message)
+            logger.info(
+                "Anomaly alert emailed to %s", settings.REPORT_EMAIL,
+            )
+    except Exception as e:
+        logger.error("Failed to scan for anomalies: %s", e)

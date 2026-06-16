@@ -10,6 +10,7 @@ type Config struct {
 	DatabaseURL     string
 	RedisURL        string
 	KafkaBrokers    string
+	KafkaTopic      string
 	JWTSecret       string
 	TwilioSID       string
 	TwilioAuthToken string
@@ -23,6 +24,7 @@ func Load() *Config {
 		DatabaseURL:     getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
 		RedisURL:        getEnv("REDIS_URL", "redis://localhost:6379/0"),
 		KafkaBrokers:    getEnv("KAFKA_BROKERS", "localhost:9092"),
+		KafkaTopic:      getEnv("KAFKA_TOPIC", "waybill-events"),
 		JWTSecret:       getEnv("JWT_SECRET", "change-me-in-production"),
 		TwilioSID:       getEnv("TWILIO_SID", ""),
 		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),

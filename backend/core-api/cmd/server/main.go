@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("failed to connect to redis: %v", err)
 	}
 
-	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers)
+	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer kafkaProducer.Close()
 
 	wsHub := ws.NewHub()

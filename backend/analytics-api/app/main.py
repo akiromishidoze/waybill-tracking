@@ -26,7 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
-app.include_router(analytics.router, prefix="/api/analytics")
-app.include_router(reports.router, prefix="/api/reports")
+app.include_router(analytics.router)
+app.include_router(reports.router)
 
 Instrumentator().instrument(app).expose(app)

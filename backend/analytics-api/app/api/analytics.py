@@ -1,35 +1,94 @@
+from datetime import datetime
+from typing import Any
+
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.services.analytics_service import AnalyticsService
 
-router = APIRouter(dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/api/analytics",
+    tags=["Analytics"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
-@router.get("/stats")
+class DashboardStats(BaseModel):
+    total_active: int = 0
+    delivered_today: int = 0
+    in_transit: int = 0
+    pending_pickup: int = 0
+
+
+class SLARow(BaseModel):
+    date: str
+    total: int
+    onTime: int
+    sla: float
+
+
+class Anomaly(BaseModel):
+    waybillId: str
+    trackingNumber: str
+    anomalyType: str
+    severity: str
+    description: str
+    detectedAt: str
+
+
+class ETAPrediction(BaseModel):
+    waybillId: str
+    trackingNumber: str
+    predictedDelivery: str | None = None
+    confidence: float
+    basedOn: str
+
+
+@router.get(
+    "/stats",
+    summary="Dashboard statistics",
+    description="Returns aggregate counts for active, delivered today, in-transit, and pending pickup waybills.",
+    response_model=DashboardStats,
+)
 async def get_stats(db: AsyncSession = Depends(get_db)):
     svc = AnalyticsService(db)
     return await svc.get_dashboard_stats()
 
 
-@router.get("/sla")
+@router.get(
+    "/sla",
+    summary="SLA report",
+    description="Daily on-time delivery percentages between the given date range.",
+    response_model=list[SLARow],
+)
 async def get_sla(
-    from_date: str = Query(default="2024-01-01"),
-    to_date: str = Query(default="2024-12-31"),
+    from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
+    to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
 ):
     svc = AnalyticsService(db)
     return await svc.get_sla_report(from_date, to_date)
 
 
-@router.get("/anomalies")
+@router.get(
+    "/anomalies",
+    summary="Detect anomalies",
+    description="Finds shipments stuck in a non-terminal state for over 3 days.",
+    response_model=list[Anomaly],
+)
 async def get_anomalies(db: AsyncSession = Depends(get_db)):
     svc = AnalyticsService(db)
     return await svc.detect_anomalies()
 
 
-@router.get("/predict-eta/{waybill_id}")
+@router.get(
+    "/predict-eta/{waybill_id}",
+    summary="Predict ETA",
+    description="Estimates delivery time for a waybill based on historical average transit time for the same route.",
+    response_model=ETAPrediction,
+)
 async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db)):
     svc = AnalyticsService(db)
     result = await svc.predict_eta(waybill_id)

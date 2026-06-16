@@ -3,19 +3,37 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import get_current_user
 from app.core.database import get_db
 import openpyxl
 
-router = APIRouter(dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/api/reports",
+    tags=["Reports"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
-@router.get("/export")
+@router.get(
+    "/export",
+    summary="Export waybill report",
+    description="Generates an XLSX spreadsheet of waybills within the given date range.",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "description": "Excel file download",
+            "content": {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+            },
+        }
+    },
+)
 async def export_report(
-    from_date: str = Query(default="2024-01-01"),
-    to_date: str = Query(default="2024-12-31"),
+    from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
+    to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(text("""

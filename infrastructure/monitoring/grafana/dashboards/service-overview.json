@@ -1,0 +1,291 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "Waybill Service Overview",
+  "uid": "waybill-service-overview",
+  "version": 1,
+  "tags": ["waybill", "production"],
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Core API — Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"core-api\"}[5m])",
+          "legendFormat": "RPS"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Core API — Latency (P95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"core-api\"}[5m]))",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"core-api\"}[5m]))",
+          "legendFormat": "P50"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Core API — Status Breakdown",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"core-api\",status=~\"2..\"}[5m])",
+          "legendFormat": "2xx"
+        },
+        {
+          "expr": "rate(http_requests_total{job=\"core-api\",status=~\"4..\"}[5m])",
+          "legendFormat": "4xx"
+        },
+        {
+          "expr": "rate(http_requests_total{job=\"core-api\",status=~\"5..\"}[5m])",
+          "legendFormat": "5xx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Analytics API — Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"analytics-api\"}[5m])",
+          "legendFormat": "RPS"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Analytics API — Latency (P95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"analytics-api\"}[5m]))",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"analytics-api\"}[5m]))",
+          "legendFormat": "P50"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Analytics API — Status Breakdown",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"analytics-api\",status=~\"2..\"}[5m])",
+          "legendFormat": "2xx"
+        },
+        {
+          "expr": "rate(http_requests_total{job=\"analytics-api\",status=~\"4..\"}[5m])",
+          "legendFormat": "4xx"
+        },
+        {
+          "expr": "rate(http_requests_total{job=\"analytics-api\",status=~\"5..\"}[5m])",
+          "legendFormat": "5xx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Service Health",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "up{job=\"core-api\"}", "legendFormat": "Core API" },
+        { "expr": "up{job=\"analytics-api\"}", "legendFormat": "Analytics API" },
+        { "expr": "up{job=\"postgres\"}", "legendFormat": "PostgreSQL" },
+        { "expr": "up{job=\"kafka\"}", "legendFormat": "Kafka" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "unit": "none",
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 8,
+      "title": "Error Rate (5xx %)",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) * 100",
+          "legendFormat": "Error Rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 9,
+      "title": "Active Alerts",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "alertstate" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-text" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red", "value": null },
+                    { "color": "green", "value": 1 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{"displayName": "Time"}]
+      }
+    }
+  ],
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+  },
+  "refresh": "30s"
+}

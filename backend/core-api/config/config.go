@@ -18,6 +18,7 @@ type Config struct {
 	TwilioSID        string
 	TwilioAuthToken  string
 	SendGridKey      string
+	MigrationsDir    string
 	AllowedOrigins   []string
 }
 
@@ -33,6 +34,7 @@ func Load() *Config {
 		KafkaTopic:       getEnv("KAFKA_TOPIC", "waybill-events"),
 		JWTSecret:        jwtSecret,
 		JWTSecretOld:     getEnv("JWT_SECRET_OLD", ""),
+		MigrationsDir:    getEnv("MIGRATIONS_DIR", "migrations"),
 		TwilioSID:        getEnv("TWILIO_SID", ""),
 		TwilioAuthToken:  getEnv("TWILIO_AUTH_TOKEN", ""),
 		SendGridKey:      getEnv("SENDGRID_KEY", ""),

@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
+	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
@@ -28,6 +29,11 @@ func main() {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
 	defer db.Close()
+
+	m := migrator.New(db, cfg.MigrationsDir)
+	if err := m.Run(context.Background()); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
 
 	redisOpts, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {

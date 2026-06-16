@@ -16,6 +16,7 @@ class AnalyticsService:
                 COUNT(*) FILTER (WHERE status = 'CREATED') AS pending_pickup
             FROM waybills
         """))
+
         row = result.mappings().first()
         return dict(row) if row else {}
 
@@ -34,6 +35,7 @@ class AnalyticsService:
             ORDER BY date
         """), {"from_date": from_date, "to_date": to_date})
         rows = result.mappings().all()
+
         return [
             {
                 "date": str(r["date"]),
@@ -41,6 +43,7 @@ class AnalyticsService:
                 "onTime": r["on_time"],
                 "sla": round(r["on_time"] / r["total"] * 100, 2) if r["total"] > 0 else 0,
             }
+
             for r in rows
         ]
 
@@ -52,7 +55,9 @@ class AnalyticsService:
               AND updated_at < NOW() - INTERVAL '3 days'
             ORDER BY updated_at ASC
         """))
+
         rows = result.mappings().all()
+
         return [
             {
                 "waybillId": r["id"],
@@ -62,6 +67,7 @@ class AnalyticsService:
                 "description": f"Shipment stuck in '{r['status']}' for over 3 days",
                 "detectedAt": datetime.utcnow().isoformat(),
             }
+
             for r in rows
         ]
 
@@ -78,6 +84,7 @@ class AnalyticsService:
             FROM waybills WHERE id = :wid
         """), {"wid": waybill_id})
         row = result.mappings().first()
+
         if not row:
             return None
         return {
@@ -85,7 +92,9 @@ class AnalyticsService:
             "trackingNumber": row["tracking_number"],
             "predictedDelivery": (
                 datetime.utcnow() + timedelta(hours=row["avg_hours"])
-            ).isoformat() if row["avg_hours"] else None,
+            ).isoformat()
+
+            if row["avg_hours"] else None,
             "confidence": 0.85 if row["avg_hours"] else 0.0,
             "basedOn": "Historical average transit time",
         }

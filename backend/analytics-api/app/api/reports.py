@@ -16,7 +16,6 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)],
 )
 
-
 @router.get(
     "/export",
     summary="Export waybill report",
@@ -31,6 +30,7 @@ router = APIRouter(
         }
     },
 )
+
 async def export_report(
     from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),

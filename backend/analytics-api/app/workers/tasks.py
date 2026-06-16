@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 def send_email_notification(to: str, subject: str, body: str):
     if not settings.SENDGRID_KEY:
         logger.warning("SENDGRID_KEY not set, skipping email")
+
         return
 
     message = Mail(
@@ -43,14 +44,17 @@ def send_email_notification(to: str, subject: str, body: str):
             "Email sent to %s: %s (status=%s)",
             to, subject, response.status_code,
         )
+
     except Exception as e:
         logger.error("Failed to send email to %s: %s", to, e)
 
 
 @celery_app.task
 def send_sms_notification(to: str, message: str):
+
     if not settings.TWILIO_SID or not settings.TWILIO_AUTH_TOKEN:
         logger.warning("Twilio credentials not set, skipping SMS")
+
         return
 
     try:
@@ -60,9 +64,11 @@ def send_sms_notification(to: str, message: str):
             from_="+12025551234",
             body=message,
         )
+
         logger.info(
             "SMS sent to %s (sid=%s)", to, twilio_msg.sid,
         )
+
     except Exception as e:
         logger.error("Failed to send SMS to %s: %s", to, e)
 
@@ -81,6 +87,7 @@ def generate_daily_report():
                   AND created_at < CURRENT_DATE
                 ORDER BY created_at DESC
             """))
+
             rows = result.mappings().all()
 
             import openpyxl
@@ -93,6 +100,7 @@ def generate_daily_report():
                 "Tracking #", "Shipper", "Recipient", "Destination",
                 "Status", "Created", "Updated",
             ]
+
             ws.append(headers)
 
             for r in rows:
@@ -106,6 +114,7 @@ def generate_daily_report():
             output = io.BytesIO()
             wb.save(output)
             output.seek(0)
+
             return output.getvalue()
 
     try:
@@ -131,13 +140,16 @@ def generate_daily_report():
                 subject=f"Daily Waybill Report - {datetime.now().date()}",
                 html_content="<p>Attached is the daily waybill report.</p>",
             )
+
             message.add_attachment(attachment)
 
             sg = SendGridAPIClient(settings.SENDGRID_KEY)
             sg.send(message)
+
             logger.info(
                 "Daily report emailed to %s", settings.REPORT_EMAIL,
             )
+
     except Exception as e:
         logger.error("Failed to generate daily report: %s", e)
 
@@ -155,6 +167,7 @@ def scan_for_anomalies():
                   AND updated_at < NOW() - INTERVAL '3 days'
                 ORDER BY updated_at ASC
             """))
+
             return result.mappings().all()
 
     try:
@@ -162,6 +175,7 @@ def scan_for_anomalies():
 
         if not anomalies:
             logger.info("No anomalies detected")
+
             return
 
         logger.warning(
@@ -181,6 +195,7 @@ def scan_for_anomalies():
                 f"{a['shipper_name']} (updated {a['updated_at']})</li>"
                 for a in anomalies
             )
+
             message = Mail(
                 from_email="noreply@waybilltracking.com",
                 to_emails=settings.REPORT_EMAIL,
@@ -193,10 +208,13 @@ def scan_for_anomalies():
                     f"<ul>{items}</ul>"
                 ),
             )
+
             sg = SendGridAPIClient(settings.SENDGRID_KEY)
             sg.send(message)
+
             logger.info(
                 "Anomaly alert emailed to %s", settings.REPORT_EMAIL,
             )
+
     except Exception as e:
         logger.error("Failed to scan for anomalies: %s", e)

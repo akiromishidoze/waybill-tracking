@@ -28,26 +28,33 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
+
 	defer db.Close()
 
 	m := migrator.New(db, cfg.MigrationsDir)
+
 	if err := m.Run(context.Background()); err != nil {
 		log.Fatalf("migration failed: %v", err)
 	}
 
 	redisOpts, err := redis.ParseURL(cfg.RedisURL)
+
 	if err != nil {
 		log.Fatalf("failed to parse redis url: %v", err)
 	}
+
 	rdb := redis.NewClient(redisOpts)
 
 	redisCtx, redisCancel := context.WithTimeout(context.Background(), 5*time.Second)
+
 	defer redisCancel()
+
 	if err := rdb.Ping(redisCtx).Err(); err != nil {
 		log.Fatalf("failed to connect to redis: %v", err)
 	}
 
 	esClient := es.NewClient(cfg.ElasticsearchURL)
+
 	if err := esClient.Ping(context.Background()); err != nil {
 		log.Printf("elasticsearch not reachable: %v", err)
 	}
@@ -72,19 +79,24 @@ func main() {
 	r.Use(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		allowed := false
+
 		for _, o := range cfg.AllowedOrigins {
 			if o == origin || o == "*" {
 				allowed = true
 				break
 			}
 		}
+
 		if allowed && origin != "" {
 			c.Header("Access-Control-Allow-Origin", origin)
 		}
+
 		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
+
 			return
 		}
 		c.Next()
@@ -130,5 +142,6 @@ func main() {
 	r.GET("/health", healthHandler.Check)
 
 	log.Printf("Core API starting on :%s", cfg.Port)
+
 	r.Run(":" + cfg.Port)
 }

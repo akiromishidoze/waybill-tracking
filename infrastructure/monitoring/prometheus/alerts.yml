@@ -1,0 +1,70 @@
+groups:
+  - name: waybill-services
+    interval: 30s
+    rules:
+      - alert: CoreAPIDown
+        expr: probe_success{job="core-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Core API is unreachable"
+          description: "Core API has been unreachable for more than 1 minute."
+
+      - alert: AnalyticsAPIDown
+        expr: probe_success{job="analytics-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Analytics API is unreachable"
+          description: "Analytics API has been unreachable for more than 1 minute."
+
+      - alert: DatabaseDown
+        expr: probe_success{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is unreachable"
+          description: "PostgreSQL has been unreachable for more than 1 minute."
+
+      - alert: KafkaDown
+        expr: probe_success{job="kafka"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka is unreachable"
+          description: "Kafka broker has been unreachable for more than 1 minute."
+
+      - alert: HighErrorRate
+        expr: |
+          rate(http_requests_total{status=~"5.."}[5m])
+          /
+          rate(http_requests_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency"
+          description: "P95 latency is {{ $value }}s over the last 5 minutes."
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."

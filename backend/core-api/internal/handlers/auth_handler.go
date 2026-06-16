@@ -15,25 +15,25 @@ import (
 )
 
 type loginRequest struct {
-	Email    string `json:"email" binding:"required"`
+	Email tring `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 type registerRequest struct {
-	Email    string `json:"email" binding:"required"`
+	Email string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required,min=6"`
-	Name     string `json:"name" binding:"required"`
-	Role     string `json:"role" binding:"required,oneof=SHIPPER COURIER OPS ADMIN"`
-	Company  string `json:"company"`
+	Name string `json:"name" binding:"required"`
+	Role string `json:"role" binding:"required,oneof=SHIPPER COURIER OPS ADMIN"`
+	Company string `json:"company"`
 }
 
 func respondWithToken(c *gin.Context, jwtSecret, id, email, name, role, company string) {
 	claims := jwt.MapClaims{
-		"sub":   id,
+		"sub": id,
 		"email": email,
-		"name":  name,
-		"role":  role,
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+		"name": name,
+		"role": role,
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, _ := token.SignedString([]byte(jwtSecret))
@@ -41,10 +41,10 @@ func respondWithToken(c *gin.Context, jwtSecret, id, email, name, role, company 
 	c.JSON(http.StatusOK, gin.H{
 		"accessToken": tokenStr,
 		"user": gin.H{
-			"id":      id,
-			"email":   email,
-			"name":    name,
-			"role":    role,
+			"id": id,
+			"email": email,
+			"name": name,
+			"role": role,
 			"company": company,
 		},
 	})
@@ -70,6 +70,7 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			 RETURNING id`,
 			req.Email, req.Name, string(hash), req.Role, req.Company,
 		).Scan(&id)
+
 		if err != nil {
 			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
 			return
@@ -98,10 +99,10 @@ func MeHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"id":      userID,
-			"email":   email,
-			"name":    name,
-			"role":    role,
+			"id": userID,
+			"email": email,
+			"name": name,
+			"role": role,
 			"company": co,
 		})
 	}
@@ -116,16 +117,17 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		var user struct {
-			ID       string
-			Email    string
-			Name     string
+			ID string
+			Email string
+			Name string
 			Password string
-			Role     string
-			Company  sql.NullString
+			Role string
+			Company sql.NullString
 		}
 		err := db.QueryRow(c, `SELECT id, email, name, password, role, company FROM users WHERE email=$1`, req.Email).Scan(
 			&user.ID, &user.Email, &user.Name, &user.Password, &user.Role, &user.Company,
 		)
+
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return

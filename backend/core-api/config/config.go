@@ -26,19 +26,19 @@ func Load() *Config {
 	jwtSecret := resolveJWTSecret()
 
 	cfg := &Config{
-		Port:             getEnv("PORT", "8080"),
-		DatabaseURL:      getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
-		RedisURL:         getEnv("REDIS_URL", "redis://localhost:6379/0"),
+		Port: getEnv("PORT", "8080"),
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
+		RedisURL: getEnv("REDIS_URL", "redis://localhost:6379/0"),
 		ElasticsearchURL: getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
-		KafkaBrokers:     getEnv("KAFKA_BROKERS", "localhost:9092"),
-		KafkaTopic:       getEnv("KAFKA_TOPIC", "waybill-events"),
-		JWTSecret:        jwtSecret,
-		JWTSecretOld:     getEnv("JWT_SECRET_OLD", ""),
-		MigrationsDir:    getEnv("MIGRATIONS_DIR", "migrations"),
-		TwilioSID:        getEnv("TWILIO_SID", ""),
-		TwilioAuthToken:  getEnv("TWILIO_AUTH_TOKEN", ""),
-		SendGridKey:      getEnv("SENDGRID_KEY", ""),
-		AllowedOrigins:   getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
+		KafkaBrokers: getEnv("KAFKA_BROKERS", "localhost:9092"),
+		KafkaTopic: getEnv("KAFKA_TOPIC", "waybill-events"),
+		JWTSecret: jwtSecret,
+		JWTSecretOld: getEnv("JWT_SECRET_OLD", ""),
+		MigrationsDir: getEnv("MIGRATIONS_DIR", "migrations"),
+		TwilioSID: getEnv("TWILIO_SID", ""),
+		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),
+		SendGridKey: getEnv("SENDGRID_KEY", ""),
+		AllowedOrigins: getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {

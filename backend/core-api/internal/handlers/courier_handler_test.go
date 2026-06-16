@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
 	"github.com/gin-gonic/gin"
 )
 
 func TestNewCourierHandler(t *testing.T) {
 	h := NewCourierHandler(nil)
+
 	if h == nil {
 		t.Fatal("expected non-nil handler")
 	}
+
 	if h.repo != nil {
 		t.Error("expected nil repo")
 	}

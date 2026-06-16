@@ -13,6 +13,7 @@ from sendgrid.helpers.mail import (
     FileType,
     Mail,
 )
+
 from sqlalchemy import text
 from twilio.rest import Client
 
@@ -21,7 +22,6 @@ from app.core.database import async_session
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
-
 
 @celery_app.task
 def send_email_notification(to: str, subject: str, body: str):
@@ -140,7 +140,6 @@ def generate_daily_report():
             )
     except Exception as e:
         logger.error("Failed to generate daily report: %s", e)
-
 
 @celery_app.task
 def scan_for_anomalies():

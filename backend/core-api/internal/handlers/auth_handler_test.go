@@ -32,8 +32,8 @@ func TestRegisterHandler_MissingEmail(t *testing.T) {
 
 	body, _ := json.Marshal(map[string]string{
 		"password": "password123",
-		"name":     "Test User",
-		"role":     "SHIPPER",
+		"name": "Test User",
+		"role": "SHIPPER",
 	})
 
 	w := httptest.NewRecorder()
@@ -53,8 +53,8 @@ func TestRegisterHandler_MissingPassword(t *testing.T) {
 
 	body, _ := json.Marshal(map[string]string{
 		"email": "test@example.com",
-		"name":  "Test User",
-		"role":  "SHIPPER",
+		"name": "Test User",
+		"role": "SHIPPER",
 	})
 
 	w := httptest.NewRecorder()
@@ -73,10 +73,10 @@ func TestRegisterHandler_ShortPassword(t *testing.T) {
 	r.POST("/auth/register", RegisterHandler("secret", nil))
 
 	body, _ := json.Marshal(map[string]string{
-		"email":    "test@example.com",
+		"email": "test@example.com",
 		"password": "12345",
-		"name":     "Test User",
-		"role":     "SHIPPER",
+		"name": "Test User",
+		"role": "SHIPPER",
 	})
 
 	w := httptest.NewRecorder()
@@ -95,9 +95,9 @@ func TestRegisterHandler_MissingName(t *testing.T) {
 	r.POST("/auth/register", RegisterHandler("secret", nil))
 
 	body, _ := json.Marshal(map[string]string{
-		"email":    "test@example.com",
+		"email": "test@example.com",
 		"password": "password123",
-		"role":     "SHIPPER",
+		"role": "SHIPPER",
 	})
 
 	w := httptest.NewRecorder()
@@ -116,10 +116,10 @@ func TestRegisterHandler_InvalidRole(t *testing.T) {
 	r.POST("/auth/register", RegisterHandler("secret", nil))
 
 	body, _ := json.Marshal(map[string]string{
-		"email":    "test@example.com",
+		"email": "test@example.com",
 		"password": "password123",
-		"name":     "Test User",
-		"role":     "INVALID_ROLE",
+		"name": "Test User",
+		"role": "INVALID_ROLE",
 	})
 
 	w := httptest.NewRecorder()
@@ -213,12 +213,15 @@ func TestRespondWithToken(t *testing.T) {
 	if user["id"] != "user-1" {
 		t.Errorf("expected user.id user-1, got %v", user["id"])
 	}
+
 	if user["email"] != "test@example.com" {
 		t.Errorf("expected user.email test@example.com, got %v", user["email"])
 	}
+
 	if user["role"] != "ADMIN" {
 		t.Errorf("expected user.role ADMIN, got %v", user["role"])
 	}
+
 	if user["company"] != "ACME Inc" {
 		t.Errorf("expected user.company ACME Inc, got %v", user["company"])
 	}

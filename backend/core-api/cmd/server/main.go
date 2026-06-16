@@ -16,6 +16,7 @@ import (
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
@@ -51,9 +52,12 @@ func main() {
 	wsHub := ws.NewHub()
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient)
+	webhookRepo := repository.NewWebhookRepository(db)
+	webhookDispatcher := wh.NewDispatcher(webhookRepo)
+	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher)
 	courierHandler := handlers.NewCourierHandler(waybillRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
+	webhookHandler := handlers.NewWebhookHandler(webhookRepo)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	r := gin.New()
@@ -105,6 +109,11 @@ func main() {
 				courier.GET("/assignments", courierHandler.GetAssignments)
 				courier.POST("/scan", courierHandler.Scan)
 			}
+
+			protected.GET("/webhooks", webhookHandler.List)
+			protected.POST("/webhooks", webhookHandler.Create)
+			protected.PATCH("/webhooks/:id", webhookHandler.Update)
+			protected.DELETE("/webhooks/:id", webhookHandler.Delete)
 		}
 	}
 

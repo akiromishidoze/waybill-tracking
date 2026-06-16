@@ -11,6 +11,7 @@ import (
 	"github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
@@ -19,10 +20,11 @@ type WaybillHandler struct {
 	kafkaProducer *kafka.Producer
 	wsHub         *ws.Hub
 	esClient      *es.Client
+	webhooks      *wh.Dispatcher
 }
 
-func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client) *WaybillHandler {
-	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec}
+func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher) *WaybillHandler {
+	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec, webhooks: wd}
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
@@ -106,6 +108,8 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 		log.Printf("elasticsearch index error: %v", err)
 	}
 
+	h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
+
 	c.JSON(http.StatusCreated, wb)
 }
 
@@ -156,6 +160,8 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
 		log.Printf("elasticsearch index error: %v", err)
 	}
+
+	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 
 	c.JSON(http.StatusOK, wb)
 }

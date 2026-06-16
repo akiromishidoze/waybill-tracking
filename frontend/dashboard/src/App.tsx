@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import WaybillListPage from './pages/WaybillListPage'
 import WaybillDetailPage from './pages/WaybillDetailPage'
+import WaybillNewPage from './pages/WaybillNewPage'
 import TrackingPage from './pages/TrackingPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/waybills" element={<WaybillListPage />} />
+            <Route path="/waybills/new" element={<WaybillNewPage />} />
             <Route path="/waybills/:id" element={<WaybillDetailPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>

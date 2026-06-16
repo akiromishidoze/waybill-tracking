@@ -20,28 +20,40 @@ func NewWaybillRepository(db *pgxpool.Pool, redis *redis.Client) *WaybillReposit
 	return &WaybillRepository{db: db, redis: redis}
 }
 
-func (r *WaybillRepository) List(ctx context.Context, search string) ([]models.Waybill, error) {
-	query := `
+func (r *WaybillRepository) List(ctx context.Context, search string, page, limit int) ([]models.Waybill, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 200 {
+		limit = 50
+	}
+
+	whereClause := ""
+	var args []interface{}
+
+	if search != "" {
+		whereClause = ` WHERE tracking_number ILIKE '%' || $1 || '%' OR shipper_name ILIKE '%' || $1 || '%' OR recipient_name ILIKE '%' || $1 || '%'`
+		args = append(args, search)
+	}
+
+	countQuery := `SELECT COUNT(*) FROM waybills` + whereClause
+	var total int
+	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	dataQuery := fmt.Sprintf(`
 		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
 		       recipient_address, recipient_phone, origin, destination, weight,
 		       dimensions, service_type, status, estimated_delivery, actual_delivery,
 		       created_at, updated_at
-		FROM waybills`
+		FROM waybills%s ORDER BY created_at DESC LIMIT %d OFFSET %d`,
+		whereClause, limit, offset)
 
-	if search != "" {
-		query += ` WHERE tracking_number ILIKE '%' || $1 || '%' OR shipper_name ILIKE '%' || $1 || '%' OR recipient_name ILIKE '%' || $1 || '%'`
-	}
-
-	query += ` ORDER BY created_at DESC LIMIT 100`
-
-	var args []interface{}
-	if search != "" {
-		args = append(args, search)
-	}
-
-	rows, err := r.db.Query(ctx, query, args...)
+	rows, err := r.db.Query(ctx, dataQuery, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -56,11 +68,11 @@ func (r *WaybillRepository) List(ctx context.Context, search string) ([]models.W
 			&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		waybills = append(waybills, wb)
 	}
-	return waybills, nil
+	return waybills, total, nil
 }
 
 func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string) ([]models.Waybill, error) {

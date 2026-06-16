@@ -18,10 +18,17 @@ const statusColors: Record<string, string> = {
 
 export default function WaybillListPage() {
   const [search, setSearch] = useState('')
-  const { data: waybills, isLoading } = useQuery({
-    queryKey: ['waybills', search],
-    queryFn: () => waybillService.list({ search }).then((r) => r.data),
+  const [page, setPage] = useState(1)
+  const { data, isLoading } = useQuery({
+    queryKey: ['waybills', search, page],
+    queryFn: () =>
+      waybillService
+        .list({ search, page: String(page), limit: '50' })
+        .then((r) => r.data),
   })
+
+  const waybills = data?.data
+  const meta = data?.meta
 
   return (
     <div>
@@ -130,6 +137,60 @@ export default function WaybillListPage() {
             )}
           </tbody>
         </table>
+        {meta && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.75rem 1rem',
+              borderTop: '1px solid #f1f5f9',
+              fontSize: '0.875rem',
+            }}
+          >
+            <span style={{ color: '#64748b' }}>
+              {meta.total} total
+            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 6,
+                  background: page <= 1 ? '#f8fafc' : '#fff',
+                  color: page <= 1 ? '#94a3b8' : '#2563eb',
+                  cursor: page <= 1 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Previous
+              </button>
+              <span style={{ padding: '0.375rem 0', color: '#64748b' }}>
+                Page {meta.page}
+              </span>
+              <button
+                disabled={page * meta.limit >= meta.total}
+                onClick={() => setPage((p) => p + 1)}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 6,
+                  background:
+                    page * meta.limit >= meta.total ? '#f8fafc' : '#fff',
+                  color:
+                    page * meta.limit >= meta.total ? '#94a3b8' : '#2563eb',
+                  cursor:
+                    page * meta.limit >= meta.total
+                      ? 'not-allowed'
+                      : 'pointer',
+                }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

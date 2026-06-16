@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -24,12 +25,23 @@ func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, h
 
 func (h *WaybillHandler) List(c *gin.Context) {
 	search := c.Query("search")
-	waybills, err := h.repo.List(c.Request.Context(), search)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	waybills, total, err := h.repo.List(c.Request.Context(), search, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, waybills)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": waybills,
+		"meta": gin.H{
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		},
+	})
 }
 
 func (h *WaybillHandler) Get(c *gin.Context) {

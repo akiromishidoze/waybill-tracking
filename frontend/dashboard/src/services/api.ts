@@ -25,9 +25,14 @@ api.interceptors.response.use(
   },
 )
 
+export interface PaginatedResponse<T> {
+  data: T[]
+  meta: { total: number; page: number; limit: number }
+}
+
 export const waybillService = {
   list: (params?: Record<string, string>) =>
-    api.get<Waybill[]>('/waybills', { params }),
+    api.get<PaginatedResponse<Waybill>>('/waybills', { params }),
   get: (id: string) => api.get<Waybill>(`/waybills/${id}`),
   track: (trackingNumber: string) =>
     api.get<Waybill>(`/track/${trackingNumber}`),

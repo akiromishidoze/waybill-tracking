@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
+import { SkeletonTableRow } from '@/components/Skeleton'
 import type { Waybill } from '@/types/waybill'
 
 const statusColors: Record<string, string> = {
@@ -91,11 +92,13 @@ export default function WaybillListPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr>
-                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center' }}>
-                  Loading...
-                </td>
-              </tr>
+              <>
+                <SkeletonTableRow />
+                <SkeletonTableRow />
+                <SkeletonTableRow />
+                <SkeletonTableRow />
+                <SkeletonTableRow />
+              </>
             ) : (
               waybills?.map((wb: Waybill) => (
                 <tr

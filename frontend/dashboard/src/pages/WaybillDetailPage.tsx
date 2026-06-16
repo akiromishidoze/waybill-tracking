@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
+import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 
 export default function WaybillDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -10,7 +11,17 @@ export default function WaybillDetailPage() {
     enabled: !!id,
   })
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) {
+    return (
+      <div>
+        <SkeletonLine width={280} height={28} style={{ marginBottom: '1.5rem' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <SkeletonBlock height={220} />
+          <SkeletonBlock height={220} />
+        </div>
+      </div>
+    )
+  }
   if (!wb) return <p>Waybill not found</p>
 
   return (

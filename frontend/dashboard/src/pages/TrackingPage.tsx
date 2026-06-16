@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
+import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 
 export default function TrackingPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
@@ -80,7 +81,11 @@ export default function TrackingPage() {
           </button>
         </form>
 
-        {isLoading && <p style={{ textAlign: 'center' }}>Searching...</p>}
+        {isLoading && (
+          <div style={{ maxWidth: 600, margin: '0 auto' }}>
+            <SkeletonBlock height={180} />
+          </div>
+        )}
         {error && (
           <p style={{ textAlign: 'center', color: '#dc2626' }}>
             Shipment not found. Please check your tracking number.

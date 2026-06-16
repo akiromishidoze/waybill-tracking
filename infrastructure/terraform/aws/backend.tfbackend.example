@@ -1,0 +1,14 @@
+# Copy this file to backend.tfbackend, fill in values, and run:
+#   terraform init -backend-config=backend.tfbackend -migrate
+#
+# Or pass values via CLI:
+#   terraform init -backend-config="bucket=my-tfstate-bucket" \
+#                  -backend-config="dynamodb_table=terraform-state-lock" \
+#                  -backend-config="region=us-east-1" \
+#                  -migrate
+#
+# bucket  = "waybill-tfstate-<ENV>"
+# key     = "terraform/aws/terraform.tfstate"
+# region  = "us-east-1"
+# dynamodb_table = "terraform-state-lock"
+# encrypt = true

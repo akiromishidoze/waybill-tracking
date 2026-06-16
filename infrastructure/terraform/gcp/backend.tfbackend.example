@@ -1,0 +1,10 @@
+# Copy this file to backend.tfbackend, fill in values, and run:
+#   terraform init -backend-config=backend.tfbackend -migrate
+#
+# Or pass via CLI:
+#   terraform init -backend-config="bucket=my-tfstate-bucket" \
+#                  -backend-config="prefix=terraform/gcp" \
+#                  -migrate
+#
+# bucket = "waybill-tfstate-<ENV>"
+# prefix = "terraform/gcp"

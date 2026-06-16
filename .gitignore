@@ -13,3 +13,7 @@ venv/
 *.log
 .DS_Store
 coverage/
+*.tfbackend
+.terraform/
+terraform.tfstate*
+crash.log

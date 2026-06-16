@@ -10,6 +10,16 @@ terraform {
       version = "~> 2.30"
     }
   }
+
+  # Remote state stored in a GCS bucket.
+  # 1. Run: gsutil mb gs://<BUCKET_NAME>
+  # 2. Uncomment the block below and replace <BUCKET_NAME> / <PREFIX>
+  # 3. Run: terraform init -migrate
+  #
+  # backend "gcs" {
+  #   bucket = "<BUCKET_NAME>"
+  #   prefix = "terraform/gcp"
+  # }
 }
 
 provider "google" {

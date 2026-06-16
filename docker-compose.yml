@@ -149,6 +149,8 @@ services:
       - ./infrastructure/monitoring/grafana/dashboards/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - ./infrastructure/monitoring/grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
       - ./infrastructure/monitoring/grafana/dashboards/service-overview.json:/var/lib/grafana/dashboards/service-overview.json
+      - ./infrastructure/monitoring/grafana/dashboards/waybill-operations.json:/var/lib/grafana/dashboards/waybill-operations.json
+      - ./infrastructure/monitoring/grafana/dashboards/infrastructure.json:/var/lib/grafana/dashboards/infrastructure.json
       - grafana_data:/var/lib/grafana
 
 volumes:

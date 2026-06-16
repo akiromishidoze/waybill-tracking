@@ -56,7 +56,7 @@ Prioritized list of improvements needed to bring the application to production r
 | 31 | **No Terraform state backend** | `terraform/*/main.tf` | State stored locally — no remote backend. |
 | 32 | **No database migration tool** | `migrations/` | SQL file exists but no migration runner. |
 | 33 | **Alerting rules missing** | `prometheus.yml:4` | References `alerts.yml` but file doesn't exist. |
-| 34 | **Grafana dashboards empty** | `grafana/dashboards/` | Only datasource defined, zero dashboards. |
+| 34 | ~~**Grafana dashboards empty**~~ ✅ | `grafana/dashboards/` | **Fixed** — Added three provisioned dashboards: `service-overview.json` (API rates, latency, errors, alerts), `waybill-operations.json` (scan events, status transitions, courier activity, Kafka lag), `infrastructure.json` (PostgreSQL, Redis, Kafka broker, Go runtime). All auto-loaded via Grafana file provisioner. |
 | 35 | **No SSL/TLS config** | `nginx.conf` | Only port 80. No SSL despite `443` in docker-compose. |
 | 36 | **No log aggregation** | `infrastructure` | No ELK/loki/fluentd setup. |
 | 37 | **No feature flags** | `entire project` | No mechanism to toggle features. |

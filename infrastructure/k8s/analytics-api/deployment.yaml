@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-api
+  namespace: waybill
+  labels:
+    app: analytics-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: analytics-api
+  template:
+    metadata:
+      labels:
+        app: analytics-api
+    spec:
+      containers:
+        - name: api
+          image: waybill/analytics-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: waybill-secrets
+                  key: analytics-database-url
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
+            - name: KAFKA_BROKERS
+              value: "kafka:9092"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-api
+  namespace: waybill
+spec:
+  selector:
+    app: analytics-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

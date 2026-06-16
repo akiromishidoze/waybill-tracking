@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-api
+  namespace: waybill
+  labels:
+    app: core-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: core-api
+  template:
+    metadata:
+      labels:
+        app: core-api
+    spec:
+      containers:
+        - name: api
+          image: waybill/core-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: waybill-secrets
+                  key: database-url
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
+            - name: KAFKA_BROKERS
+              value: "kafka:9092"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: waybill-secrets
+                  key: jwt-secret
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-api
+  namespace: waybill
+spec:
+  selector:
+    app: core-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

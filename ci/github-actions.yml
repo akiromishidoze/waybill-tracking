@@ -1,0 +1,108 @@
+name: Waybill CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  test-core-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/core-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - run: go mod download
+      - run: go vet ./...
+      - run: go test ./... -v -race -coverprofile=coverage.out
+      - uses: codecov/codecov-action@v4
+        with:
+          file: backend/core-api/coverage.out
+
+  test-analytics-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/analytics-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pip install pytest pytest-asyncio
+      - run: python -m pytest tests/ -v --cov=app
+
+  test-dashboard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test -- --run
+
+  build-and-push:
+    needs: [test-core-api, test-analytics-api, test-dashboard]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: core-api
+            context: backend/core-api
+          - name: analytics-api
+            context: backend/analytics-api
+          - name: dashboard
+            context: frontend/dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
+
+  deploy:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: waybill-cluster
+          location: us-central1
+      - run: |
+          kubectl set image deployment/core-api core-api=ghcr.io/${{ github.repository }}/core-api:${{ env.IMAGE_TAG }} -n waybill
+          kubectl set image deployment/analytics-api analytics-api=ghcr.io/${{ github.repository }}/analytics-api:${{ env.IMAGE_TAG }} -n waybill
+          kubectl set image deployment/dashboard dashboard=ghcr.io/${{ github.repository }}/dashboard:${{ env.IMAGE_TAG }} -n waybill
+          kubectl rollout status deployment/core-api -n waybill
+          kubectl rollout status deployment/analytics-api -n waybill
+          kubectl rollout status deployment/dashboard -n waybill

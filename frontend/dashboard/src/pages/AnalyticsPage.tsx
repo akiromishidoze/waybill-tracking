@@ -4,6 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
 import { analyticsService } from '@/services/api'
+import s from '@/styles/components.module.css'
 
 const monthlyData: Array<{ month: string; shipments: number; sla: number }> = []
 
@@ -30,51 +31,33 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Analytics</h2>
-        <button
-          onClick={handleExport}
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#16a34a',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
+      <div className={s.analyticsHeader}>
+        <h2 className={s.pageTitle} style={{ marginBottom: 0 }}>Analytics</h2>
+        <button onClick={handleExport} className={s.btnSuccess}>
           Export Report
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>SLA Compliance</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 700, color: '#16a34a' }}>
+      <div className={s.grid2} style={{ marginBottom: '1.5rem' }}>
+        <div className={s.statCard}>
+          <h3 className={s.chartTitle}>SLA Compliance</h3>
+          <p className={s.statValue} style={{ color: '#16a34a' }}>
             {stats?.slaCompliance ?? '—'}%
           </p>
-          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Last 30 days</p>
+          <p className={s.statLabel}>Last 30 days</p>
         </div>
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Avg Transit Time</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 700, color: '#2563eb' }}>
+        <div className={s.statCard}>
+          <h3 className={s.chartTitle}>Avg Transit Time</h3>
+          <p className={s.statValue} style={{ color: '#2563eb' }}>
             {stats?.avgTransitTime ?? '—'}h
           </p>
-          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Last 30 days</p>
+          <p className={s.statLabel}>Last 30 days</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Monthly Trend</h3>
+      <div className={s.grid2}>
+        <div className={s.chartContainer}>
+          <h3 className={s.chartTitle}>Monthly Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -87,8 +70,8 @@ export default function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
 
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Status Distribution</h3>
+        <div className={s.chartContainer}>
+          <h3 className={s.chartTitle}>Status Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie

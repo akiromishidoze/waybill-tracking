@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
-import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
+import { SkeletonBlock } from '@/components/Skeleton'
+import s from '@/styles/components.module.css'
 
 export default function TrackingPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
@@ -20,63 +21,22 @@ export default function TrackingPage() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        background: '#f1f5f9',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: 600, padding: '2rem' }}>
-        <h1
-          style={{
-            fontSize: '2rem',
-            fontWeight: 700,
-            textAlign: 'center',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Track Your Shipment
-        </h1>
-        <p
-          style={{
-            textAlign: 'center',
-            color: '#64748b',
-            marginBottom: '1.5rem',
-          }}
-        >
+    <div className={s.centerPage}>
+      <div className={s.trackContainer}>
+        <h1 className={s.trackTitle}>Track Your Shipment</h1>
+        <p className={s.trackSubtitle}>
           Enter your tracking number to get real-time status
         </p>
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+        <form onSubmit={handleSearch} className={s.trackForm}>
           <input
             type="text"
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
             placeholder="e.g. WBT-2024-001234"
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              border: '1px solid #e2e8f0',
-              borderRadius: 8,
-              fontSize: '1rem',
-            }}
+            className={s.formInput}
           />
-          <button
-            type="submit"
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
+          <button type="submit" className={s.btnPrimary} style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', fontWeight: 600 }}>
             Track
           </button>
         </form>
@@ -93,15 +53,8 @@ export default function TrackingPage() {
         )}
 
         {wb && (
-          <div style={{ background: '#fff', borderRadius: 12, padding: '1.5rem' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.5rem',
-              }}
-            >
+          <div className={s.trackCard}>
+            <div className={s.trackCardHeader}>
               <div>
                 <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Status</p>
                 <p style={{ fontWeight: 700, fontSize: '1.125rem' }}>
@@ -118,33 +71,16 @@ export default function TrackingPage() {
               </div>
             </div>
 
-            <div style={{ position: 'relative', paddingLeft: '1.5rem' }}>
-              {wb.events?.map((evt, idx) => (
-                <div
-                  key={evt.id}
-                  style={{
-                    position: 'relative',
-                    paddingBottom: '1rem',
-                    borderLeft: idx < wb.events.length - 1 ? '2px solid #e2e8f0' : 'none',
-                    paddingLeft: '1.5rem',
-                    marginLeft: '-0.75rem',
-                  }}
+            <div className={s.timeline}>
+              {wb.events?.map((evt: any, idx: number) => (
+                <div key={evt.id} className={s.timelineItem}
+                  style={{ borderLeft: idx < wb.events.length - 1 ? '2px solid #e2e8f0' : 'none' }}
                 >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: -7,
-                      top: 4,
-                      width: 12,
-                      height: 12,
-                      borderRadius: '50%',
-                      background: idx === 0 ? '#16a34a' : '#2563eb',
-                    }}
-                  />
-                  <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>
+                  <div className={s.timelineDot} style={{ background: idx === 0 ? '#16a34a' : '#2563eb' }} />
+                  <p className={s.timelineStatus} style={{ fontSize: '0.9rem' }}>
                     {evt.status.replace(/_/g, ' ')}
                   </p>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  <p className={s.timelineMeta} style={{ fontSize: '0.8rem' }}>
                     {evt.location} — {new Date(evt.timestamp).toLocaleString()}
                   </p>
                 </div>

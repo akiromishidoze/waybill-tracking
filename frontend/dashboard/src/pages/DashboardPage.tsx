@@ -3,6 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { analyticsService } from '@/services/api'
+import s from '@/styles/components.module.css'
 
 const statsCards = [
   { label: 'Active Waybills', key: 'totalActive', color: '#2563eb' },
@@ -22,29 +23,11 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-        Dashboard
-      </h2>
+      <h2 className={s.pageTitle}>Dashboard</h2>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
+      <div className={s.gridAuto} style={{ marginBottom: '2rem' }}>
         {statsCards.map((card) => (
-          <div
-            key={card.key}
-            style={{
-              background: '#fff',
-              padding: '1.25rem',
-              borderRadius: 10,
-              borderLeft: `4px solid ${card.color}`,
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-            }}
-          >
+          <div key={card.key} className={s.cardStat} style={{ borderLeft: `4px solid ${card.color}` }}>
             <p style={{ fontSize: '0.875rem', color: '#64748b' }}>{card.label}</p>
             <p style={{ fontSize: '1.75rem', fontWeight: 700 }}>
               {stats?.[card.key as keyof typeof stats] ?? '—'}
@@ -53,14 +36,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div
-        style={{
-          background: '#fff',
-          padding: '1.5rem',
-          borderRadius: 10,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-        }}
-      >
+      <div className={s.cardPadded}>
         <h3 style={{ marginBottom: '1rem', fontWeight: 600 }}>SLA Compliance (%)</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={slaData}>

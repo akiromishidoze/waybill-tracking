@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -14,10 +13,10 @@ import (
 )
 
 type HealthHandler struct {
-	db     *pgxpool.Pool
-	rdb    *redis.Client
+	db *pgxpool.Pool
+	rdb *redis.Client
 	broker string
-	es     *es.Client
+	es *es.Client
 }
 
 func NewHealthHandler(db *pgxpool.Pool, rdb *redis.Client, broker string, ec *es.Client) *HealthHandler {
@@ -53,15 +52,18 @@ func (h *HealthHandler) Check(c *gin.Context) {
 		if b == "" {
 			continue
 		}
+
 		conn, err := kafka.Dial("tcp", b)
 		if err != nil {
 			lastErr = err
 			continue
 		}
+
 		conn.Close()
 		kafkaUp = true
 		break
 	}
+
 	if kafkaUp {
 		checks["kafka"] = gin.H{"status": "up"}
 	} else {
@@ -77,6 +79,7 @@ func (h *HealthHandler) Check(c *gin.Context) {
 	}
 
 	checks["status"] = "ok"
+
 	if status != http.StatusOK {
 		checks["status"] = "degraded"
 	}

@@ -8,12 +8,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Migrator struct {
-	db        *pgxpool.Pool
+	db *pgxpool.Pool
 	migrationsDir string
 }
 
@@ -27,6 +26,7 @@ func (m *Migrator) Run(ctx context.Context) error {
 	}
 
 	entries, err := os.ReadDir(m.migrationsDir)
+
 	if err != nil {
 		return fmt.Errorf("read migrations dir %s: %w", m.migrationsDir, err)
 	}
@@ -41,6 +41,7 @@ func (m *Migrator) Run(ctx context.Context) error {
 
 	if len(files) == 0 {
 		log.Println("migrator: no .sql files found in", m.migrationsDir)
+
 		return nil
 	}
 
@@ -70,9 +71,11 @@ func (m *Migrator) ensureTable(ctx context.Context) error {
 func (m *Migrator) appliedSet(ctx context.Context) map[string]bool {
 	set := map[string]bool{}
 	rows, err := m.db.Query(ctx, `SELECT version FROM schema_migrations ORDER BY version`)
+
 	if err != nil {
 		return set
 	}
+
 	defer rows.Close()
 	for rows.Next() {
 		var v string
@@ -80,20 +83,24 @@ func (m *Migrator) appliedSet(ctx context.Context) map[string]bool {
 			set[v] = true
 		}
 	}
+
 	return set
 }
 
 func (m *Migrator) apply(ctx context.Context, filename string) error {
 	path := filepath.Join(m.migrationsDir, filename)
 	content, err := os.ReadFile(path)
+
 	if err != nil {
 		return err
 	}
 
 	tx, err := m.db.Begin(ctx)
+
 	if err != nil {
 		return err
 	}
+
 	defer tx.Rollback(ctx)
 
 	if _, err := tx.Exec(ctx, string(content)); err != nil {

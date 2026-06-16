@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -32,21 +31,25 @@ func NewDispatcher(repo *repository.WebhookRepository) *Dispatcher {
 
 func (d *Dispatcher) Dispatch(ctx context.Context, event string, waybillID string, data interface{}) {
 	hooks, err := d.repo.ListMatchingEvents(ctx, event)
+
 	if err != nil {
 		log.Printf("webhook dispatch: list hooks error: %v", err)
+
 		return
 	}
 
 	payload := models.WebhookEventPayload{
-		Event:     event,
+		Event: event,
 		WaybillID: waybillID,
-		Data:      data,
+		Data: data,
 		Timestamp: time.Now(),
 	}
 
 	body, err := json.Marshal(payload)
+
 	if err != nil {
 		log.Printf("webhook dispatch: marshal error: %v", err)
+
 		return
 	}
 
@@ -57,10 +60,13 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event string, waybillID strin
 
 func (d *Dispatcher) send(h models.Webhook, body []byte) {
 	req, err := http.NewRequest(http.MethodPost, h.URL, bytes.NewReader(body))
+
 	if err != nil {
 		log.Printf("webhook dispatch: request error for %s: %v", h.ID, err)
+
 		return
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	if h.Secret != "" {
@@ -73,8 +79,10 @@ func (d *Dispatcher) send(h models.Webhook, body []byte) {
 	resp, err := d.client.Do(req)
 	if err != nil {
 		log.Printf("webhook dispatch: call error for %s: %v", h.ID, err)
+
 		return
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {

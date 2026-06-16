@@ -3,7 +3,6 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-
 	"github.com/segmentio/kafka-go"
 	"github.com/waybill-tracking/core-api/internal/models"
 )
@@ -18,14 +17,16 @@ func NewProducer(brokers, defaultTopic string) *Producer {
 		Topic:    defaultTopic,
 		Balancer: &kafka.LeastBytes{},
 	}
+
 	return &Producer{writer: w}
 }
 
 func (p *Producer) PublishScanEvent(ctx context.Context, event models.ScanEvent) error {
 	data, _ := json.Marshal(event)
+
 	return p.writer.WriteMessages(ctx, kafka.Message{
 		Topic: "scan-events",
-		Key:   []byte(event.WaybillID),
+		Key: []byte(event.WaybillID),
 		Value: data,
 	})
 }
@@ -34,7 +35,7 @@ func (p *Producer) PublishStatusChange(ctx context.Context, wb models.Waybill) e
 	data, _ := json.Marshal(wb)
 	return p.writer.WriteMessages(ctx, kafka.Message{
 		Topic: "status-changes",
-		Key:   []byte(wb.ID),
+		Key: []byte(wb.ID),
 		Value: data,
 	})
 }

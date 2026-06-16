@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/internal/models"
@@ -24,6 +23,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 	if page < 1 {
 		page = 1
 	}
+
 	if limit < 1 || limit > 200 {
 		limit = 50
 	}
@@ -38,6 +38,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 
 	countQuery := `SELECT COUNT(*) FROM waybills` + whereClause
 	var total int
+
 	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
@@ -52,9 +53,11 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 		whereClause, limit, offset)
 
 	rows, err := r.db.Query(ctx, dataQuery, args...)
+
 	if err != nil {
 		return nil, 0, err
 	}
+
 	defer rows.Close()
 
 	var waybills []models.Waybill
@@ -67,11 +70,14 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 			&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
 		)
+
 		if err != nil {
 			return nil, 0, err
 		}
+
 		waybills = append(waybills, wb)
 	}
+
 	return waybills, total, nil
 }
 
@@ -86,9 +92,11 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 		JOIN scan_events e ON e.waybill_id = w.id
 		WHERE e.courier_id = $1
 		ORDER BY w.updated_at DESC LIMIT 50`, courierID)
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var waybills []models.Waybill
@@ -103,8 +111,10 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 		); err != nil {
 			return nil, err
 		}
+
 		waybills = append(waybills, wb)
 	}
+
 	return waybills, nil
 }
 
@@ -122,19 +132,23 @@ func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Way
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
 	)
+
 	if err != nil {
 		return nil, err
 	}
 
 	events, err := r.getEvents(ctx, id)
+
 	if err == nil {
 		wb.Events = events
 	}
+
 	return &wb, nil
 }
 
 func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) (*models.Waybill, error) {
 	cacheKey := fmt.Sprintf("track:%s", tn)
+
 	if cached, err := r.redis.Get(ctx, cacheKey).Result(); err == nil {
 		var wb models.Waybill
 		if json.Unmarshal([]byte(cached), &wb) == nil {
@@ -155,6 +169,7 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
 	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -164,6 +179,7 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 	if data, err := json.Marshal(wb); err == nil {
 		r.redis.Set(ctx, cacheKey, string(data), 5*time.Minute)
 	}
+
 	return &wb, nil
 }
 
@@ -178,14 +194,17 @@ func (r *WaybillRepository) Create(ctx context.Context, wb *models.Waybill) erro
 		wb.Origin, wb.Destination, wb.Weight, wb.Dimensions,
 		wb.ServiceType, wb.Status, time.Now(), time.Now(),
 	)
+
 	return err
 }
 
 func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill, event models.ScanEvent) error {
 	tx, err := r.db.Begin(ctx)
+
 	if err != nil {
 		return err
 	}
+
 	defer tx.Rollback(ctx)
 
 	if _, err := tx.Exec(ctx, `UPDATE waybills SET status=$1, updated_at=$2 WHERE id=$3`,
@@ -194,6 +213,7 @@ func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill
 	}
 
 	event.Timestamp = time.Now()
+
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO scan_events (id, waybill_id, status, location, courier_id, courier_name, timestamp, remark)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
@@ -212,9 +232,11 @@ func (r *WaybillRepository) getEvents(ctx context.Context, waybillID string) ([]
 	rows, err := r.db.Query(ctx, `
 		SELECT id, waybill_id, status, location, courier_id, courier_name, timestamp, remark
 		FROM scan_events WHERE waybill_id = $1 ORDER BY timestamp ASC`, waybillID)
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	var events []models.ScanEvent
@@ -226,5 +248,6 @@ func (r *WaybillRepository) getEvents(ctx context.Context, waybillID string) ([]
 		}
 		events = append(events, e)
 	}
+
 	return events, nil
 }

@@ -12,6 +12,7 @@ func TestWaybillStatusValues(t *testing.T) {
 		StatusAtSortingCenter, StatusOutForDelivery, StatusDelivered,
 		StatusFailedDelivery, StatusReturned, StatusCancelled,
 	}
+
 	if len(expected) != 9 {
 		t.Errorf("expected 9 status values, got %d", len(expected))
 	}
@@ -28,6 +29,7 @@ func TestWaybillStatus_StringValues(t *testing.T) {
 		{StatusDelivered, "DELIVERED"},
 		{StatusCancelled, "CANCELLED"},
 	}
+
 	for _, tt := range tests {
 		if string(tt.status) != tt.want {
 			t.Errorf("expected %s, got %s", tt.want, string(tt.status))
@@ -38,25 +40,27 @@ func TestWaybillStatus_StringValues(t *testing.T) {
 func TestWaybill_JSONSerialization(t *testing.T) {
 	now := time.Now()
 	wb := Waybill{
-		ID:             "wb-1",
+		ID: "wb-1",
 		TrackingNumber: "WBT-001",
-		ShipperID:      "user-1",
-		ShipperName:    "Test Shipper",
-		RecipientName:  "John Doe",
-		Status:         StatusInTransit,
-		Weight:         10.5,
-		Dimensions:     "10x10x10",
-		ServiceType:    "standard",
-		CreatedAt:      now,
-		UpdatedAt:      now,
+		ShipperID: "user-1",
+		ShipperName: "Test Shipper",
+		RecipientName: "John Doe",
+		Status: StatusInTransit,
+		Weight: 10.5,
+		Dimensions: "10x10x10",
+		ServiceType: "standard",
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	data, err := json.Marshal(wb)
+
 	if err != nil {
 		t.Fatalf("failed to marshal waybill: %v", err)
 	}
 
 	var decoded Waybill
+
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("failed to unmarshal waybill: %v", err)
 	}
@@ -64,9 +68,11 @@ func TestWaybill_JSONSerialization(t *testing.T) {
 	if decoded.ID != wb.ID {
 		t.Errorf("expected id %s, got %s", wb.ID, decoded.ID)
 	}
+
 	if decoded.TrackingNumber != wb.TrackingNumber {
 		t.Errorf("expected trackingNumber %s, got %s", wb.TrackingNumber, decoded.TrackingNumber)
 	}
+
 	if decoded.Status != wb.Status {
 		t.Errorf("expected status %s, got %s", wb.Status, decoded.Status)
 	}
@@ -76,15 +82,16 @@ func TestScanEvent_JSONSerialization(t *testing.T) {
 	now := time.Now()
 	remark := "Package arrived"
 	event := ScanEvent{
-		ID:        "evt-1",
+		ID: "evt-1",
 		WaybillID: "wb-1",
-		Status:    StatusInTransit,
-		Location:  "Sorting Center A",
+		Status: StatusInTransit,
+		Location: "Sorting Center A",
 		Timestamp: now,
-		Remark:    &remark,
+		Remark: &remark,
 	}
 
 	data, err := json.Marshal(event)
+
 	if err != nil {
 		t.Fatalf("failed to marshal scan event: %v", err)
 	}
@@ -97,9 +104,11 @@ func TestScanEvent_JSONSerialization(t *testing.T) {
 	if decoded.ID != event.ID {
 		t.Errorf("expected id %s, got %s", event.ID, decoded.ID)
 	}
+
 	if decoded.Location != event.Location {
 		t.Errorf("expected location %s, got %s", event.Location, decoded.Location)
 	}
+
 	if *decoded.Remark != *event.Remark {
 		t.Errorf("expected remark %s, got %s", *event.Remark, *decoded.Remark)
 	}
@@ -107,17 +116,18 @@ func TestScanEvent_JSONSerialization(t *testing.T) {
 
 func TestCreateWaybillRequest_Validation(t *testing.T) {
 	req := CreateWaybillRequest{
-		RecipientName:    "John Doe",
+		RecipientName: "John Doe",
 		RecipientAddress: "123 Main St",
-		RecipientPhone:   "555-0100",
-		Origin:           "NYC",
-		Destination:      "LAX",
-		Weight:           10.5,
+		RecipientPhone: "555-0100",
+		Origin: "NYC",
+		Destination: "LAX",
+		Weight: 10.5,
 	}
 
 	if req.RecipientName != "John Doe" {
 		t.Errorf("expected recipientName John Doe, got %s", req.RecipientName)
 	}
+
 	if req.Weight != 10.5 {
 		t.Errorf("expected weight 10.5, got %f", req.Weight)
 	}
@@ -126,17 +136,19 @@ func TestCreateWaybillRequest_Validation(t *testing.T) {
 func TestStatusUpdateRequest_JSON(t *testing.T) {
 	remark := "Delivered on time"
 	req := StatusUpdateRequest{
-		Status:   StatusDelivered,
+		Status: StatusDelivered,
 		Location: "Customer Door",
-		Remark:   &remark,
+		Remark: &remark,
 	}
 
 	data, err := json.Marshal(req)
+
 	if err != nil {
 		t.Fatalf("failed to marshal: %v", err)
 	}
 
 	var decoded StatusUpdateRequest
+
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("failed to unmarshal: %v", err)
 	}
@@ -148,13 +160,14 @@ func TestStatusUpdateRequest_JSON(t *testing.T) {
 
 func TestUser_JSONSerialization(t *testing.T) {
 	user := User{
-		ID:    "user-1",
+		ID: "user-1",
 		Email: "test@example.com",
-		Name:  "Test User",
-		Role:  "ADMIN",
+		Name: "Test User",
+		Role: "ADMIN",
 	}
 
 	data, err := json.Marshal(user)
+
 	if err != nil {
 		t.Fatalf("failed to marshal user: %v", err)
 	}
@@ -167,9 +180,11 @@ func TestUser_JSONSerialization(t *testing.T) {
 	if decoded.ID != user.ID {
 		t.Errorf("expected id %s, got %s", user.ID, decoded.ID)
 	}
+
 	if decoded.Role != "ADMIN" {
 		t.Errorf("expected role ADMIN, got %s", decoded.Role)
 	}
+
 	if decoded.Password != "" {
 		t.Error("expected password to be hidden from JSON")
 	}

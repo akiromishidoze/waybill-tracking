@@ -7,15 +7,16 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
 	"github.com/gin-gonic/gin"
 )
 
 func TestGenerateTrackingNumber(t *testing.T) {
 	tn := generateTrackingNumber()
+
 	if !strings.HasPrefix(tn, "WBT-") {
 		t.Errorf("expected tracking number to start with WBT-, got %s", tn)
 	}
+
 	if len(tn) != 13 {
 		t.Errorf("expected tracking number length 13, got %d (%s)", len(tn), tn)
 	}
@@ -23,26 +24,32 @@ func TestGenerateTrackingNumber(t *testing.T) {
 
 func TestGenerateTrackingNumber_Unique(t *testing.T) {
 	seen := make(map[string]bool)
+
 	for i := 0; i < 100; i++ {
 		tn := generateTrackingNumber()
 		if seen[tn] {
 			t.Errorf("duplicate tracking number: %s", tn)
 		}
+
 		seen[tn] = true
 	}
 }
 
 func TestNewWaybillHandler(t *testing.T) {
 	h := NewWaybillHandler(nil, nil, nil)
+
 	if h == nil {
 		t.Fatal("expected non-nil handler")
 	}
+
 	if h.repo != nil {
 		t.Error("expected nil repo")
 	}
+
 	if h.kafkaProducer != nil {
 		t.Error("expected nil kafkaProducer")
 	}
+
 	if h.wsHub != nil {
 		t.Error("expected nil wsHub")
 	}
@@ -52,6 +59,7 @@ func TestCreateWaybill_InvalidJSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := NewWaybillHandler(nil, nil, nil)
 	r := gin.New()
+
 	r.POST("/waybills", func(c *gin.Context) {
 		c.Set("userID", "user-1")
 		c.Set("userName", "Test Shipper")
@@ -72,6 +80,7 @@ func TestCreateWaybill_MissingRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := NewWaybillHandler(nil, nil, nil)
 	r := gin.New()
+
 	r.POST("/waybills", func(c *gin.Context) {
 		c.Set("userID", "user-1")
 		c.Set("userName", "Test Shipper")
@@ -99,12 +108,12 @@ func TestCreateWaybill_MissingUserContext(t *testing.T) {
 	r.POST("/waybills", h.Create)
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"recipientName":    "John Doe",
+		"recipientName": "John Doe",
 		"recipientAddress": "123 Main St",
-		"recipientPhone":   "555-0100",
-		"origin":           "NYC",
-		"destination":      "LAX",
-		"weight":           10.5,
+		"recipientPhone": "555-0100",
+		"origin": "NYC",
+		"destination": "LAX",
+		"weight": 10.5,
 	})
 
 	w := httptest.NewRecorder()
@@ -202,6 +211,7 @@ func TestCreateWaybill_EmptyBody(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	h := NewWaybillHandler(nil, nil, nil)
 	r := gin.New()
+
 	r.POST("/waybills", func(c *gin.Context) {
 		c.Set("userID", "user-1")
 		c.Set("userName", "Test Shipper")

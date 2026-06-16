@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -15,6 +14,7 @@ func RateLimitMiddleware(rdb *redis.Client, maxRequests int, window time.Duratio
 		key := "ratelimit:" + ip + ":" + c.FullPath()
 
 		count, err := rdb.Incr(c, key).Result()
+
 		if err != nil {
 			c.Next()
 			return
@@ -36,6 +36,7 @@ func RateLimitMiddleware(rdb *redis.Client, maxRequests int, window time.Duratio
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
 				"error": "rate limit exceeded, try again later",
 			})
+
 			return
 		}
 

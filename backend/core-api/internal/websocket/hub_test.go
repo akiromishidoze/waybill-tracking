@@ -3,15 +3,16 @@ package websocket
 import (
 	"testing"
 	"time"
-
 	"github.com/gorilla/websocket"
 )
 
 func TestNewHub(t *testing.T) {
 	h := NewHub()
+
 	if h == nil {
 		t.Fatal("expected non-nil hub")
 	}
+
 	if len(h.clients) != 0 {
 		t.Errorf("expected empty clients map, got %d", len(h.clients))
 	}
@@ -22,7 +23,9 @@ func TestRegisterClient(t *testing.T) {
 	c := &Client{
 		Subscriptions: make(map[string]bool),
 	}
+
 	h.Register(c)
+
 	if len(h.clients) != 1 {
 		t.Errorf("expected 1 client, got %d", len(h.clients))
 	}
@@ -33,8 +36,10 @@ func TestUnregisterClient(t *testing.T) {
 	c := &Client{
 		Subscriptions: make(map[string]bool),
 	}
+
 	h.Register(c)
 	h.Unregister(c)
+
 	if len(h.clients) != 0 {
 		t.Errorf("expected 0 clients after unregister, got %d", len(h.clients))
 	}
@@ -42,11 +47,14 @@ func TestUnregisterClient(t *testing.T) {
 
 func TestRegisterDuplicateClient(t *testing.T) {
 	h := NewHub()
+
 	c := &Client{
 		Subscriptions: make(map[string]bool),
 	}
+
 	h.Register(c)
 	h.Register(c)
+
 	if len(h.clients) != 1 {
 		t.Errorf("expected 1 client (deduped), got %d", len(h.clients))
 	}
@@ -57,7 +65,9 @@ func TestUnregisterNonexistentClient(t *testing.T) {
 	c := &Client{
 		Subscriptions: make(map[string]bool),
 	}
+
 	h.Unregister(c)
+
 	if len(h.clients) != 0 {
 		t.Errorf("expected 0 clients, got %d", len(h.clients))
 	}

@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
@@ -16,11 +15,11 @@ import (
 )
 
 type WaybillHandler struct {
-	repo          *repository.WaybillRepository
+	repo *repository.WaybillRepository
 	kafkaProducer *kafka.Producer
-	wsHub         *ws.Hub
-	esClient      *es.Client
-	webhooks      *wh.Dispatcher
+	wsHub *ws.Hub
+	esClient *es.Client
+	webhooks *wh.Dispatcher
 }
 
 func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher) *WaybillHandler {
@@ -33,6 +32,7 @@ func (h *WaybillHandler) List(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 
 	waybills, total, err := h.repo.List(c.Request.Context(), search, page, limit)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -50,28 +50,35 @@ func (h *WaybillHandler) List(c *gin.Context) {
 
 func (h *WaybillHandler) Get(c *gin.Context) {
 	id := c.Param("id")
+
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
 		return
 	}
+
 	c.JSON(http.StatusOK, wb)
 }
 
 func (h *WaybillHandler) Track(c *gin.Context) {
 	trackingNumber := c.Param("trackingNumber")
+
 	wb, err := h.repo.GetByTrackingNumber(c.Request.Context(), trackingNumber)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "tracking number not found"})
 		return
 	}
+
 	c.JSON(http.StatusOK, wb)
 }
 
 func (h *WaybillHandler) Create(c *gin.Context) {
 	var req models.CreateWaybillRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 
@@ -80,23 +87,24 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	shipperName, _ := userName.(string)
 
 	wb := &models.Waybill{
-		ID:               uuid.New().String(),
-		TrackingNumber:   generateTrackingNumber(),
-		ShipperID:        userID.(string),
-		ShipperName:      shipperName,
-		Status:           models.StatusCreated,
-		RecipientName:    req.RecipientName,
+		ID: uuid.New().String(),
+		TrackingNumber: generateTrackingNumber(),
+		ShipperID: userID.(string),
+		ShipperName: shipperName,
+		Status: models.StatusCreated,
+		RecipientName: req.RecipientName,
 		RecipientAddress: req.RecipientAddress,
-		RecipientPhone:   req.RecipientPhone,
-		Origin:           req.Origin,
-		Destination:      req.Destination,
-		Weight:           req.Weight,
-		Dimensions:       req.Dimensions,
-		ServiceType:      req.ServiceType,
+		RecipientPhone: req.RecipientPhone,
+		Origin: req.Origin,
+		Destination: req.Destination,
+		Weight: req.Weight,
+		Dimensions: req.Dimensions,
+		ServiceType: req.ServiceType,
 	}
 
 	if err := h.repo.Create(c.Request.Context(), wb); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
@@ -116,14 +124,18 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	id := c.Param("id")
 	var req models.StatusUpdateRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+
 		return
 	}
 
@@ -131,26 +143,30 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid status transition from " + string(wb.Status) + " to " + string(req.Status),
 		})
+
 		return
 	}
 
 	event := models.ScanEvent{
-		ID:        uuid.New().String(),
+		ID: uuid.New().String(),
 		WaybillID: id,
-		Status:    req.Status,
-		Location:  req.Location,
-		Remark:    req.Remark,
+		Status: req.Status,
+		Location: req.Location,
+		Remark: req.Remark,
 	}
 
 	wb.Status = req.Status
+
 	if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
 	if err := h.kafkaProducer.PublishScanEvent(c.Request.Context(), event); err != nil {
 		log.Printf("kafka publish scan event error: %v", err)
 	}
+
 	if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
 		log.Printf("kafka publish status change error: %v", err)
 	}

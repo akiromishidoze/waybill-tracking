@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
 	"github.com/gorilla/websocket"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
@@ -15,7 +14,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type WSHandler struct {
-	hub  *ws.Hub
+	hub *ws.Hub
 	repo *repository.WaybillRepository
 }
 
@@ -25,8 +24,10 @@ func NewWSHandler(hub *ws.Hub, repo *repository.WaybillRepository) *WSHandler {
 
 func (h *WSHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
 		log.Printf("ws upgrade error: %v", err)
+
 		return
 	}
 
@@ -34,6 +35,7 @@ func (h *WSHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		Conn:          conn,
 		Subscriptions: make(map[string]bool),
 	}
+
 	h.hub.Register(client)
 
 	defer func() {
@@ -43,6 +45,7 @@ func (h *WSHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		_, msg, err := conn.ReadMessage()
+
 		if err != nil {
 			break
 		}
@@ -51,6 +54,7 @@ func (h *WSHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			Action         string `json:"action"`
 			TrackingNumber string `json:"trackingNumber"`
 		}
+
 		if json.Unmarshal(msg, &req) != nil {
 			continue
 		}

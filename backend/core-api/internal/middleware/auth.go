@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -11,14 +10,18 @@ import (
 func AuthMiddleware(secrets ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
+
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing authorization header"})
+
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
+
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization format"})
+
 			return
 		}
 
@@ -28,9 +31,11 @@ func AuthMiddleware(secrets ...string) gin.HandlerFunc {
 			if secret == "" {
 				continue
 			}
+
 			token, err := jwt.Parse(parts[1], func(t *jwt.Token) (interface{}, error) {
 				return []byte(secret), nil
 			})
+
 			if err == nil && token.Valid {
 				claims, valid = token.Claims.(jwt.MapClaims)
 				if valid {
@@ -38,6 +43,7 @@ func AuthMiddleware(secrets ...string) gin.HandlerFunc {
 				}
 			}
 		}
+
 		if !valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
@@ -56,6 +62,7 @@ func RoleMiddleware(roles ...string) gin.HandlerFunc {
 		for _, r := range roles {
 			if r == userRole {
 				c.Next()
+
 				return
 			}
 		}

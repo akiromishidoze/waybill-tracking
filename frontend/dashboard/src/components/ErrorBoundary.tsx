@@ -30,17 +30,21 @@ export default class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback
       }
+
       return (
         <div className={s.errorContainer}>
           <h1 className={s.errorTitle}>Something went wrong</h1>
+
           <p className={s.errorMsg}>
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>
+
           <button
             onClick={() => {
               this.setState({ hasError: false, error: null })
               window.location.href = '/'
             }}
+
             className={s.errorBtn}
           >
             Reload page

@@ -36,6 +36,7 @@ export default function WaybillNewPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
     try {
       await waybillService.create({
         recipientName: form.recipientName,

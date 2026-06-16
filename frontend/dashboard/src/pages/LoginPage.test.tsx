@@ -16,6 +16,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </BrowserRouter>,
     )
+
     expect(screen.getByRole('heading', { name: /sign in/i })).toBeDefined()
   })
 
@@ -25,6 +26,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </BrowserRouter>,
     )
+
     expect(screen.getByText('Email')).toBeDefined()
   })
 
@@ -34,6 +36,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </BrowserRouter>,
     )
+
     expect(screen.getByText('Password')).toBeDefined()
   })
 
@@ -43,6 +46,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </BrowserRouter>,
     )
+
     expect(screen.getByRole('button', { name: /sign in/i })).toBeDefined()
   })
 
@@ -52,6 +56,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </BrowserRouter>,
     )
+
     expect(screen.getByRole('textbox')).toBeDefined()
   })
 })

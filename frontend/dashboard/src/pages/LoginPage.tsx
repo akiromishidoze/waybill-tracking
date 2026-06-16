@@ -12,11 +12,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (email === 'Admin' && password === 'admin00') {
       setToken('mock_token')
       navigate('/dashboard')
+
       return
     }
+
     try {
       await login(email, password)
       navigate('/dashboard')

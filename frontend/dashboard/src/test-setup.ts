@@ -1,9 +1,9 @@
 import '@testing-library/react'
 
 class ResizeObserverStub {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() { }
+  unobserve() { }
+  disconnect() { }
 }
 
 window.ResizeObserver = ResizeObserverStub as any

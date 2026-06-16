@@ -12,6 +12,7 @@ vi.mock('axios', () => {
       response: { use: vi.fn() },
     },
   }
+
   return { default: mockAxios }
 })
 

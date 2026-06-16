@@ -40,10 +40,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   loadUser: async () => {
     const { token } = get()
+
     if (!token) {
       set({ loading: false })
+
       return
     }
+
     try {
       const res = await authService.me()
       set({ user: res.data, loading: false })

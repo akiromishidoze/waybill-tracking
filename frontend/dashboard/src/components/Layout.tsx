@@ -36,11 +36,13 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
         <button onClick={handleLogout} className={s.logoutBtn}>
           <LogOut size={20} />
           Logout
         </button>
       </aside>
+
       <main className={s.mainContent}>
         <Outlet />
       </main>

@@ -9,13 +9,16 @@ const skeletonStyle: CSSProperties = {
 
 function injectKeyframes() {
   if (typeof document === 'undefined') return
+
   if (document.getElementById('skeleton-keyframes')) return
+
   const style = document.createElement('style')
   style.id = 'skeleton-keyframes'
   style.textContent = `@keyframes skeleton-pulse {
     0% { background-position: 200% 0 }
     100% { background-position: -200% 0 }
   }`
+
   document.head.appendChild(style)
 }
 

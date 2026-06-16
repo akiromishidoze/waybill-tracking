@@ -33,6 +33,7 @@ export default function AnalyticsPage() {
     <div>
       <div className={s.analyticsHeader}>
         <h2 className={s.pageTitle} style={{ marginBottom: 0 }}>Analytics</h2>
+
         <button onClick={handleExport} className={s.btnSuccess}>
           Export Report
         </button>

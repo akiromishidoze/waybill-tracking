@@ -23,6 +23,7 @@ export default function WaybillDetailPage() {
       </div>
     )
   }
+
   if (!wb) return <p>Waybill not found</p>
 
   return (

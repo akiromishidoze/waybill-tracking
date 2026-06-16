@@ -23,7 +23,8 @@ func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, h
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
-	waybills, err := h.repo.List(c.Request.Context())
+	search := c.Query("search")
+	waybills, err := h.repo.List(c.Request.Context(), search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

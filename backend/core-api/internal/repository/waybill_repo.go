@@ -20,13 +20,26 @@ func NewWaybillRepository(db *pgxpool.Pool, redis *redis.Client) *WaybillReposit
 	return &WaybillRepository{db: db, redis: redis}
 }
 
-func (r *WaybillRepository) List(ctx context.Context) ([]models.Waybill, error) {
-	rows, err := r.db.Query(ctx, `
+func (r *WaybillRepository) List(ctx context.Context, search string) ([]models.Waybill, error) {
+	query := `
 		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
 		       recipient_address, recipient_phone, origin, destination, weight,
 		       dimensions, service_type, status, estimated_delivery, actual_delivery,
 		       created_at, updated_at
-		FROM waybills ORDER BY created_at DESC LIMIT 100`)
+		FROM waybills`
+
+	if search != "" {
+		query += ` WHERE tracking_number ILIKE '%' || $1 || '%' OR shipper_name ILIKE '%' || $1 || '%' OR recipient_name ILIKE '%' || $1 || '%'`
+	}
+
+	query += ` ORDER BY created_at DESC LIMIT 100`
+
+	var args []interface{}
+	if search != "" {
+		args = append(args, search)
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

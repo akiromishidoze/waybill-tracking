@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     TWILIO_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     REPORT_EMAIL: str = "ops@waybilltracking.com"
+    ALLOWED_ORIGINS: str = "http://localhost:3010"
 
     class Config:
         env_file = ".env"

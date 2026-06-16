@@ -11,9 +11,15 @@ app = FastAPI(
     docs_url="/docs",
 )
 
+origins = (
+    settings.ALLOWED_ORIGINS.split(",")
+    if settings.ALLOWED_ORIGINS
+    else ["http://localhost:3010"]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

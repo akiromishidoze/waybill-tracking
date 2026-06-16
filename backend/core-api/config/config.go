@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 type Config struct {
 	Port            string
@@ -11,6 +14,7 @@ type Config struct {
 	TwilioSID       string
 	TwilioAuthToken string
 	SendGridKey     string
+	AllowedOrigins  []string
 }
 
 func Load() *Config {
@@ -23,6 +27,7 @@ func Load() *Config {
 		TwilioSID:       getEnv("TWILIO_SID", ""),
 		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),
 		SendGridKey:     getEnv("SENDGRID_KEY", ""),
+		AllowedOrigins:  getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 }
 
@@ -31,4 +36,12 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func getEnvSlice(key, fallback string) []string {
+	v := os.Getenv(key)
+	if v == "" {
+		return []string{fallback}
+	}
+	return strings.Split(v, ",")
 }

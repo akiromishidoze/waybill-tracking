@@ -91,7 +91,7 @@ func main() {
 		public.GET("/track/:trackingNumber", waybillHandler.Track)
 
 		protected := api.Group("")
-		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret, cfg.JWTSecretOld))
 		{
 			protected.GET("/auth/me", handlers.MeHandler(db))
 			protected.GET("/waybills", waybillHandler.List)

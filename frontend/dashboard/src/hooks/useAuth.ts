@@ -15,7 +15,10 @@ export function useAuth() {
     authService
       .me()
       .then((res) => setUser(res.data))
-      .catch(() => localStorage.removeItem('access_token'))
+      .catch((err) => {
+        console.error('auth me failed', err)
+        localStorage.removeItem('access_token')
+      })
       .finally(() => setLoading(false))
   }, [])
 

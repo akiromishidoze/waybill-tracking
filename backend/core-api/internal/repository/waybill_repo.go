@@ -50,6 +50,39 @@ func (r *WaybillRepository) List(ctx context.Context) ([]models.Waybill, error) 
 	return waybills, nil
 }
 
+func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string) ([]models.Waybill, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT DISTINCT w.id, w.tracking_number, w.shipper_id, w.shipper_name,
+		       w.recipient_name, w.recipient_address, w.recipient_phone,
+		       w.origin, w.destination, w.weight, w.dimensions, w.service_type,
+		       w.status, w.estimated_delivery, w.actual_delivery,
+		       w.created_at, w.updated_at
+		FROM waybills w
+		JOIN scan_events e ON e.waybill_id = w.id
+		WHERE e.courier_id = $1
+		ORDER BY w.updated_at DESC LIMIT 50`, courierID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var waybills []models.Waybill
+	for rows.Next() {
+		var wb models.Waybill
+		if err := rows.Scan(
+			&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
+			&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
+			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
+			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
+			&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		waybills = append(waybills, wb)
+	}
+	return waybills, nil
+}
+
 func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Waybill, error) {
 	var wb models.Waybill
 	err := r.db.QueryRow(ctx, `

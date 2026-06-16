@@ -36,6 +36,7 @@ func main() {
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub)
+	courierHandler := handlers.NewCourierHandler(waybillRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 
 	r := gin.Default()
@@ -60,6 +61,13 @@ func main() {
 			protected.GET("/waybills/:id", waybillHandler.Get)
 			protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
 			protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+
+			courier := protected.Group("/courier")
+			courier.Use(middleware.RoleMiddleware("COURIER", "ADMIN"))
+			{
+				courier.GET("/assignments", courierHandler.GetAssignments)
+				courier.POST("/scan", courierHandler.Scan)
+			}
 		}
 	}
 

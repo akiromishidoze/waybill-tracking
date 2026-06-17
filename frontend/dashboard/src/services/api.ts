@@ -1,19 +1,16 @@
 import axios from 'axios'
 import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo } from '@/types/waybill'
-import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token
-
+  const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-
   return config
 })
 
@@ -21,22 +18,16 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      useAuthStore.getState().logout()
+      localStorage.removeItem('access_token')
       window.location.href = '/login'
     }
-
     return Promise.reject(err)
   },
 )
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  meta: { total: number; page: number; limit: number }
-}
-
 export const waybillService = {
   list: (params?: Record<string, string>) =>
-    api.get<PaginatedResponse<Waybill>>('/waybills', { params }),
+    api.get<Waybill[]>('/waybills', { params }),
   get: (id: string) => api.get<Waybill>(`/waybills/${id}`),
   track: (trackingNumber: string) =>
     api.get<Waybill>(`/track/${trackingNumber}`),
@@ -67,6 +58,12 @@ export const analyticsService = {
       params: { from, to },
       responseType: 'blob',
     }),
+}
+
+export const userService = {
+  list: () => api.get<User[]>('/users'),
+  updateRole: (id: string, role: string) =>
+    api.patch(`/users/${id}/role`, { role }),
 }
 
 export default api

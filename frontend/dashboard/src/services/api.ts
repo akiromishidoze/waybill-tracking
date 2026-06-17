@@ -60,6 +60,7 @@ export const analyticsService = {
       params: { from, to },
       responseType: 'blob',
     }),
+  carrierPerformance: () => api.get<any[]>('/analytics/carrier-performance'),
 }
 
 export const userService = {

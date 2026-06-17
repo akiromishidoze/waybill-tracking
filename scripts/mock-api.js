@@ -470,6 +470,33 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Carrier Performance ---
+  if (path === '/api/analytics/carrier-performance' && req.method === 'GET') {
+    if (!requireAuth()) return
+    const now = Date.now()
+    const stats = CARRIERS.map(c => {
+      const wbs = WAYBILLS.filter(w => w.carrierId === c.id)
+      const total = wbs.length
+      const delivered = wbs.filter(w => w.status === 'DELIVERED').length
+      const breaches = wbs.filter(w => w.status !== 'DELIVERED' && w.status !== 'CANCELLED' && new Date(w.estimatedDelivery).getTime() < now).length
+      const avgTransit = wbs.filter(w => w.actualDelivery).reduce((sum, w) => sum + (new Date(w.actualDelivery).getTime() - new Date(w.createdAt).getTime()), 0) / (delivered || 1)
+      return {
+        carrierId: c.id,
+        carrierName: c.name,
+        isActive: c.isActive,
+        totalShipments: total,
+        deliveredCount: delivered,
+        onTimeRate: total ? Math.round(((total - breaches) / total) * 100) : 0,
+        exceptionRate: total ? Math.round((wbs.filter(w => w.events.some(e => e.eventType === 'EXCEPTION')).length / total) * 100) : 0,
+        avgTransitHours: Math.round(avgTransit / 3600000),
+        slaBreaches: breaches,
+        trackingUrlTemplate: c.trackingUrlTemplate,
+      }
+    })
+    send(200, stats)
+    return
+  }
+
   // --- Analytics ---
   if (path === '/api/analytics/stats' && req.method === 'GET') {
     send(200, { totalActive: 3, deliveredToday: 1, inTransit: 1, pendingPickup: 0, totalVolume: 5, slaCompliance: 80.0, exceptionRate: 20.0, avgTransitTime: 72 })

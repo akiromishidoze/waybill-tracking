@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp,
 } from 'lucide-react'
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/roadmap/integrations', label: 'Integrations', icon: Link2 },
   { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
   { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
+  { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
 ]
 
 const ROLE_COLORS: Record<string, string> = {
@@ -63,7 +64,7 @@ export default function Layout() {
           )}
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
               <item.icon size={20} />

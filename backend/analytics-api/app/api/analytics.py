@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.services.analytics_service import AnalyticsService
+from app.services.ml_service import ml_service
 
 router = APIRouter(
     prefix="/api/v1/analytics",
@@ -39,6 +40,7 @@ class ETAPrediction(BaseModel):
     trackingNumber: str
     predictedDelivery: str | None = None
     confidence: float
+    estimatedHours: float | None = None
     basedOn: str
 
 @router.get(
@@ -70,26 +72,34 @@ async def get_sla(
 @router.get(
     "/anomalies",
     summary="Detect anomalies",
-    description="Finds shipments stuck in a non-terminal state for over 3 days.",
+    description="Finds anomalous shipments using ML (IsolationForest) and rule-based checks (stuck >3 days).",
     response_model=list[Anomaly],
 )
 
 async def get_anomalies(db: AsyncSession = Depends(get_db)):
-    svc = AnalyticsService(db)
-    return await svc.detect_anomalies()
+    return await ml_service.detect_anomalies(db)
 
 @router.get(
     "/predict-eta/{waybill_id}",
     summary="Predict ETA",
-    description="Estimates delivery time for a waybill based on historical average transit time for the same route.",
+    description="Estimates delivery time using ML model (RandomForest) when available, falls back to historical average.",
     response_model=ETAPrediction,
 )
 
 async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db)):
-    svc = AnalyticsService(db)
-    result = await svc.predict_eta(waybill_id)
+    result = await ml_service.predict_eta(db, waybill_id)
 
     if not result:
         return {"error": "Waybill not found"}
 
     return result
+
+
+@router.post(
+    "/train",
+    summary="Train ML models",
+    description="Trains ETA prediction (RandomForest) and anomaly detection (IsolationForest) models on historical waybill data.",
+)
+
+async def train_models(db: AsyncSession = Depends(get_db)):
+    return await ml_service.train(db)

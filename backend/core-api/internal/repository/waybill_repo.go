@@ -215,10 +215,11 @@ func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill
 	event.Timestamp = time.Now()
 
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO scan_events (id, waybill_id, status, location, courier_id, courier_name, timestamp, remark)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+		INSERT INTO scan_events (id, waybill_id, status, location, courier_id, courier_name, timestamp, remark, exception_code, exception_detail, resolved_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
 		event.ID, event.WaybillID, event.Status, event.Location,
-		event.CourierID, event.CourierName, event.Timestamp, event.Remark); err != nil {
+		event.CourierID, event.CourierName, event.Timestamp, event.Remark,
+		event.ExceptionCode, event.ExceptionDetail, event.ResolvedAt); err != nil {
 		return err
 	}
 
@@ -230,7 +231,7 @@ func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill
 
 func (r *WaybillRepository) getEvents(ctx context.Context, waybillID string) ([]models.ScanEvent, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, waybill_id, status, location, courier_id, courier_name, timestamp, remark
+		SELECT id, waybill_id, status, location, courier_id, courier_name, timestamp, remark, exception_code, exception_detail, resolved_at
 		FROM scan_events WHERE waybill_id = $1 ORDER BY timestamp ASC`, waybillID)
 
 	if err != nil {
@@ -243,7 +244,8 @@ func (r *WaybillRepository) getEvents(ctx context.Context, waybillID string) ([]
 	for rows.Next() {
 		var e models.ScanEvent
 		if err := rows.Scan(&e.ID, &e.WaybillID, &e.Status, &e.Location,
-			&e.CourierID, &e.CourierName, &e.Timestamp, &e.Remark); err != nil {
+			&e.CourierID, &e.CourierName, &e.Timestamp, &e.Remark,
+			&e.ExceptionCode, &e.ExceptionDetail, &e.ResolvedAt); err != nil {
 			return nil, err
 		}
 		events = append(events, e)

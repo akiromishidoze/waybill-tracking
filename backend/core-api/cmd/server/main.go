@@ -114,6 +114,7 @@ func main() {
 
 		public := api.Group("")
 		public.GET("/track/:trackingNumber", waybillHandler.Track)
+		public.GET("/exception-codes", waybillHandler.ListExceptionCodes)
 
 		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret, cfg.JWTSecretOld))

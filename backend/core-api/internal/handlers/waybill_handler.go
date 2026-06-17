@@ -148,11 +148,14 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	event := models.ScanEvent{
-		ID: uuid.New().String(),
-		WaybillID: id,
-		Status: req.Status,
-		Location: req.Location,
-		Remark: req.Remark,
+		ID:              uuid.New().String(),
+		WaybillID:       id,
+		Status:          req.Status,
+		Location:        req.Location,
+		Remark:          req.Remark,
+		ExceptionCode:   req.ExceptionCode,
+		ExceptionDetail: req.ExceptionDetail,
+		ResolvedAt:      req.ResolvedAt,
 	}
 
 	wb.Status = req.Status
@@ -180,6 +183,25 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 
 	c.JSON(http.StatusOK, wb)
+}
+
+func (h *WaybillHandler) ListExceptionCodes(c *gin.Context) {
+	codes := []models.ExceptionCodeInfo{
+		{Code: models.ExceptionDelay, Label: "Delivery Delayed", Description: "Shipment delayed beyond estimated delivery date"},
+		{Code: models.ExceptionDamage, Label: "Package Damaged", Description: "Package found damaged during transit or delivery"},
+		{Code: models.ExceptionWrongAddress, Label: "Wrong Address", Description: "Recipient address is incorrect or incomplete"},
+		{Code: models.ExceptionCustomerNotAvail, Label: "Customer Not Available", Description: "Recipient not present at delivery location"},
+		{Code: models.ExceptionAddressNotFound, Label: "Address Not Found", Description: "Delivery address could not be located"},
+		{Code: models.ExceptionRefused, Label: "Refused by Recipient", Description: "Recipient refused to accept the package"},
+		{Code: models.ExceptionLost, Label: "Lost in Transit", Description: "Package missing and cannot be located"},
+		{Code: models.ExceptionWeatherDelay, Label: "Weather Delay", Description: "Delay caused by adverse weather conditions"},
+		{Code: models.ExceptionCustomsHold, Label: "Customs Hold", Description: "Package held by customs for inspection or documentation"},
+		{Code: models.ExceptionInsufficientAddr, Label: "Insufficient Address", Description: "Address details insufficient for delivery"},
+		{Code: models.ExceptionNoResponse, Label: "No Response", Description: "No response at delivery location after multiple attempts"},
+		{Code: models.ExceptionWrongPackage, Label: "Wrong Package", Description: "Incorrect package delivered to recipient"},
+		{Code: models.ExceptionOther, Label: "Other Exception", Description: "Other exception not covered by specific codes"},
+	}
+	c.JSON(http.StatusOK, codes)
 }
 
 func generateTrackingNumber() string {

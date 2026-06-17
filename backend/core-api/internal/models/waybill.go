@@ -16,6 +16,30 @@ const (
 	StatusCancelled WaybillStatus = "CANCELLED"
 )
 
+type ExceptionCode string
+
+const (
+	ExceptionDelay            ExceptionCode = "DELAY"
+	ExceptionDamage           ExceptionCode = "DAMAGE"
+	ExceptionWrongAddress     ExceptionCode = "WRONG_ADDRESS"
+	ExceptionCustomerNotAvail ExceptionCode = "CUSTOMER_NOT_AVAILABLE"
+	ExceptionAddressNotFound  ExceptionCode = "ADDRESS_NOT_FOUND"
+	ExceptionRefused          ExceptionCode = "REFUSED"
+	ExceptionLost             ExceptionCode = "LOST"
+	ExceptionWeatherDelay     ExceptionCode = "WEATHER_DELAY"
+	ExceptionCustomsHold      ExceptionCode = "CUSTOMS_HOLD"
+	ExceptionInsufficientAddr ExceptionCode = "INSUFFICIENT_ADDRESS"
+	ExceptionNoResponse       ExceptionCode = "NO_RESPONSE"
+	ExceptionWrongPackage     ExceptionCode = "WRONG_PACKAGE"
+	ExceptionOther            ExceptionCode = "OTHER"
+)
+
+type ExceptionCodeInfo struct {
+	Code        ExceptionCode `json:"code"`
+	Label       string        `json:"label"`
+	Description string        `json:"description"`
+}
+
 type Waybill struct {
 	ID string `json:"id"`
 	TrackingNumber string `json:"trackingNumber"`
@@ -38,14 +62,17 @@ type Waybill struct {
 }
 
 type ScanEvent struct {
-	ID string `json:"id"`
-	WaybillID string `json:"waybillId"`
-	Status WaybillStatus `json:"status"`
-	Location string `json:"location"`
-	CourierID *string `json:"courierId,omitempty"`
-	CourierName *string `json:"courierName,omitempty"`
-	Timestamp time.Time `json:"timestamp"`
-	Remark *string `json:"remark,omitempty"`
+	ID              string        `json:"id"`
+	WaybillID       string        `json:"waybillId"`
+	Status          WaybillStatus `json:"status"`
+	Location        string        `json:"location"`
+	CourierID       *string       `json:"courierId,omitempty"`
+	CourierName     *string       `json:"courierName,omitempty"`
+	Timestamp       time.Time     `json:"timestamp"`
+	Remark          *string       `json:"remark,omitempty"`
+	ExceptionCode   *string       `json:"exceptionCode,omitempty"`
+	ExceptionDetail string        `json:"exceptionDetail,omitempty"`
+	ResolvedAt      *time.Time    `json:"resolvedAt,omitempty"`
 }
 
 type User struct {
@@ -69,9 +96,12 @@ type CreateWaybillRequest struct {
 }
 
 type StatusUpdateRequest struct {
-	Status WaybillStatus `json:"status" binding:"required"`
-	Location string `json:"location"`
-	Remark *string `json:"remark,omitempty"`
+	Status          WaybillStatus `json:"status" binding:"required"`
+	Location        string        `json:"location"`
+	Remark          *string       `json:"remark,omitempty"`
+	ExceptionCode   *string       `json:"exceptionCode,omitempty"`
+	ExceptionDetail string        `json:"exceptionDetail,omitempty"`
+	ResolvedAt      *time.Time    `json:"resolvedAt,omitempty"`
 }
 
 var validTransitions = map[WaybillStatus][]WaybillStatus{

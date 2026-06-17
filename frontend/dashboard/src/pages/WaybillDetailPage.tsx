@@ -2,7 +2,25 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
+import type { ExceptionCode } from '@/types/waybill'
+import { EXCEPTION_LABELS } from '@/types/waybill'
 import s from '@/styles/components.module.css'
+
+const EXCEPTION_BG: Record<string, string> = {
+  DELAY: '#f59e0b',
+  DAMAGE: '#ef4444',
+  WRONG_ADDRESS: '#f97316',
+  CUSTOMER_NOT_AVAILABLE: '#f97316',
+  ADDRESS_NOT_FOUND: '#ef4444',
+  REFUSED: '#8b5cf6',
+  LOST: '#dc2626',
+  WEATHER_DELAY: '#f59e0b',
+  CUSTOMS_HOLD: '#3b82f6',
+  INSUFFICIENT_ADDRESS: '#f97316',
+  NO_RESPONSE: '#6b7280',
+  WRONG_PACKAGE: '#ef4444',
+  OTHER: '#6b7280',
+}
 
 export default function WaybillDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -53,16 +71,30 @@ export default function WaybillDetailPage() {
         <h3 className={s.detailSectionTitle}>Tracking Timeline</h3>
         {wb.events?.length ? (
           <div className={s.timeline}>
-            {wb.events.map((evt: any) => (
-              <div key={evt.id} className={s.timelineItem}>
-                <div className={s.timelineDot} />
-                <p className={s.timelineStatus}>{evt.status.replace(/_/g, ' ')}</p>
-                <p className={s.timelineMeta}>
-                  {evt.location} — {new Date(evt.timestamp).toLocaleString()}
-                </p>
-                {evt.remark && <p className={s.timelineRemark}>{evt.remark}</p>}
-              </div>
-            ))}
+            {wb.events.map((evt: any) => {
+              const isException = !!evt.exceptionCode
+              return (
+                <div key={evt.id} className={isException ? s.timelineItemException : s.timelineItem}>
+                  <div className={isException ? s.timelineDotException : s.timelineDot} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p className={s.timelineStatus}>{evt.status.replace(/_/g, ' ')}</p>
+                    {isException && (
+                      <span
+                        className={s.exceptionBadge}
+                        style={{ background: EXCEPTION_BG[evt.exceptionCode] || '#6b7280' }}
+                      >
+                        {EXCEPTION_LABELS[evt.exceptionCode as ExceptionCode] || evt.exceptionCode}
+                      </span>
+                    )}
+                  </div>
+                  <p className={s.timelineMeta}>
+                    {evt.location} — {new Date(evt.timestamp).toLocaleString()}
+                  </p>
+                  {evt.exceptionDetail && <p className={s.exceptionDetail}>{evt.exceptionDetail}</p>}
+                  {evt.remark && <p className={s.timelineRemark}>{evt.remark}</p>}
+                </div>
+              )
+            })}
           </div>
         ) : (
           <p className={s.timelineEmpty}>No scan events yet.</p>

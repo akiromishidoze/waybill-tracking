@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo } from '@/types/waybill'
 import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
@@ -52,6 +52,10 @@ export const authService = {
       password,
     }),
   me: () => api.get<User>('/auth/me'),
+}
+
+export const exceptionCodeService = {
+  list: () => api.get<ExceptionCodeInfo[]>('/exception-codes'),
 }
 
 export const analyticsService = {

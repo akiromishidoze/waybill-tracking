@@ -377,6 +377,30 @@
     background: #2563eb;
 }
 
+.timelineItemException {
+    composes: timelineItem;
+    border-left-color: #fca5a5;
+}
+
+.timelineDotException {
+    composes: timelineDot;
+    background: #ef4444;
+}
+
+.exceptionBadge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.exceptionDetail {
+    color: #dc2626;
+    font-size: 0.875rem;
+}
+
 .timelineStatus {
     font-weight: 500;
 }

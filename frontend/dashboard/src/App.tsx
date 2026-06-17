@@ -6,6 +6,7 @@ import WaybillDetailPage from './pages/WaybillDetailPage'
 import WaybillNewPage from './pages/WaybillNewPage'
 import TrackingPage from './pages/TrackingPage'
 import AnalyticsPage from './pages/AnalyticsPage'
+import { FeatureProvider } from './hooks/useFeatures'
 import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -13,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 export default function App() {
   return (
     <ErrorBoundary>
+      <FeatureProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/track/:trackingNumber" element={<TrackingPage />} />
@@ -27,6 +29,7 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
+      </FeatureProvider>
     </ErrorBoundary>
   )
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
+	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
@@ -23,6 +24,8 @@ import (
 
 func main() {
 	cfg := config.Load()
+
+	feature.RegisterAll(feature.DefaultFlags)
 
 	db, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
@@ -127,6 +130,8 @@ func main() {
 				courier.GET("/assignments", courierHandler.GetAssignments)
 				courier.POST("/scan", courierHandler.Scan)
 			}
+
+			protected.GET("/features", feature.Handler())
 
 			protected.GET("/webhooks", webhookHandler.List)
 			protected.POST("/webhooks", webhookHandler.Create)

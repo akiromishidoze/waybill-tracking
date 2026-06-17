@@ -90,6 +90,7 @@ export interface Waybill {
   carrierName?: string
   carrierTrackingNumber?: string
   carrierEvents?: CarrierEvent[]
+  slaBreached?: boolean
 }
 
 export interface ScanEvent {

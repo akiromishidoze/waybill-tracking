@@ -1,5 +1,9 @@
 const http = require('http')
 
+let nextUserId = 5
+let nextCarrierId = 4
+let nextWbId = 6
+
 const CARRIERS = [
   { id: 'c1', name: 'FastDeliver Logistics', apiEndpoint: 'https://api.fastdeliver.com/v1/track', apiKey: 'sk_fd_****', isActive: true, trackingUrlTemplate: 'https://fastdeliver.com/track/{{number}}', createdAt: new Date(Date.now() - 864000000).toISOString() },
   { id: 'c2', name: 'SpeedShip Express', apiEndpoint: 'https://api.speedship.io/v2/tracking', apiKey: 'sk_ss_****', isActive: true, trackingUrlTemplate: 'https://speedship.io/track/{{number}}', createdAt: new Date(Date.now() - 432000000).toISOString() },
@@ -30,7 +34,7 @@ const USERS = [
   { id: 'u4', email: 'ops@waybill.com', name: 'Ops Manager', role: 'OPS', company: 'Waybill Corp' },
 ]
 
-const WAYBILLS = [
+let WAYBILLS = [
   {
     id: 'wb1', trackingNumber: 'WBT-2024-00001', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'Alice Johnson', recipientAddress: '123 Main St, Manila', recipientPhone: '+63 912 345 6789',
@@ -182,6 +186,15 @@ const server = http.createServer((req, res) => {
     return claims
   }
 
+  const requireAdmin = () => {
+    const claims = requireAuth()
+    if (!claims) return null
+    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return null }
+    return claims
+  }
+
+  const VALID_ROLES = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
+
   // --- Auth routes ---
   if (path === '/api/auth/login' && req.method === 'POST') {
     parseBody().then(({ email, password }) => {
@@ -207,35 +220,69 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  // --- User management ---
+  // --- Users CRUD ---
   if (path === '/api/users' && req.method === 'GET') {
-    const claims = requireAuth()
+    const claims = requireAdmin()
     if (!claims) return
-    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
     send(200, USERS)
     return
   }
 
-  const userRoleMatch = path.match(/^\/api\/users\/([^/]+)\/role$/)
-  if (userRoleMatch && req.method === 'PATCH') {
-    const claims = requireAuth()
+  if (path === '/api/users' && req.method === 'POST') {
+    const claims = requireAdmin()
     if (!claims) return
-    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
-    parseBody().then(({ role }) => {
-      const user = USERS.find(u => u.id === userRoleMatch[1])
-      if (!user) { send(404, { error: 'user not found' }); return }
-      if (!['SHIPPER', 'COURIER', 'OPS', 'ADMIN'].includes(role)) { send(400, { error: 'invalid role' }); return }
-      user.role = role
-      send(200, { message: 'role updated' })
+    parseBody().then((body) => {
+      if (!body.email || !body.name || !body.role) {
+        send(400, { error: 'email, name, and role are required' })
+        return
+      }
+      if (!VALID_ROLES.includes(body.role)) { send(400, { error: 'invalid role' }); return }
+      if (USERS.find(u => u.email === body.email)) { send(409, { error: 'email already exists' }); return }
+      const newUser = { id: 'u' + nextUserId++, email: body.email, name: body.name, role: body.role, company: body.company || '' }
+      USERS.push(newUser)
+      send(201, newUser)
     })
     return
+  }
+
+  const userByIdMatch = path.match(/^\/api\/users\/([^/]+)$/)
+  if (userByIdMatch) {
+    const userId = userByIdMatch[1]
+    const userIdx = USERS.findIndex(u => u.id === userId)
+
+    if (req.method === 'PATCH') {
+      const claims = requireAdmin()
+      if (!claims) return
+      if (userIdx === -1) { send(404, { error: 'user not found' }); return }
+      parseBody().then((body) => {
+        if (body.role && !VALID_ROLES.includes(body.role)) { send(400, { error: 'invalid role' }); return }
+        if (body.email) USERS[userIdx].email = body.email
+        if (body.name) USERS[userIdx].name = body.name
+        if (body.role) USERS[userIdx].role = body.role
+        if (body.company !== undefined) USERS[userIdx].company = body.company
+        send(200, USERS[userIdx])
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      const claims = requireAdmin()
+      if (!claims) return
+      if (userIdx === -1) { send(404, { error: 'user not found' }); return }
+      if (userId === 'u1') { send(400, { error: 'cannot delete the primary admin' }); return }
+      USERS.splice(userIdx, 1)
+      send(200, { message: 'user deleted' })
+      return
+    }
   }
 
   // --- Waybill routes ---
   if (path === '/api/waybills' && req.method === 'GET') {
     const claims = requireAuth()
     if (!claims) return
-    send(200, WAYBILLS)
+    const now = Date.now()
+    const result = WAYBILLS.map(w => ({ ...w, slaBreached: w.status !== 'DELIVERED' && w.status !== 'CANCELLED' && new Date(w.estimatedDelivery).getTime() < now }))
+    send(200, result)
     return
   }
 
@@ -244,6 +291,8 @@ const server = http.createServer((req, res) => {
     const wb = { ...WAYBILLS.find(w => w.id === wbMatch[1]) }
     if (!wb) { send(404, { error: 'waybill not found' }); return }
     wb.carrierEvents = CARRIER_EVENTS[wb.id] || []
+    const now = Date.now()
+    wb.slaBreached = wb.status !== 'DELIVERED' && wb.status !== 'CANCELLED' && new Date(wb.estimatedDelivery).getTime() < now
     send(200, wb)
     return
   }
@@ -255,7 +304,8 @@ const server = http.createServer((req, res) => {
 
   const trackMatch = path.match(/^\/api\/track\/(.+)$/)
   if (trackMatch && req.method === 'GET') {
-    const wb = WAYBILLS.find(w => w.trackingNumber === trackMatch[1])
+    const tn = trackMatch[1]
+    const wb = WAYBILLS.find(w => w.trackingNumber === tn || w.carrierTrackingNumber === tn)
     if (!wb) { send(404, { error: 'tracking number not found' }); return }
     send(200, wb)
     return
@@ -263,16 +313,7 @@ const server = http.createServer((req, res) => {
 
   // --- Analytics ---
   if (path === '/api/analytics/stats' && req.method === 'GET') {
-    send(200, {
-      totalActive: 3,
-      deliveredToday: 1,
-      inTransit: 1,
-      pendingPickup: 0,
-      totalVolume: 5,
-      slaCompliance: 80.0,
-      exceptionRate: 20.0,
-      avgTransitTime: 72,
-    })
+    send(200, { totalActive: 3, deliveredToday: 1, inTransit: 1, pendingPickup: 0, totalVolume: 5, slaCompliance: 80.0, exceptionRate: 20.0, avgTransitTime: 72 })
     return
   }
 
@@ -286,13 +327,58 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  // --- Carriers ---
+  // --- Carriers CRUD ---
   if (path === '/api/carriers' && req.method === 'GET') {
-    const claims = requireAuth()
-    if (!claims) return
-    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
+    if (!requireAdmin()) return
     send(200, CARRIERS)
     return
+  }
+
+  if (path === '/api/carriers' && req.method === 'POST') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      if (!body.name) { send(400, { error: 'name is required' }); return }
+      const newCarrier = {
+        id: 'c' + nextCarrierId++,
+        name: body.name,
+        apiEndpoint: body.apiEndpoint || '',
+        apiKey: body.apiKey || '',
+        isActive: body.isActive !== false,
+        trackingUrlTemplate: body.trackingUrlTemplate || '',
+        createdAt: new Date().toISOString(),
+      }
+      CARRIERS.push(newCarrier)
+      send(201, newCarrier)
+    })
+    return
+  }
+
+  const carrierByIdMatch = path.match(/^\/api\/carriers\/([^/]+)$/)
+  if (carrierByIdMatch) {
+    const carrierId = carrierByIdMatch[1]
+    const idx = CARRIERS.findIndex(c => c.id === carrierId)
+
+    if (req.method === 'PATCH') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'carrier not found' }); return }
+      parseBody().then((body) => {
+        if (body.name !== undefined) CARRIERS[idx].name = body.name
+        if (body.apiEndpoint !== undefined) CARRIERS[idx].apiEndpoint = body.apiEndpoint
+        if (body.apiKey !== undefined) CARRIERS[idx].apiKey = body.apiKey
+        if (body.isActive !== undefined) CARRIERS[idx].isActive = body.isActive
+        if (body.trackingUrlTemplate !== undefined) CARRIERS[idx].trackingUrlTemplate = body.trackingUrlTemplate
+        send(200, CARRIERS[idx])
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'carrier not found' }); return }
+      CARRIERS.splice(idx, 1)
+      send(200, { message: 'carrier deleted' })
+      return
+    }
   }
 
   // --- Carrier Events for a waybill ---
@@ -330,11 +416,45 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Assign/Update/Remove carrier on a waybill ---
+  const aggregatedByIdMatch = path.match(/^\/api\/tracking\/aggregated\/([^/]+)$/)
+  if (aggregatedByIdMatch) {
+    const wbId = aggregatedByIdMatch[1]
+    const wbIdx = WAYBILLS.findIndex(w => w.id === wbId)
+
+    if (req.method === 'POST') {
+      const claims = requireAuth()
+      if (!claims) return
+      parseBody().then((body) => {
+        if (wbIdx === -1) { send(404, { error: 'waybill not found' }); return }
+        const carrier = CARRIERS.find(c => c.id === body.carrierId)
+        if (!carrier) { send(400, { error: 'carrier not found' }); return }
+        if (!body.carrierTrackingNumber) { send(400, { error: 'carrierTrackingNumber is required' }); return }
+        WAYBILLS[wbIdx].carrierId = body.carrierId
+        WAYBILLS[wbIdx].carrierName = carrier.name
+        WAYBILLS[wbIdx].carrierTrackingNumber = body.carrierTrackingNumber
+        CARRIER_EVENTS[wbId] = CARRIER_EVENTS[wbId] || []
+        send(200, { message: 'carrier assigned', waybill: WAYBILLS[wbIdx] })
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      const claims = requireAuth()
+      if (!claims) return
+      if (wbIdx === -1) { send(404, { error: 'waybill not found' }); return }
+      delete WAYBILLS[wbIdx].carrierId
+      delete WAYBILLS[wbIdx].carrierName
+      delete WAYBILLS[wbIdx].carrierTrackingNumber
+      delete CARRIER_EVENTS[wbId]
+      send(200, { message: 'carrier unassigned' })
+      return
+    }
+  }
+
   // --- Audit Logs ---
   if (path === '/api/audit-logs' && req.method === 'GET') {
-    const claims = requireAuth()
-    if (!claims) return
-    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
+    if (!requireAdmin()) return
     send(200, AUDIT_LOGS)
     return
   }

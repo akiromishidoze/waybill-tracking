@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, ExternalLink } from 'lucide-react'
+import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User } from 'lucide-react'
 import { waybillService } from '@/services/api'
 import type { ExceptionCode, EventType, WaybillStatus } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS } from '@/types/waybill'
@@ -61,6 +61,12 @@ export default function WaybillDetailPage() {
 
   return (
     <div>
+      {wb.slaBreached && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: '1rem', color: '#dc2626', fontSize: '0.875rem', fontWeight: 500 }}>
+          <AlertTriangle size={18} />
+          SLA Breached — Estimated delivery was {new Date(wb.estimatedDelivery).toLocaleDateString()}
+        </div>
+      )}
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
         Waybill #{wb.trackingNumber}
       </h2>
@@ -74,6 +80,8 @@ export default function WaybillDetailPage() {
           <DetailRow label="Dimensions" value={wb.dimensions} />
           <DetailRow label="Origin" value={wb.origin} />
           <DetailRow label="Destination" value={wb.destination} />
+          <DetailRow label="Est. Delivery" value={wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'} />
+          <DetailRow label="SLA Status" value={wb.slaBreached ? 'Breached' : 'On Time'} />
           {wb.carrierName && (
             <>
               <DetailRow label="Carrier" value={wb.carrierName} />

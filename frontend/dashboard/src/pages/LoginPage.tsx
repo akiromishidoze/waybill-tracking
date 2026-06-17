@@ -1,27 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/auth'
-import s from '@/styles/components.module.css'
+import { authService } from '@/services/api'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { setToken, login } = useAuthStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (email === 'Admin' && password === 'admin00') {
-      setToken('mock_token')
-      navigate('/dashboard')
-
-      return
-    }
-
     try {
-      await login(email, password)
+      const res = await authService.login(email, password)
+      localStorage.setItem('access_token', res.data.accessToken)
       navigate('/dashboard')
     } catch {
       setError('Invalid email or password')
@@ -29,31 +20,85 @@ export default function LoginPage() {
   }
 
   return (
-    <div className={s.centerPage}>
-      <form onSubmit={handleSubmit} className={s.formCard}>
-        <h1 className={s.formTitle}>Sign In</h1>
-        {error && <p className={s.formError}>{error}</p>}
-        <div className={s.formGroup}>
-          <label className={s.formLabel}>Email</label>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: '#f1f5f9',
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          background: '#fff',
+          padding: '2.5rem',
+          borderRadius: 12,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+          width: '100%',
+          maxWidth: 400,
+        }}
+      >
+        <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
+        <p style={{ color: '#64748b', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
+          Email: <strong>admin</strong> / Password: <strong>admin</strong>
+        </p>
+        {error && (
+          <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            {error}
+          </p>
+        )}
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
+            Email
+          </label>
           <input
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className={s.formInput}
+            style={{
+              width: '100%',
+              padding: '0.625rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              fontSize: '1rem',
+            }}
           />
         </div>
-        <div className={s.formSubmit}>
-          <label className={s.formLabel}>Password</label>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
+            Password
+          </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className={s.formInput}
+            style={{
+              width: '100%',
+              padding: '0.625rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: 6,
+              fontSize: '1rem',
+            }}
           />
         </div>
-        <button type="submit" className={`${s.btnBlock} ${s.btnPrimary}`}>
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            background: '#2563eb',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
           Sign In
         </button>
       </form>

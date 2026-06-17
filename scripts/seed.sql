@@ -1,6 +1,6 @@
 INSERT INTO users (id, email, name, password, role, company)
 VALUES
-  (gen_random_uuid(), 'admin@waybill.com', 'Admin User', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN', 'Waybill Corp'),
+  (gen_random_uuid(), 'admin', 'Admin User', '$2b$12$QiULqsdxZ68CIwlV0XqIEugJvqqDvBjpEvyCnhpcu5f5QiQdnINuK', 'ADMIN', 'Waybill Corp'),
   (gen_random_uuid(), 'shipper@acme.com', 'John Shipper', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SHIPPER', 'ACME Inc'),
   (gen_random_uuid(), 'courier@fastdeliver.com', 'Jane Courier', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'COURIER', 'Fast Deliver Co'),
   (gen_random_uuid(), 'ops@waybill.com', 'Ops Manager', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'OPS', 'Waybill Corp');

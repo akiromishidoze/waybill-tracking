@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 class AnalyticsService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -13,12 +14,31 @@ class AnalyticsService:
                 COUNT(*) FILTER (WHERE status NOT IN ('DELIVERED','CANCELLED','RETURNED')) AS total_active,
                 COUNT(*) FILTER (WHERE status = 'DELIVERED' AND updated_at >= NOW() - INTERVAL '1 day') AS delivered_today,
                 COUNT(*) FILTER (WHERE status = 'IN_TRANSIT') AS in_transit,
-                COUNT(*) FILTER (WHERE status = 'CREATED') AS pending_pickup
+                COUNT(*) FILTER (WHERE status = 'CREATED') AS pending_pickup,
+                COUNT(*) AS total_volume,
+                COUNT(*) FILTER (WHERE status = 'DELIVERED') AS total_delivered,
+                COUNT(*) FILTER (WHERE status IN ('FAILED_DELIVERY','RETURNED')) AS total_exceptions,
+                COUNT(*) FILTER (WHERE status = 'DELIVERED' AND actual_delivery <= estimated_delivery) AS on_time
             FROM waybills
         """))
-
         row = result.mappings().first()
-        return dict(row) if row else {}
+        if not row:
+            return {}
+
+        total_delivered = row["total_delivered"] or 1
+        sla = round(row["on_time"] / total_delivered * 100, 1) if row["on_time"] else 0
+        exception_rate = round(row["total_exceptions"] / max(row["total_volume"], 1) * 100, 1)
+
+        return {
+            "totalActive": row["total_active"],
+            "deliveredToday": row["delivered_today"],
+            "inTransit": row["in_transit"],
+            "pendingPickup": row["pending_pickup"],
+            "totalVolume": row["total_volume"],
+            "slaCompliance": sla,
+            "exceptionRate": exception_rate,
+            "avgTransitTime": 0,
+        }
 
     async def get_sla_report(self, from_date: str, to_date: str) -> list[dict]:
         result = await self.db.execute(text("""
@@ -35,7 +55,6 @@ class AnalyticsService:
             ORDER BY date
         """), {"from_date": from_date, "to_date": to_date})
         rows = result.mappings().all()
-
         return [
             {
                 "date": str(r["date"]),
@@ -43,7 +62,6 @@ class AnalyticsService:
                 "onTime": r["on_time"],
                 "sla": round(r["on_time"] / r["total"] * 100, 2) if r["total"] > 0 else 0,
             }
-
             for r in rows
         ]
 
@@ -55,9 +73,7 @@ class AnalyticsService:
               AND updated_at < NOW() - INTERVAL '3 days'
             ORDER BY updated_at ASC
         """))
-
         rows = result.mappings().all()
-
         return [
             {
                 "waybillId": r["id"],
@@ -67,7 +83,6 @@ class AnalyticsService:
                 "description": f"Shipment stuck in '{r['status']}' for over 3 days",
                 "detectedAt": datetime.utcnow().isoformat(),
             }
-
             for r in rows
         ]
 
@@ -84,7 +99,6 @@ class AnalyticsService:
             FROM waybills WHERE id = :wid
         """), {"wid": waybill_id})
         row = result.mappings().first()
-
         if not row:
             return None
         return {
@@ -92,9 +106,7 @@ class AnalyticsService:
             "trackingNumber": row["tracking_number"],
             "predictedDelivery": (
                 datetime.utcnow() + timedelta(hours=row["avg_hours"])
-            ).isoformat()
-
-            if row["avg_hours"] else None,
+            ).isoformat() if row["avg_hours"] else None,
             "confidence": 0.85 if row["avg_hours"] else 0.0,
             "basedOn": "Historical average transit time",
         }

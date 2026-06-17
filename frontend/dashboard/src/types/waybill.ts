@@ -116,12 +116,8 @@ export interface DashboardStats {
   deliveredToday: number
   inTransit: number
   pendingPickup: number
+  totalVolume: number
   slaCompliance: number
+  exceptionRate: number
   avgTransitTime: number
-}
-
-export interface AnalyticsPayload {
-  period: 'daily' | 'weekly' | 'monthly'
-  from: string
-  to: string
 }

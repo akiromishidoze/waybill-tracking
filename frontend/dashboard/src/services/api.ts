@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -64,6 +64,16 @@ export const userService = {
   list: () => api.get<User[]>('/users'),
   updateRole: (id: string, role: string) =>
     api.patch(`/users/${id}/role`, { role }),
+}
+
+export const auditLogService = {
+  list: () => api.get<AuditLog[]>('/audit-logs'),
+}
+
+export const carrierService = {
+  list: () => api.get<Carrier[]>('/carriers'),
+  getEvents: (waybillId: string) =>
+    api.get<CarrierEvent[]>(`/carriers/events/${waybillId}`),
 }
 
 export default api

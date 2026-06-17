@@ -6,6 +6,8 @@ import WaybillDetailPage from './pages/WaybillDetailPage'
 import TrackingPage from './pages/TrackingPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import UsersPage from './pages/UsersPage'
+import AuditLogPage from './pages/AuditLogPage'
+import CarriersPage from './pages/CarriersPage'
 import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
 import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
 import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
@@ -26,6 +28,8 @@ export default function App() {
           <Route path="/waybills/:id" element={<WaybillDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/audit-logs" element={<AuditLogPage />} />
+          <Route path="/carriers" element={<CarriersPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

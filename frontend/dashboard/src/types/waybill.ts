@@ -86,6 +86,10 @@ export interface Waybill {
   createdAt: string
   updatedAt: string
   events: ScanEvent[]
+  carrierId?: string
+  carrierName?: string
+  carrierTrackingNumber?: string
+  carrierEvents?: CarrierEvent[]
 }
 
 export interface ScanEvent {
@@ -109,6 +113,40 @@ export interface User {
   name: string
   role: 'SHIPPER' | 'COURIER' | 'OPS' | 'ADMIN'
   company?: string
+}
+
+export interface Carrier {
+  id: string
+  name: string
+  apiEndpoint: string
+  apiKey: string
+  isActive: boolean
+  trackingUrlTemplate: string
+  createdAt: string
+}
+
+export interface CarrierEvent {
+  id: string
+  carrierId: string
+  carrierName: string
+  waybillId: string
+  status: string
+  location: string
+  timestamp: string
+  remark: string
+}
+
+export interface AuditLog {
+  id: string
+  userId: string
+  userName: string
+  userRole: string
+  action: string
+  resourceType: string
+  resourceId: string
+  details: string
+  ipAddress: string
+  createdAt: string
 }
 
 export interface DashboardStats {

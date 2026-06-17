@@ -1,5 +1,28 @@
 const http = require('http')
 
+const CARRIERS = [
+  { id: 'c1', name: 'FastDeliver Logistics', apiEndpoint: 'https://api.fastdeliver.com/v1/track', apiKey: 'sk_fd_****', isActive: true, trackingUrlTemplate: 'https://fastdeliver.com/track/{{number}}', createdAt: new Date(Date.now() - 864000000).toISOString() },
+  { id: 'c2', name: 'SpeedShip Express', apiEndpoint: 'https://api.speedship.io/v2/tracking', apiKey: 'sk_ss_****', isActive: true, trackingUrlTemplate: 'https://speedship.io/track/{{number}}', createdAt: new Date(Date.now() - 432000000).toISOString() },
+  { id: 'c3', name: 'QuickCourier PH', apiEndpoint: 'https://api.quickcourier.ph/v1', apiKey: 'sk_qc_****', isActive: false, trackingUrlTemplate: 'https://quickcourier.ph/tracking/{{number}}', createdAt: new Date(Date.now() - 216000000).toISOString() },
+]
+
+const CARRIER_EVENTS = {
+  wb1: [
+    { id: 'ce1', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb1', status: 'Picked Up', location: 'Quezon City Hub', timestamp: new Date(Date.now() - 345600000).toISOString(), remark: 'Package scanned at origin hub' },
+    { id: 'ce2', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb1', status: 'In Transit', location: 'Manila Sorting Center', timestamp: new Date(Date.now() - 259200000).toISOString(), remark: 'Arrived at Manila sorting center' },
+    { id: 'ce3', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb1', status: 'Out for Delivery', location: 'Makati City', timestamp: new Date(Date.now() - 172800000).toISOString(), remark: 'With delivery courier' },
+    { id: 'ce4', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb1', status: 'Delivered', location: '123 Main St, Manila', timestamp: new Date(Date.now() - 172800000).toISOString(), remark: 'Delivered and signed for' },
+  ],
+  wb2: [
+    { id: 'ce5', carrierId: 'c2', carrierName: 'SpeedShip Express', waybillId: 'wb2', status: 'Collected', location: 'Quezon City', timestamp: new Date(Date.now() - 172800000).toISOString(), remark: 'Package collected from shipper' },
+    { id: 'ce6', carrierId: 'c2', carrierName: 'SpeedShip Express', waybillId: 'wb2', status: 'Departed', location: 'Manila Hub', timestamp: new Date(Date.now() - 86400000).toISOString(), remark: 'Departed for Cebu' },
+  ],
+  wb5: [
+    { id: 'ce7', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb5', status: 'Picked Up', location: 'Manila Warehouse', timestamp: new Date(Date.now() - 86400000).toISOString(), remark: 'Picked up from warehouse' },
+    { id: 'ce8', carrierId: 'c1', carrierName: 'FastDeliver Logistics', waybillId: 'wb5', status: 'In Transit', location: 'Manila Hub', timestamp: new Date(Date.now() - 43200000).toISOString(), remark: 'Processed at hub' },
+  ],
+}
+
 const USERS = [
   { id: 'u1', email: 'admin', name: 'Admin User', role: 'ADMIN', company: 'Waybill Corp' },
   { id: 'u2', email: 'shipper@acme.com', name: 'John Shipper', role: 'SHIPPER', company: 'ACME Inc' },
@@ -12,7 +35,7 @@ const WAYBILLS = [
     id: 'wb1', trackingNumber: 'WBT-2024-00001', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'Alice Johnson', recipientAddress: '123 Main St, Manila', recipientPhone: '+63 912 345 6789',
     origin: 'Quezon City', destination: 'Makati City', weight: 2.5, dimensions: '30x20x15 cm',
-    serviceType: 'EXPRESS', status: 'DELIVERED',
+    serviceType: 'EXPRESS', status: 'DELIVERED', carrierId: 'c1', carrierName: 'FastDeliver Logistics', carrierTrackingNumber: 'FD-847291',
     estimatedDelivery: new Date(Date.now() - 172800000).toISOString(),
     actualDelivery: new Date(Date.now() - 172800000).toISOString(),
     createdAt: new Date(Date.now() - 432000000).toISOString(),
@@ -29,7 +52,7 @@ const WAYBILLS = [
     id: 'wb2', trackingNumber: 'WBT-2024-00002', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'Bob Smith', recipientAddress: '456 Elm St, Cebu City', recipientPhone: '+63 923 456 7890',
     origin: 'Quezon City', destination: 'Cebu City', weight: 5.0, dimensions: '40x30x20 cm',
-    serviceType: 'STANDARD', status: 'IN_TRANSIT',
+    serviceType: 'STANDARD', status: 'IN_TRANSIT', carrierId: 'c2', carrierName: 'SpeedShip Express', carrierTrackingNumber: 'SS-563902',
     estimatedDelivery: new Date(Date.now() + 172800000).toISOString(),
     createdAt: new Date(Date.now() - 259200000).toISOString(),
     updatedAt: new Date(Date.now() - 86400000).toISOString(),
@@ -70,7 +93,7 @@ const WAYBILLS = [
     id: 'wb5', trackingNumber: 'WBT-2024-00005', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'Elena Cruz', recipientAddress: '654 Acacia St, Iloilo City', recipientPhone: '+63 956 789 0123',
     origin: 'Manila', destination: 'Iloilo City', weight: 8.0, dimensions: '45x35x25 cm',
-    serviceType: 'STANDARD', status: 'OUT_FOR_DELIVERY',
+    serviceType: 'STANDARD', status: 'OUT_FOR_DELIVERY', carrierId: 'c1', carrierName: 'FastDeliver Logistics', carrierTrackingNumber: 'FD-918273',
     estimatedDelivery: new Date(Date.now() + 86400000).toISOString(),
     createdAt: new Date(Date.now() - 172800000).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
@@ -97,6 +120,19 @@ const EXCEPTION_CODES = [
   { code: 'NO_RESPONSE', label: 'No Response', description: 'No response after multiple attempts' },
   { code: 'WRONG_PACKAGE', label: 'Wrong Package', description: 'Incorrect package delivered to recipient' },
   { code: 'OTHER', label: 'Other Exception', description: 'Other exception not covered by specific codes' },
+]
+
+const AUDIT_LOGS = [
+  { id: 'a1', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_LOGIN', resourceType: 'session', resourceId: 'u1', details: 'Admin User logged in', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 60000).toISOString() },
+  { id: 'a2', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_VIEW', resourceType: 'user_list', resourceId: '', details: 'Viewed all users', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 120000).toISOString() },
+  { id: 'a3', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'ROLE_CHANGE', resourceType: 'user', resourceId: 'u2', details: 'Changed John Shipper role to OPS', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 180000).toISOString() },
+  { id: 'a4', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'WAYBILL_VIEW', resourceType: 'waybill', resourceId: 'wb1', details: 'Viewed waybill WBT-2024-00001', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 240000).toISOString() },
+  { id: 'a5', userId: 'u2', userName: 'John Shipper', userRole: 'SHIPPER', action: 'WAYBILL_CREATE', resourceType: 'waybill', resourceId: 'wb5', details: 'Created waybill WBT-2024-00005', ipAddress: '192.168.1.2', createdAt: new Date(Date.now() - 360000).toISOString() },
+  { id: 'a6', userId: 'u3', userName: 'Jane Courier', userRole: 'COURIER', action: 'STATUS_UPDATE', resourceType: 'waybill', resourceId: 'wb1', details: 'Updated status to OUT_FOR_DELIVERY on WBT-2024-00001', ipAddress: '192.168.1.3', createdAt: new Date(Date.now() - 720000).toISOString() },
+  { id: 'a7', userId: 'u3', userName: 'Jane Courier', userRole: 'COURIER', action: 'STATUS_UPDATE', resourceType: 'waybill', resourceId: 'wb4', details: 'Updated status to FAILED_DELIVERY (CUSTOMER_NOT_AVAILABLE) on WBT-2024-00004', ipAddress: '192.168.1.3', createdAt: new Date(Date.now() - 900000).toISOString() },
+  { id: 'a8', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'EXCEPTION_CODE_VIEW', resourceType: 'exception_codes', resourceId: '', details: 'Listed exception codes', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 1800000).toISOString() },
+  { id: 'a9', userId: 'u4', userName: 'Ops Manager', userRole: 'OPS', action: 'REPORT_EXPORT', resourceType: 'report', resourceId: '', details: 'Exported waybill report (2024-01-01 to 2024-12-31)', ipAddress: '192.168.1.4', createdAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: 'a10', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'DASHBOARD_VIEW', resourceType: 'dashboard', resourceId: '', details: 'Viewed KPI dashboard', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 7200000).toISOString() },
 ]
 
 const server = http.createServer((req, res) => {
@@ -205,8 +241,9 @@ const server = http.createServer((req, res) => {
 
   const wbMatch = path.match(/^\/api\/waybills\/([^/]+)$/)
   if (wbMatch && req.method === 'GET') {
-    const wb = WAYBILLS.find(w => w.id === wbMatch[1])
+    const wb = { ...WAYBILLS.find(w => w.id === wbMatch[1]) }
     if (!wb) { send(404, { error: 'waybill not found' }); return }
+    wb.carrierEvents = CARRIER_EVENTS[wb.id] || []
     send(200, wb)
     return
   }
@@ -246,6 +283,34 @@ const server = http.createServer((req, res) => {
       { date: '2024-06-12', total: 1, onTime: 0, sla: 0 },
       { date: '2024-06-13', total: 1, onTime: 1, sla: 100 },
     ])
+    return
+  }
+
+  // --- Carriers ---
+  if (path === '/api/carriers' && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
+    send(200, CARRIERS)
+    return
+  }
+
+  // --- Carrier Events for a waybill ---
+  const carrierEventsMatch = path.match(/^\/api\/carriers\/events\/([^/]+)$/)
+  if (carrierEventsMatch && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    const events = CARRIER_EVENTS[carrierEventsMatch[1]] || []
+    send(200, events)
+    return
+  }
+
+  // --- Audit Logs ---
+  if (path === '/api/audit-logs' && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    if (claims.role !== 'ADMIN') { send(403, { error: 'insufficient permissions' }); return }
+    send(200, AUDIT_LOGS)
     return
   }
 

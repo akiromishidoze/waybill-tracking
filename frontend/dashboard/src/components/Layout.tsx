@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck,
 } from 'lucide-react'
 
 const navItems = [
@@ -100,26 +100,60 @@ export default function Layout() {
             </NavLink>
           ))}
           {user?.role === 'ADMIN' && (
-            <NavLink
-              to="/users"
-              style={({ isActive }) => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.75rem 1rem',
-                borderRadius: 8,
-                textDecoration: 'none',
-                color: isActive ? '#fff' : '#94a3b8',
-                background: isActive ? '#334155' : 'transparent',
-                fontWeight: isActive ? 600 : 400,
-                borderTop: '1px solid #334155',
-                marginTop: '0.5rem',
-                paddingTop: '1rem',
-              })}
-            >
-              <Shield size={20} />
-              Users
-            </NavLink>
+            <>
+              <div style={{ borderTop: '1px solid #334155', marginTop: '0.5rem', paddingTop: '0.5rem' }} />
+              <NavLink
+                to="/users"
+                style={({ isActive }) => ({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : '#94a3b8',
+                  background: isActive ? '#334155' : 'transparent',
+                  fontWeight: isActive ? 600 : 400,
+                })}
+              >
+                <Shield size={20} />
+                Users
+              </NavLink>
+              <NavLink
+                to="/carriers"
+                style={({ isActive }) => ({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : '#94a3b8',
+                  background: isActive ? '#334155' : 'transparent',
+                  fontWeight: isActive ? 600 : 400,
+                })}
+              >
+                <Truck size={20} />
+                Carriers
+              </NavLink>
+              <NavLink
+                to="/audit-logs"
+                style={({ isActive }) => ({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : '#94a3b8',
+                  background: isActive ? '#334155' : 'transparent',
+                  fontWeight: isActive ? 600 : 400,
+                })}
+              >
+                <ClipboardList size={20} />
+                Audit Log
+              </NavLink>
+            </>
           )}
         </nav>
         <button

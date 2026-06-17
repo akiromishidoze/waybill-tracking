@@ -160,3 +160,19 @@ export interface DashboardStats {
   exceptionRate: number
   avgTransitTime: number
 }
+
+export interface AppSettings {
+  companyName: string
+  timezone: string
+  sessionTimeout: number
+  emailNotifications: boolean
+  defaultServiceType: string
+  logoUrl: string
+}
+
+export interface Team {
+  id: string
+  name: string
+  description: string
+  color: string
+}

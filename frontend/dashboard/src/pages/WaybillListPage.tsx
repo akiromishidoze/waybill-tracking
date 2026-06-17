@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
-import { Truck, AlertTriangle, Clock } from 'lucide-react'
+import { Truck, AlertTriangle, Clock, Shield } from 'lucide-react'
 
 const statusColors: Record<string, string> = {
   CREATED: '#6b7280',
@@ -21,6 +21,7 @@ export default function WaybillListPage() {
   const [search, setSearch] = useState('')
   const [carrierFilter, setCarrierFilter] = useState('')
   const [breachFilter, setBreachFilter] = useState<'all' | 'breached' | 'ontime'>('all')
+  const [teamFilter, setTeamFilter] = useState('')
   const { data: waybills, isLoading } = useQuery({
     queryKey: ['waybills', search],
     queryFn: () => waybillService.list({ search }).then((r) => r.data),
@@ -29,11 +30,15 @@ export default function WaybillListPage() {
   const carriers = waybills
     ? [...new Set(waybills.filter((w) => w.carrierName).map((w) => w.carrierName!))]
     : []
+  const teams = waybills
+    ? [...new Set(waybills.filter((w) => w.teamName).map((w) => w.teamName!))]
+    : []
 
   const filtered = waybills?.filter((wb) => {
     if (carrierFilter && wb.carrierName !== carrierFilter) return false
     if (breachFilter === 'breached' && !wb.slaBreached) return false
     if (breachFilter === 'ontime' && wb.slaBreached) return false
+    if (teamFilter && wb.teamName !== teamFilter) return false
     return true
   })
 
@@ -47,21 +52,28 @@ export default function WaybillListPage() {
       </div>
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <input type="text" placeholder="Search by tracking number, shipper, recipient..." value={search} onChange={(e) => setSearch(e.target.value)}
+        <input type="text" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
           style={{ flex: 1, minWidth: 200, padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '1rem' }} />
         {carriers.length > 0 && (
           <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)}
-            style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 180 }}>
+            style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>
             <option value="">All Carriers</option>
             {carriers.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
         )}
         <select value={breachFilter} onChange={(e) => setBreachFilter(e.target.value as any)}
-          style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 140 }}>
+          style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 130 }}>
           <option value="all">All SLA</option>
           <option value="breached">SLA Breached</option>
           <option value="ontime">On Time</option>
         </select>
+        {teams.length > 0 && (
+          <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
+            style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>
+            <option value="">All Teams</option>
+            {teams.map((t) => (<option key={t} value={t}>{t}</option>))}
+          </select>
+        )}
       </div>
 
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
@@ -72,6 +84,7 @@ export default function WaybillListPage() {
               <th style={{ padding: '0.75rem 1rem' }}>Shipper</th>
               <th style={{ padding: '0.75rem 1rem' }}>Destination</th>
               <th style={{ padding: '0.75rem 1rem' }}>Status</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Team</th>
               <th style={{ padding: '0.75rem 1rem' }}>Carrier</th>
               <th style={{ padding: '0.75rem 1rem' }}>Est. Delivery</th>
               <th style={{ padding: '0.75rem 1rem' }}>SLA</th>
@@ -79,7 +92,7 @@ export default function WaybillListPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
+              <tr><td colSpan={8} style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
             ) : (
               filtered?.map((wb: Waybill) => (
                 <tr key={wb.id} style={{ borderTop: '1px solid #f1f5f9', background: wb.slaBreached ? '#fef2f2' : undefined }}>
@@ -94,6 +107,15 @@ export default function WaybillListPage() {
                     <span style={{ display: 'inline-block', padding: '0.25rem 0.75rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: statusColors[wb.status] + '20', color: statusColors[wb.status] }}>
                       {wb.status.replace(/_/g, ' ')}
                     </span>
+                  </td>
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    {wb.teamName ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 500, background: '#fffbeb', color: '#d97706' }}>
+                        <Shield size={12} /> {wb.teamName}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '0.8125rem' }}>—</span>
+                    )}
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.carrierName ? (

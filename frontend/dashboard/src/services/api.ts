@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -62,22 +62,50 @@ export const analyticsService = {
 
 export const userService = {
   list: () => api.get<User[]>('/users'),
+  create: (data: Partial<User>) => api.post<User>('/users', data),
+  update: (id: string, data: Partial<User>) =>
+    api.patch<User>(`/users/${id}`, data),
+  delete: (id: string) => api.delete(`/users/${id}`),
   updateRole: (id: string, role: string) =>
     api.patch(`/users/${id}/role`, { role }),
+}
+
+export const carrierService = {
+  list: () => api.get<Carrier[]>('/carriers'),
+  create: (data: Partial<Carrier>) => api.post<Carrier>('/carriers', data),
+  update: (id: string, data: Partial<Carrier>) =>
+    api.patch<Carrier>(`/carriers/${id}`, data),
+  delete: (id: string) => api.delete(`/carriers/${id}`),
+  getEvents: (waybillId: string) =>
+    api.get<CarrierEvent[]>(`/carriers/events/${waybillId}`),
+}
+
+export const aggregatedTrackingService = {
+  list: () => api.get<any[]>('/tracking/aggregated'),
+  assign: (waybillId: string, data: { carrierId: string; carrierTrackingNumber: string }) =>
+    api.post(`/tracking/aggregated/${waybillId}`, data),
+  remove: (waybillId: string) =>
+    api.delete(`/tracking/aggregated/${waybillId}`),
 }
 
 export const auditLogService = {
   list: () => api.get<AuditLog[]>('/audit-logs'),
 }
 
-export const aggregatedTrackingService = {
-  list: () => api.get<any[]>('/tracking/aggregated'),
+export const settingsService = {
+  get: () => api.get<AppSettings>('/settings'),
+  update: (data: Partial<AppSettings>) => api.put<AppSettings>('/settings', data),
+  resetPassword: (userId: string, newPassword: string) =>
+    api.post('/auth/reset-password', { userId, newPassword }),
 }
 
-export const carrierService = {
-  list: () => api.get<Carrier[]>('/carriers'),
-  getEvents: (waybillId: string) =>
-    api.get<CarrierEvent[]>(`/carriers/events/${waybillId}`),
+export const teamService = {
+  list: () => api.get<Team[]>('/teams'),
+  create: (data: Partial<Team>) => api.post<Team>('/teams', data),
+  update: (id: string, data: Partial<Team>) => api.patch<Team>(`/teams/${id}`, data),
+  delete: (id: string) => api.delete(`/teams/${id}`),
+  assignToWaybill: (waybillId: string, teamId: string | null) =>
+    api.patch<Waybill>(`/waybills/${waybillId}/assign-team`, { teamId }),
 }
 
 export default api

@@ -154,6 +154,23 @@ export default function Layout() {
                 <ClipboardList size={20} />
                 Audit Log
               </NavLink>
+              <NavLink
+                to="/settings"
+                style={({ isActive }) => ({
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 8,
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : '#94a3b8',
+                  background: isActive ? '#334155' : 'transparent',
+                  fontWeight: isActive ? 600 : 400,
+                })}
+              >
+                <Settings size={20} />
+                Settings
+              </NavLink>
             </>
           )}
         </nav>

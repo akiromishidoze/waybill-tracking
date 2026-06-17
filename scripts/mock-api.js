@@ -3,6 +3,27 @@ const http = require('http')
 let nextUserId = 5
 let nextCarrierId = 4
 let nextWbId = 6
+let nextTeamId = 2
+
+const USER_PASSWORDS = {
+  'u1': 'admin',
+  'u2': 'admin',
+  'u3': 'admin',
+  'u4': 'admin',
+}
+
+const APP_SETTINGS = {
+  companyName: 'WaybillTrack',
+  timezone: 'Asia/Manila',
+  sessionTimeout: 60,
+  emailNotifications: true,
+  defaultServiceType: 'STANDARD',
+  logoUrl: '',
+}
+
+const TEAMS = [
+  { id: 't1', name: 'Manila Hub', description: 'Manila city operations', color: '#2563eb' },
+]
 
 const CARRIERS = [
   { id: 'c1', name: 'FastDeliver Logistics', apiEndpoint: 'https://api.fastdeliver.com/v1/track', apiKey: 'sk_fd_****', isActive: true, trackingUrlTemplate: 'https://fastdeliver.com/track/{{number}}', createdAt: new Date(Date.now() - 864000000).toISOString() },
@@ -83,7 +104,7 @@ let WAYBILLS = [
     id: 'wb4', trackingNumber: 'WBT-2024-00004', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'David Reyes', recipientAddress: '321 Pine Rd, BGC, Taguig', recipientPhone: '+63 945 678 9012',
     origin: 'Quezon City', destination: 'Taguig City', weight: 1.2, dimensions: '20x15x10 cm',
-    serviceType: 'EXPRESS', status: 'FAILED_DELIVERY',
+    serviceType: 'EXPRESS', status: 'FAILED_DELIVERY', teamId: 't1', teamName: 'Manila Hub',
     estimatedDelivery: new Date(Date.now() - 86400000).toISOString(),
     createdAt: new Date(Date.now() - 172800000).toISOString(),
     updatedAt: new Date(Date.now() - 21600000).toISOString(),
@@ -97,7 +118,7 @@ let WAYBILLS = [
     id: 'wb5', trackingNumber: 'WBT-2024-00005', shipperId: 'u2', shipperName: 'ACME Inc',
     recipientName: 'Elena Cruz', recipientAddress: '654 Acacia St, Iloilo City', recipientPhone: '+63 956 789 0123',
     origin: 'Manila', destination: 'Iloilo City', weight: 8.0, dimensions: '45x35x25 cm',
-    serviceType: 'STANDARD', status: 'OUT_FOR_DELIVERY', carrierId: 'c1', carrierName: 'FastDeliver Logistics', carrierTrackingNumber: 'FD-918273',
+    serviceType: 'STANDARD', status: 'OUT_FOR_DELIVERY', carrierId: 'c1', carrierName: 'FastDeliver Logistics', carrierTrackingNumber: 'FD-918273', teamId: 't1', teamName: 'Manila Hub',
     estimatedDelivery: new Date(Date.now() + 86400000).toISOString(),
     createdAt: new Date(Date.now() - 172800000).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
@@ -220,6 +241,108 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Password Reset ---
+  if (path === '/api/auth/reset-password' && req.method === 'POST') {
+    const claims = requireAdmin()
+    if (!claims) return
+    parseBody().then(({ userId, newPassword }) => {
+      if (!userId || !newPassword) { send(400, { error: 'userId and newPassword are required' }); return }
+      if (newPassword.length < 4) { send(400, { error: 'password must be at least 4 characters' }); return }
+      const user = USERS.find(u => u.id === userId)
+      if (!user) { send(404, { error: 'user not found' }); return }
+      USER_PASSWORDS[userId] = newPassword
+      send(200, { message: 'password updated successfully for ' + user.name })
+    })
+    return
+  }
+
+  // --- App Settings ---
+  if (path === '/api/settings' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, APP_SETTINGS)
+    return
+  }
+
+  if (path === '/api/settings' && req.method === 'PUT') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      if (body.companyName !== undefined) APP_SETTINGS.companyName = body.companyName
+      if (body.timezone !== undefined) APP_SETTINGS.timezone = body.timezone
+      if (body.sessionTimeout !== undefined) APP_SETTINGS.sessionTimeout = body.sessionTimeout
+      if (body.emailNotifications !== undefined) APP_SETTINGS.emailNotifications = body.emailNotifications
+      if (body.defaultServiceType !== undefined) APP_SETTINGS.defaultServiceType = body.defaultServiceType
+      if (body.logoUrl !== undefined) APP_SETTINGS.logoUrl = body.logoUrl
+      send(200, APP_SETTINGS)
+    })
+    return
+  }
+
+  // --- Teams CRUD ---
+  if (path === '/api/teams' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, TEAMS)
+    return
+  }
+
+  if (path === '/api/teams' && req.method === 'POST') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      if (!body.name) { send(400, { error: 'name is required' }); return }
+      const newTeam = { id: 't' + nextTeamId++, name: body.name, description: body.description || '', color: body.color || '#6b7280' }
+      TEAMS.push(newTeam)
+      send(201, newTeam)
+    })
+    return
+  }
+
+  const teamByIdMatch = path.match(/^\/api\/teams\/([^/]+)$/)
+  if (teamByIdMatch) {
+    const teamId = teamByIdMatch[1]
+    const idx = TEAMS.findIndex(t => t.id === teamId)
+
+    if (req.method === 'PATCH') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'team not found' }); return }
+      parseBody().then((body) => {
+        if (body.name !== undefined) TEAMS[idx].name = body.name
+        if (body.description !== undefined) TEAMS[idx].description = body.description
+        if (body.color !== undefined) TEAMS[idx].color = body.color
+        send(200, TEAMS[idx])
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'team not found' }); return }
+      TEAMS.splice(idx, 1)
+      WAYBILLS.forEach(w => { if (w.teamId === teamId) { delete w.teamId; delete w.teamName } })
+      send(200, { message: 'team deleted' })
+      return
+    }
+  }
+
+  // --- Assign waybill to team ---
+  const assignTeamMatch = path.match(/^\/api\/waybills\/([^/]+)\/assign-team$/)
+  if (assignTeamMatch && req.method === 'PATCH') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      const wb = WAYBILLS.find(w => w.id === assignTeamMatch[1])
+      if (!wb) { send(404, { error: 'waybill not found' }); return }
+      if (body.teamId) {
+        const team = TEAMS.find(t => t.id === body.teamId)
+        if (!team) { send(400, { error: 'team not found' }); return }
+        wb.teamId = team.id
+        wb.teamName = team.name
+      } else {
+        delete wb.teamId
+        delete wb.teamName
+      }
+      send(200, wb)
+    })
+    return
+  }
+
   // --- Users CRUD ---
   if (path === '/api/users' && req.method === 'GET') {
     const claims = requireAdmin()
@@ -293,6 +416,7 @@ const server = http.createServer((req, res) => {
     wb.carrierEvents = CARRIER_EVENTS[wb.id] || []
     const now = Date.now()
     wb.slaBreached = wb.status !== 'DELIVERED' && wb.status !== 'CANCELLED' && new Date(wb.estimatedDelivery).getTime() < now
+    wb.availableTeams = TEAMS
     send(200, wb)
     return
   }

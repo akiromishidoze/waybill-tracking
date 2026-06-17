@@ -61,6 +61,7 @@ export const analyticsService = {
       responseType: 'blob',
     }),
   carrierPerformance: () => api.get<any[]>('/analytics/carrier-performance'),
+  getWaybillsMap: () => api.get<any[]>('/api/waybills/map-data'),
 }
 
 export const userService = {

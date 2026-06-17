@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin,
 } from 'lucide-react'
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
   { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
   { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
+  { to: '/map', label: 'GPS Tracking', icon: MapPin },
 ]
 
 const ROLE_COLORS: Record<string, string> = {
@@ -47,7 +48,7 @@ export default function Layout() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <aside style={{ width: 260, background: '#1e293b', color: '#fff', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: '1.5rem' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>WaybillTrack</h1>
@@ -96,7 +97,7 @@ export default function Layout() {
           <LogOut size={20} /> Logout
         </button>
       </aside>
-      <style>{`.nav-link:hover { background: rgb(51, 65, 85) !important; }`}</style>
+      <style>{`body { margin: 0; overflow: hidden; } .nav-link:hover { background: rgb(51, 65, 85) !important; }`}</style>
       <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
         <Outlet />
       </main>

@@ -434,6 +434,51 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Map data endpoint ---
+  const CITY_COORDS = {
+    'Quezon City': [14.6760, 121.0437],
+    'Makati City': [14.5547, 121.0244],
+    'Manila': [14.5995, 120.9842],
+    'Cebu City': [10.3157, 123.8854],
+    'Davao City': [7.1907, 125.4553],
+    'Taguig City': [14.5146, 121.0793],
+    'Iloilo City': [10.7202, 122.5621],
+    'Manila Hub': [14.5850, 120.9750],
+    'Manila Sorting Center': [14.5900, 120.9800],
+    'Manila Warehouse': [14.5950, 120.9900],
+    'En Route to Cebu': [12.0000, 123.5000],
+    'Quezon City Hub': [14.6300, 121.0300],
+  }
+
+  if (path === '/api/waybills/map-data' && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    const now = Date.now()
+    const result = WAYBILLS.map(w => {
+      const origin = CITY_COORDS[w.origin] || [14.5, 121.0]
+      const dest = CITY_COORDS[w.destination] || [14.5, 121.0]
+      const events = w.events || []
+      const lastEvent = events.length > 0 ? events[events.length - 1] : null
+      const currentLoc = lastEvent && CITY_COORDS[lastEvent.location] ? CITY_COORDS[lastEvent.location] : origin
+      return {
+        id: w.id,
+        trackingNumber: w.trackingNumber,
+        status: w.status,
+        origin: w.origin,
+        destination: w.destination,
+        recipientName: w.recipientName,
+        originCoords: origin,
+        destinationCoords: dest,
+        currentCoords: currentLoc,
+        slaBreached: w.status !== 'DELIVERED' && w.status !== 'CANCELLED' && new Date(w.estimatedDelivery).getTime() < now,
+        lastUpdate: lastEvent?.timestamp || w.updatedAt,
+        lastLocation: lastEvent?.location || w.origin,
+      }
+    })
+    send(200, result)
+    return
+  }
+
   // --- Waybill routes ---
   if (path === '/api/waybills' && req.method === 'GET') {
     const claims = requireAuth()

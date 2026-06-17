@@ -110,4 +110,14 @@ export const teamService = {
     api.patch<Waybill>(`/waybills/${waybillId}/assign-team`, { teamId }),
 }
 
+export const webhookService = {
+  list: () => api.get<any[]>('/webhooks'),
+  create: (data: any) => api.post<any>('/webhooks', data),
+  update: (id: string, data: any) => api.patch<any>(`/webhooks/${id}`, data),
+  delete: (id: string) => api.delete(`/webhooks/${id}`),
+  getEvents: () => api.get<string[]>('/webhooks/events'),
+  test: (id: string) => api.post<any>(`/webhooks/${id}`, {}),
+  log: () => api.get<any[]>('/webhooks/log'),
+}
+
 export default api

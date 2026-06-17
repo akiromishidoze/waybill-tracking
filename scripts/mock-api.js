@@ -25,6 +25,12 @@ const TEAMS = [
   { id: 't1', name: 'Manila Hub', description: 'Manila city operations', color: '#2563eb' },
 ]
 
+const WEBHOOK_EVENTS = ['status.updated', 'waybill.created', 'waybill.delivered', 'exception.raised']
+let nextWebhookId = 2
+const WEBHOOKS = [
+  { id: 'wh1', name: 'Slack Notifier', url: 'https://hooks.slack.com/services/xxx/yyy/zzz', events: ['status.updated', 'exception.raised'], isActive: true, secret: 'whsec_abc123', createdAt: new Date(Date.now() - 864000000).toISOString() },
+]
+
 const CARRIERS = [
   { id: 'c1', name: 'FastDeliver Logistics', apiEndpoint: 'https://api.fastdeliver.com/v1/track', apiKey: 'sk_fd_****', isActive: true, trackingUrlTemplate: 'https://fastdeliver.com/track/{{number}}', createdAt: new Date(Date.now() - 864000000).toISOString() },
   { id: 'c2', name: 'SpeedShip Express', apiEndpoint: 'https://api.speedship.io/v2/tracking', apiKey: 'sk_ss_****', isActive: true, trackingUrlTemplate: 'https://speedship.io/track/{{number}}', createdAt: new Date(Date.now() - 432000000).toISOString() },
@@ -612,8 +618,78 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Webhooks ---
+  if (path === '/api/webhooks' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, WEBHOOKS)
+    return
+  }
+
+  if (path === '/api/webhooks' && req.method === 'POST') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      if (!body.name || !body.url || !body.events?.length) { send(400, { error: 'name, url, and events are required' }); return }
+      const wh = { id: 'wh' + nextWebhookId++, name: body.name, url: body.url, events: body.events, isActive: body.isActive !== false, secret: body.secret || 'whsec_' + Math.random().toString(36).slice(2, 10), createdAt: new Date().toISOString() }
+      WEBHOOKS.push(wh)
+      send(201, wh)
+    })
+    return
+  }
+
+  if (path === '/api/webhooks/events' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, WEBHOOK_EVENTS)
+    return
+  }
+
+  const webhookByIdMatch = path.match(/^\/api\/webhooks\/([^/]+)$/)
+  if (webhookByIdMatch) {
+    const whId = webhookByIdMatch[1]
+    const idx = WEBHOOKS.findIndex(w => w.id === whId)
+
+    if (req.method === 'PATCH') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'webhook not found' }); return }
+      parseBody().then((body) => {
+        if (body.name !== undefined) WEBHOOKS[idx].name = body.name
+        if (body.url !== undefined) WEBHOOKS[idx].url = body.url
+        if (body.events !== undefined) WEBHOOKS[idx].events = body.events
+        if (body.isActive !== undefined) WEBHOOKS[idx].isActive = body.isActive
+        if (body.secret !== undefined) WEBHOOKS[idx].secret = body.secret
+        send(200, WEBHOOKS[idx])
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'webhook not found' }); return }
+      WEBHOOKS.splice(idx, 1)
+      send(200, { message: 'webhook deleted' })
+      return
+    }
+
+    if (req.method === 'POST') {
+      if (!requireAdmin()) return
+      if (idx === -1) { send(404, { error: 'webhook not found' }); return }
+      const wh = WEBHOOKS[idx]
+      const result = { webhookId: wh.id, name: wh.name, url: wh.url, event: 'test.ping', status: 'sent', timestamp: new Date().toISOString() }
+      send(200, result)
+      return
+    }
+  }
+
+  // --- Webhook event log ---
+  if (path === '/api/webhooks/log' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, WEBHOOK_LOG.slice().reverse())
+    return
+  }
+
   send(404, { error: 'not found' })
 })
+
+const WEBHOOK_LOG = []
 
 server.listen(8080, () => {
   console.log('Mock API running on http://localhost:8080')

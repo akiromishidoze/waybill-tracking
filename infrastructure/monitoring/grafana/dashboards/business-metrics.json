@@ -1,0 +1,234 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "Waybill Business Metrics",
+  "uid": "waybill-business-metrics",
+  "version": 1,
+  "tags": ["waybill", "business"],
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Waybills Created",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "increase(waybill_created_total[24h])", "legendFormat": "Last 24h" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Delivered Today",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        { "expr": "increase(waybill_delivered_total[24h])", "legendFormat": "Delivered" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 3,
+      "title": "In Transit",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "waybill_in_transit", "legendFormat": "In Transit" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 4,
+      "title": "SLA Compliance",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "waybill_sla_compliance_percent", "legendFormat": "SLA %" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 99 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 5,
+      "title": "Pending Pickup",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 0 },
+      "targets": [
+        { "expr": "waybill_pending_pickup", "legendFormat": "Pending" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "purple" },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Average Transit Time",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        { "expr": "waybill_avg_transit_time_hours", "legendFormat": "Avg hours" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Waybill Status Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 10, "w": 8, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "waybill_by_status", "legendFormat": "{{status}}" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["sum", "mean"] },
+        "pieType": "pie"
+      }
+    },
+    {
+      "id": 8,
+      "title": "Waybills Created Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 16, "x": 8, "y": 6 },
+      "targets": [
+        { "expr": "rate(waybill_created_total[1h])", "legendFormat": "Created /h" },
+        { "expr": "rate(waybill_delivered_total[1h])", "legendFormat": "Delivered /h" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Service Type Distribution",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "waybill_by_service_type", "legendFormat": "{{service_type}}" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": { "mode": "palette-classic" },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 10,
+      "title": "Top Origin Cities",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "expr": "topk(10, waybill_by_origin)", "legendFormat": "{{origin}}" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "sortBy": [{"displayName": "Value", "desc": true}]
+      }
+    }
+  ],
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+  },
+  "refresh": "30s"
+}

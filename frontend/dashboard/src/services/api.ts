@@ -34,6 +34,8 @@ export const waybillService = {
   create: (data: Partial<Waybill>) => api.post<Waybill>('/waybills', data),
   updateStatus: (id: string, event: Partial<ScanEvent>) =>
     api.patch<Waybill>(`/waybills/${id}/status`, event),
+  batchStatusUpdate: (ids: string[], status: string, location?: string) =>
+    api.post('/waybills/batch-status', { ids, status, location }),
 }
 
 export const authService = {

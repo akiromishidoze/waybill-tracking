@@ -13,6 +13,7 @@ const navItems = [
   { to: '/roadmap/analytics', label: 'Reports', icon: PieChart },
   { to: '/roadmap/integrations', label: 'Integrations', icon: Link2 },
   { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
+  { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
 ]
 
 const ROLE_COLORS: Record<string, string> = {

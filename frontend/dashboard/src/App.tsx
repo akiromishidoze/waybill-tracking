@@ -10,6 +10,7 @@ import AuditLogPage from './pages/AuditLogPage'
 import CarriersPage from './pages/CarriersPage'
 import AggregatedTrackingPage from './pages/AggregatedTrackingPage'
 import SettingsPage from './pages/SettingsPage'
+import BatchStatusPage from './pages/BatchStatusPage'
 import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
 import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
 import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/carriers" element={<CarriersPage />} />
           <Route path="/tracking/aggregated" element={<AggregatedTrackingPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/batch-status" element={<BatchStatusPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

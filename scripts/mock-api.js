@@ -399,6 +399,35 @@ const server = http.createServer((req, res) => {
     }
   }
 
+  // --- Batch status update ---
+  if (path === '/api/waybills/batch-status' && req.method === 'POST') {
+    const claims = requireAuth()
+    if (!claims) return
+    parseBody().then((body) => {
+      if (!body.ids || !body.status) { send(400, { error: 'ids and status are required' }); return }
+      const status = body.status
+      const location = body.location || 'Batch Update'
+      body.ids.forEach((id) => {
+        const wb = WAYBILLS.find(w => w.id === id)
+        if (wb) {
+          wb.status = status
+          wb.updatedAt = new Date().toISOString()
+          wb.events.push({
+            id: 'e' + Date.now() + Math.random().toString(36).slice(2, 6),
+            waybillId: id,
+            status,
+            location,
+            timestamp: new Date().toISOString(),
+            eventType: 'NOTE',
+            remark: `Batch status update to ${status}`,
+          })
+        }
+      })
+      send(200, { message: `${body.ids.length} waybills updated to ${status}` })
+    })
+    return
+  }
+
   // --- Waybill routes ---
   if (path === '/api/waybills' && req.method === 'GET') {
     const claims = requireAuth()

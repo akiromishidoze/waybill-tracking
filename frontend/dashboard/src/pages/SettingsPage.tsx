@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { settingsService, userService, teamService } from '@/services/api'
-import { Key, Save, Plus, Trash2, Check, X, Shield } from 'lucide-react'
+import { UserPlus, Save, Plus, Trash2, Check, X, Shield } from 'lucide-react'
 
 export default function SettingsPage() {
   const queryClient = useQueryClient()
 
-  const { data: users } = useQuery({ queryKey: ['users'], queryFn: () => userService.list().then(r => r.data) })
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: () => settingsService.get().then(r => r.data) })
   const { data: teams } = useQuery({ queryKey: ['teams'], queryFn: () => teamService.list().then(r => r.data) })
 
-  const [pwForm, setPwForm] = useState({ userId: '', newPassword: '' })
-  const [pwMsg, setPwMsg] = useState('')
+  const [createUserForm, setCreateUserForm] = useState({ email: '', name: '', password: '', role: 'SHIPPER', company: '' })
+  const [createUserMsg, setCreateUserMsg] = useState('')
 
   const [settingsForm, setSettingsForm] = useState<any>(null)
   const [savedMsg, setSavedMsg] = useState('')
@@ -20,10 +19,10 @@ export default function SettingsPage() {
   const [showTeamForm, setShowTeamForm] = useState(false)
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null)
 
-  const resetPassword = useMutation({
-    mutationFn: () => settingsService.resetPassword(pwForm.userId, pwForm.newPassword),
-    onSuccess: (r) => { setPwMsg(r.data.message); setPwForm({ userId: '', newPassword: '' }) },
-    onError: () => setPwMsg('Failed to reset password'),
+  const createUser = useMutation({
+    mutationFn: () => userService.create(createUserForm),
+    onSuccess: (r) => { setCreateUserMsg(`User ${r.data.name} created successfully`); setCreateUserForm({ email: '', name: '', password: '', role: 'SHIPPER', company: '' }); queryClient.invalidateQueries({ queryKey: ['users'] }) },
+    onError: (e: any) => setCreateUserMsg(e.response?.data?.error || 'Failed to create user'),
   })
 
   const saveSettings = useMutation({
@@ -49,30 +48,44 @@ export default function SettingsPage() {
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Settings</h2>
 
       <div style={{ display: 'grid', gap: '1.5rem' }}>
-        {/* Credential Management */}
+        {/* User Credentials */}
         <section style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Key size={20} color="#7c3aed" />
+            <UserPlus size={20} color="#7c3aed" />
             <h3 style={{ fontWeight: 600, fontSize: '1.125rem' }}>User Credentials</h3>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.75rem' }}>Reset passwords for any user account.</p>
+          <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.75rem' }}>Create new user accounts with login credentials and role assignment.</p>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>User</label>
-              <select value={pwForm.userId} onChange={e => setPwForm({ ...pwForm, userId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', minWidth: 200 }}>
-                <option value="">Select user...</option>
-                {(users || []).map((u: any) => (<option key={u.id} value={u.id}>{u.name} ({u.email}) — {u.role}</option>))}
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Email *</label>
+              <input type="text" value={createUserForm.email} onChange={e => setCreateUserForm({ ...createUserForm, email: e.target.value })} placeholder="e.g. juan@company.com" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label>
+              <input type="text" value={createUserForm.name} onChange={e => setCreateUserForm({ ...createUserForm, name: e.target.value })} placeholder="e.g. Juan Dela Cruz" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Password *</label>
+              <input type="text" value={createUserForm.password} onChange={e => setCreateUserForm({ ...createUserForm, password: e.target.value })} placeholder="e.g. securePass123" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Role</label>
+              <select value={createUserForm.role} onChange={e => setCreateUserForm({ ...createUserForm, role: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 140 }}>
+                <option value="SHIPPER">Shipper</option>
+                <option value="COURIER">Courier</option>
+                <option value="OPS">Operations</option>
+                <option value="ADMIN">Admin</option>
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>New Password</label>
-              <input type="text" value={pwForm.newPassword} onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })} placeholder="Enter new password" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Company</label>
+              <input type="text" value={createUserForm.company} onChange={e => setCreateUserForm({ ...createUserForm, company: e.target.value })} placeholder="Optional" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
             </div>
-            <button onClick={() => resetPassword.mutate()} disabled={!pwForm.userId || !pwForm.newPassword || resetPassword.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
-              <Shield size={14} /> Reset Password
+            <button onClick={() => createUser.mutate()} disabled={!createUserForm.email || !createUserForm.name || !createUserForm.password || createUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
+              <UserPlus size={14} /> Create User
             </button>
           </div>
-          {pwMsg && <p style={{ fontSize: '0.8125rem', color: '#16a34a', marginTop: '0.5rem' }}>{pwMsg}</p>}
+          {createUserMsg && <p style={{ fontSize: '0.8125rem', color: createUserMsg.includes('successfully') ? '#16a34a' : '#dc2626', marginTop: '0.5rem' }}>{createUserMsg}</p>}
         </section>
 
         {/* General Settings */}

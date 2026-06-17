@@ -40,6 +40,15 @@ type ExceptionCodeInfo struct {
 	Description string        `json:"description"`
 }
 
+type EventType string
+
+const (
+	EventMilestone EventType = "MILESTONE"
+	EventScan      EventType = "SCAN"
+	EventException EventType = "EXCEPTION"
+	EventNote      EventType = "NOTE"
+)
+
 type Waybill struct {
 	ID string `json:"id"`
 	TrackingNumber string `json:"trackingNumber"`
@@ -73,6 +82,7 @@ type ScanEvent struct {
 	ExceptionCode   *string       `json:"exceptionCode,omitempty"`
 	ExceptionDetail string        `json:"exceptionDetail,omitempty"`
 	ResolvedAt      *time.Time    `json:"resolvedAt,omitempty"`
+	EventType       EventType     `json:"eventType"`
 }
 
 type User struct {
@@ -102,6 +112,7 @@ type StatusUpdateRequest struct {
 	ExceptionCode   *string       `json:"exceptionCode,omitempty"`
 	ExceptionDetail string        `json:"exceptionDetail,omitempty"`
 	ResolvedAt      *time.Time    `json:"resolvedAt,omitempty"`
+	EventType       *EventType    `json:"eventType,omitempty"`
 }
 
 var validTransitions = map[WaybillStatus][]WaybillStatus{

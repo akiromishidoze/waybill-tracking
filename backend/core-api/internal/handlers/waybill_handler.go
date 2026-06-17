@@ -147,6 +147,15 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
+	eventType := models.EventScan
+	if req.EventType != nil {
+		eventType = *req.EventType
+	} else if req.ExceptionCode != nil {
+		eventType = models.EventException
+	} else if isMilestoneStatus(req.Status) {
+		eventType = models.EventMilestone
+	}
+
 	event := models.ScanEvent{
 		ID:              uuid.New().String(),
 		WaybillID:       id,
@@ -156,6 +165,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 		ExceptionCode:   req.ExceptionCode,
 		ExceptionDetail: req.ExceptionDetail,
 		ResolvedAt:      req.ResolvedAt,
+		EventType:       eventType,
 	}
 
 	wb.Status = req.Status
@@ -206,4 +216,14 @@ func (h *WaybillHandler) ListExceptionCodes(c *gin.Context) {
 
 func generateTrackingNumber() string {
 	return "WBT-" + uuid.New().String()[:8]
+}
+
+func isMilestoneStatus(s models.WaybillStatus) bool {
+	switch s {
+	case models.StatusCreated, models.StatusPickedUp, models.StatusInTransit,
+		models.StatusOutForDelivery, models.StatusDelivered,
+		models.StatusReturned, models.StatusCancelled:
+		return true
+	}
+	return false
 }

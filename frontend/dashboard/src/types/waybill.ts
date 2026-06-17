@@ -40,6 +40,27 @@ export const EXCEPTION_LABELS: Record<ExceptionCode, string> = {
   OTHER: 'Other Exception',
 }
 
+export type EventType = 'MILESTONE' | 'SCAN' | 'EXCEPTION' | 'NOTE'
+
+export const MILESTONE_LABELS: Record<WaybillStatus, string> = {
+  CREATED: 'Shipment Created',
+  PICKED_UP: 'Picked Up',
+  IN_TRANSIT: 'In Transit',
+  AT_SORTING_CENTER: 'At Sorting Center',
+  OUT_FOR_DELIVERY: 'Out for Delivery',
+  DELIVERED: 'Delivered',
+  FAILED_DELIVERY: 'Delivery Failed',
+  RETURNED: 'Returned to Sender',
+  CANCELLED: 'Cancelled',
+}
+
+export const EVENT_TYPE_COLORS: Record<EventType, string> = {
+  MILESTONE: '#2563eb',
+  SCAN: '#6b7280',
+  EXCEPTION: '#ef4444',
+  NOTE: '#8b5cf6',
+}
+
 export interface ExceptionCodeInfo {
   code: ExceptionCode
   label: string
@@ -79,6 +100,7 @@ export interface ScanEvent {
   exceptionCode?: ExceptionCode
   exceptionDetail?: string
   resolvedAt?: string
+  eventType: EventType
 }
 
 export interface User {

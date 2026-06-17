@@ -11,7 +11,7 @@ from app.core.database import get_db
 import openpyxl
 
 router = APIRouter(
-    prefix="/api/reports",
+    prefix="/api/v1/reports",
     tags=["Reports"],
     dependencies=[Depends(get_current_user)],
 )

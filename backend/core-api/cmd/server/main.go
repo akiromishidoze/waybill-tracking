@@ -107,7 +107,7 @@ func main() {
 
 	authLimit := middleware.RateLimitMiddleware(rdb, 20, time.Minute)
 
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
 	{
 		api.POST("/auth/login", authLimit, handlers.LoginHandler(cfg.JWTSecret, db))
 		api.POST("/auth/register", authLimit, handlers.RegisterHandler(cfg.JWTSecret, db))

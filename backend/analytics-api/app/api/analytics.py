@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(
-    prefix="/api/analytics",
+    prefix="/api/v1/analytics",
     tags=["Analytics"],
     dependencies=[Depends(get_current_user)],
 )

@@ -305,6 +305,31 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- Aggregated Multi-Carrier Tracking ---
+  if (path === '/api/tracking/aggregated' && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    const aggregated = WAYBILLS
+      .filter(w => w.carrierId)
+      .map(w => {
+        const events = CARRIER_EVENTS[w.id] || []
+        return {
+          waybillId: w.id,
+          trackingNumber: w.trackingNumber,
+          carrierTrackingNumber: w.carrierTrackingNumber,
+          carrierId: w.carrierId,
+          carrierName: w.carrierName,
+          status: w.status,
+          destination: w.destination,
+          recipientName: w.recipientName,
+          lastCarrierEvent: events.length ? events[events.length - 1] : null,
+          carrierEventCount: events.length,
+        }
+      })
+    send(200, aggregated)
+    return
+  }
+
   // --- Audit Logs ---
   if (path === '/api/audit-logs' && req.method === 'GET') {
     const claims = requireAuth()

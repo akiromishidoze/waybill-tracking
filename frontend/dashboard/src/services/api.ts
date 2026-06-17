@@ -70,6 +70,10 @@ export const auditLogService = {
   list: () => api.get<AuditLog[]>('/audit-logs'),
 }
 
+export const aggregatedTrackingService = {
+  list: () => api.get<any[]>('/tracking/aggregated'),
+}
+
 export const carrierService = {
   list: () => api.get<Carrier[]>('/carriers'),
   getEvents: (waybillId: string) =>

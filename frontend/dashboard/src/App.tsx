@@ -6,6 +6,10 @@ import WaybillDetailPage from './pages/WaybillDetailPage'
 import WaybillNewPage from './pages/WaybillNewPage'
 import TrackingPage from './pages/TrackingPage'
 import AnalyticsPage from './pages/AnalyticsPage'
+import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
+import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
+import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
+import RoadmapIntegrationsPage from './pages/RoadmapIntegrationsPage'
 import { FeatureProvider } from './hooks/useFeatures'
 import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
@@ -26,6 +30,10 @@ export default function App() {
             <Route path="/waybills/new" element={<WaybillNewPage />} />
             <Route path="/waybills/:id" element={<WaybillDetailPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
+            <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
+            <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />
+            <Route path="/roadmap/integrations" element={<RoadmapIntegrationsPage />} />
           </Route>
         </Route>
       </Routes>

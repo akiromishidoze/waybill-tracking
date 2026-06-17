@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Package, BarChart3, LayoutDashboard, LogOut } from 'lucide-react'
+import { Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import s from '@/styles/components.module.css'
 
@@ -7,6 +7,10 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/waybills', label: 'Waybills', icon: Package },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/roadmap/tracking', label: 'Tracking', icon: Eye },
+  { to: '/roadmap/operations', label: 'Operations', icon: Settings },
+  { to: '/roadmap/analytics', label: 'Reports', icon: PieChart },
+  { to: '/roadmap/integrations', label: 'Integrations', icon: Link2 },
 ]
 
 export default function Layout() {

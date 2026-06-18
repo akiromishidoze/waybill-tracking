@@ -4,6 +4,7 @@ let nextUserId = 5
 let nextCarrierId = 4
 let nextWbId = 6
 let nextTeamId = 2
+let nextAttachmentId = 1
 
 const USER_PASSWORDS = {
   'u1': 'admin',
@@ -55,7 +56,7 @@ const CARRIER_EVENTS = {
 }
 
 const USERS = [
-  { id: 'u1', email: 'admin', name: 'Admin User', role: 'ADMIN', company: 'Waybill Corp' },
+  { id: 'u1', email: 'Admin', name: 'Admin User', role: 'ADMIN', company: 'Waybill Corp' },
   { id: 'u2', email: 'shipper@acme.com', name: 'John Shipper', role: 'SHIPPER', company: 'ACME Inc' },
   { id: 'u3', email: 'courier@fastdeliver.com', name: 'Jane Courier', role: 'COURIER', company: 'Fast Deliver Co' },
   { id: 'u4', email: 'ops@waybill.com', name: 'Ops Manager', role: 'OPS', company: 'Waybill Corp' },
@@ -153,6 +154,8 @@ const EXCEPTION_CODES = [
   { code: 'OTHER', label: 'Other Exception', description: 'Other exception not covered by specific codes' },
 ]
 
+const ATTACHMENTS = {}
+
 const AUDIT_LOGS = [
   { id: 'a1', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_LOGIN', resourceType: 'session', resourceId: 'u1', details: 'Admin User logged in', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 60000).toISOString() },
   { id: 'a2', userId: 'u1', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_VIEW', resourceType: 'user_list', resourceId: '', details: 'Viewed all users', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 120000).toISOString() },
@@ -225,7 +228,7 @@ const server = http.createServer((req, res) => {
   // --- Auth routes ---
   if (path === '/api/auth/login' && req.method === 'POST') {
     parseBody().then(({ email, password }) => {
-      const user = USERS.find(u => u.email === email)
+      const user = USERS.find(u => u.email.toLowerCase() === email.toLowerCase())
       if (!user || password !== 'admin') {
         send(401, { error: 'invalid credentials' })
         return
@@ -499,6 +502,70 @@ const server = http.createServer((req, res) => {
     wb.availableTeams = TEAMS
     send(200, wb)
     return
+  }
+
+  // --- Attachment routes ---
+  const wbAttachmentsMatch = path.match(/^\/api\/waybills\/([^/]+)\/attachments$/)
+  if (wbAttachmentsMatch) {
+    const wbId = wbAttachmentsMatch[1]
+
+    if (req.method === 'GET') {
+      const claims = requireAuth()
+      if (!claims) return
+      const list = ATTACHMENTS[wbId] || []
+      send(200, list)
+      return
+    }
+
+    if (req.method === 'POST') {
+      const claims = requireAuth()
+      if (!claims) return
+      parseBody().then((body) => {
+        if (!body.fileName || !body.data) { send(400, { error: 'fileName and data are required' }); return }
+        const wb = WAYBILLS.find(w => w.id === wbId)
+        if (!wb) { send(404, { error: 'waybill not found' }); return }
+        const attachment = {
+          id: 'att' + nextAttachmentId++,
+          waybillId: wbId,
+          fileName: body.fileName,
+          fileType: body.fileType || 'application/octet-stream',
+          fileSize: body.fileSize || 0,
+          uploadedBy: claims.sub,
+          uploadedAt: new Date().toISOString(),
+          data: body.data,
+        }
+        ATTACHMENTS[wbId] = ATTACHMENTS[wbId] || []
+        ATTACHMENTS[wbId].push(attachment)
+        send(201, { ...attachment, data: undefined })
+      })
+      return
+    }
+  }
+
+  const attachmentByIdMatch = path.match(/^\/api\/attachments\/([^/]+)$/)
+  if (attachmentByIdMatch) {
+    const attId = attachmentByIdMatch[1]
+    const all = Object.values(ATTACHMENTS).flat()
+    const att = all.find(a => a.id === attId)
+
+    if (req.method === 'GET') {
+      const claims = requireAuth()
+      if (!claims) return
+      if (!att) { send(404, { error: 'attachment not found' }); return }
+      send(200, att)
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      const claims = requireAuth()
+      if (!claims) return
+      if (!att) { send(404, { error: 'attachment not found' }); return }
+      const list = ATTACHMENTS[att.waybillId]
+      const idx = list.indexOf(att)
+      if (idx !== -1) list.splice(idx, 1)
+      send(200, { message: 'attachment deleted' })
+      return
+    }
   }
 
   if (path === '/api/exception-codes' && req.method === 'GET') {

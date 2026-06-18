@@ -91,6 +91,7 @@ export interface Waybill {
   carrierTrackingNumber?: string
   carrierEvents?: CarrierEvent[]
   slaBreached?: boolean
+  attachments?: Attachment[]
 }
 
 export interface ScanEvent {
@@ -168,6 +169,17 @@ export interface AppSettings {
   emailNotifications: boolean
   defaultServiceType: string
   logoUrl: string
+}
+
+export interface Attachment {
+  id: string
+  waybillId: string
+  fileName: string
+  fileType: string
+  fileSize: number
+  uploadedBy: string
+  uploadedAt: string
+  data: string
 }
 
 export interface Team {

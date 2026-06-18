@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -120,6 +120,14 @@ export const webhookService = {
   getEvents: () => api.get<string[]>('/webhooks/events'),
   test: (id: string) => api.post<any>(`/webhooks/${id}`, {}),
   log: () => api.get<any[]>('/webhooks/log'),
+}
+
+export const attachmentService = {
+  list: (waybillId: string) => api.get<Attachment[]>(`/waybills/${waybillId}/attachments`),
+  upload: (waybillId: string, data: { fileName: string; fileType: string; fileSize: number; data: string }) =>
+    api.post<Attachment>(`/waybills/${waybillId}/attachments`, data),
+  get: (attachmentId: string) => api.get<Attachment>(`/attachments/${attachmentId}`),
+  delete: (attachmentId: string) => api.delete(`/attachments/${attachmentId}`),
 }
 
 export default api

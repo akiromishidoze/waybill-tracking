@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield } from 'lucide-react'
-import { waybillService, teamService } from '@/services/api'
-import type { ExceptionCode, EventType, WaybillStatus } from '@/types/waybill'
+import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload } from 'lucide-react'
+import { waybillService, teamService, attachmentService } from '@/services/api'
+import type { ExceptionCode, EventType, WaybillStatus, Attachment } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS } from '@/types/waybill'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
@@ -54,6 +54,48 @@ export default function WaybillDetailPage() {
     mutationFn: (teamId: string | null) => teamService.assignToWaybill(id!, teamId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['waybill', id] }),
   })
+
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { data: attachments, refetch: refetchAttachments } = useQuery({
+    queryKey: ['attachments', id],
+    queryFn: () => attachmentService.list(id!).then(r => r.data),
+    enabled: !!id,
+  })
+
+  const deleteAttachment = useMutation({
+    mutationFn: (attachmentId: string) => attachmentService.delete(attachmentId),
+    onSuccess: () => refetchAttachments(),
+  })
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(',')[1]
+      try {
+        await attachmentService.upload(id!, {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          data: base64,
+        })
+        refetchAttachments()
+      } catch { }
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
 
   const groupedEvents = useMemo(() => {
     if (!wb?.events?.length) return []
@@ -133,6 +175,47 @@ export default function WaybillDetailPage() {
             )}
           </div>
         </div>
+      </div>
+
+      <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Paperclip size={18} color="#6b7280" />
+            <h3 style={{ fontWeight: 600 }}>Proof of Delivery Attachments</h3>
+            <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>({attachments?.length || 0})</span>
+          </div>
+          <div>
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} />
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer' }}>
+              <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload File'}
+            </button>
+          </div>
+        </div>
+        {(!attachments || attachments.length === 0) ? (
+          <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No attachments yet.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {attachments.map((att: Attachment) => (
+              <div key={att.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.75rem', background: '#f8fafc', borderRadius: 8, border: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                  <FileText size={16} color="#64748b" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 500, fontSize: '0.875rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.fileName}</p>
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>{formatFileSize(att.fileSize)} · {new Date(att.uploadedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.375rem' }}>
+                  <button onClick={() => { const a = document.createElement('a'); a.href = `data:${att.fileType};base64,${att.data}`; a.download = att.fileName; a.click() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#475569' }}>
+                    <Download size={12} /> Download
+                  </button>
+                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: '#fff', border: '1px solid #fecaca', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#dc2626' }}>
+                    <Trash2 size={12} /> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>

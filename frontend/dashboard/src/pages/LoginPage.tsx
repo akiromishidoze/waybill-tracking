@@ -42,7 +42,7 @@ export default function LoginPage() {
       >
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
         <p style={{ color: '#64748b', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-          Email: <strong>admin</strong> / Password: <strong>admin</strong>
+          Email: <strong>Admin</strong> / Password: <strong>admin</strong>
         </p>
         {error && (
           <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>

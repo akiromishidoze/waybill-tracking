@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight,
 } from 'lucide-react'
 
 const navItems = [
@@ -17,7 +17,6 @@ const navItems = [
   { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
   { to: '/map', label: 'GPS Tracking', icon: MapPin },
   { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
-  { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
 ]
 
 const ROLE_COLORS: Record<string, string> = {
@@ -67,7 +66,7 @@ export default function Layout() {
           )}
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
               <item.icon size={20} />
@@ -99,14 +98,7 @@ export default function Layout() {
           <LogOut size={20} /> Logout
         </button>
       </aside>
-      <style>{`
-        body { margin: 0; overflow: hidden; }
-        .nav-link:hover { background: rgb(51, 65, 85) !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
-      `}</style>
+      <style>{`body { margin: 0; overflow: hidden; } .nav-link:hover { background: rgb(51, 65, 85) !important; }`}</style>
       <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
         <Outlet />
       </main>

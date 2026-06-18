@@ -1,0 +1,156 @@
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { webhookService } from '@/services/api'
+import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
+
+const EVENT_COLORS: Record<string, string> = {
+  'status.updated': '#2563eb',
+  'waybill.created': '#16a34a',
+  'waybill.delivered': '#0891b2',
+  'exception.raised': '#dc2626',
+  'test.ping': '#6b7280',
+}
+
+export default function WebhooksPage() {
+  const queryClient = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState({ name: '', url: '', events: [] as string[], isActive: true })
+  const [testMsg, setTestMsg] = useState('')
+
+  const { data: webhooks } = useQuery({ queryKey: ['webhooks'], queryFn: () => webhookService.list().then(r => r.data) })
+  const { data: events } = useQuery({ queryKey: ['webhook-events'], queryFn: () => webhookService.getEvents().then(r => r.data) })
+
+  const createWebhook = useMutation({
+    mutationFn: () => webhookService.create(form),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['webhooks'] }); setShowForm(false); resetForm() },
+  })
+  const updateWebhook = useMutation({
+    mutationFn: () => webhookService.update(editingId!, form),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['webhooks'] }); setEditingId(null); setShowForm(false); resetForm() },
+  })
+  const deleteWebhook = useMutation({
+    mutationFn: (id: string) => webhookService.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['webhooks'] }),
+  })
+  const testWebhook = useMutation({
+    mutationFn: (id: string) => webhookService.test(id),
+    onSuccess: (r) => setTestMsg(`Test ping sent to ${r.data.url} — status: ${r.data.status}`),
+    onError: () => setTestMsg('Test failed'),
+  })
+
+  const resetForm = () => setForm({ name: '', url: '', events: [], isActive: true })
+  const openEdit = (w: any) => { setEditingId(w.id); setForm({ name: w.name, url: w.url, events: [...w.events], isActive: w.isActive }); setShowForm(true) }
+  const openAdd = () => { resetForm(); setEditingId(null); setShowForm(true) }
+
+  const toggleEvent = (evt: string) => {
+    setForm((f) => ({ ...f, events: f.events.includes(evt) ? f.events.filter((e) => e !== evt) : [...f.events, evt] }))
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Webhook Event Publishing</h2>
+        <button onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: 'pointer' }}>
+          <Plus size={16} /> Add Webhook
+        </button>
+      </div>
+
+      <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1rem' }}>
+        Configure webhooks to notify external systems when shipment events occur. Events are sent as HTTP POST requests with a JSON payload.
+      </p>
+
+      {(showForm) && (
+        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label>
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Slack Notifier" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 300 }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Webhook URL *</label>
+              <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://hooks.example.com/events" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Active</label>
+              <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm({ ...form, isActive: e.target.value === 'true' })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 100 }}>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>Subscribe to Events</label>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {(events || WEBHOOK_EVENTS).map((evt: string) => (
+                <label key={evt} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', borderRadius: 6, border: `1px solid ${form.events.includes(evt) ? EVENT_COLORS[evt] || '#2563eb' : '#e2e8f0'}`, background: form.events.includes(evt) ? (EVENT_COLORS[evt] || '#2563eb') + '10' : '#fff', cursor: 'pointer', fontSize: '0.8125rem' }}>
+                  <input type="checkbox" checked={form.events.includes(evt)} onChange={() => toggleEvent(evt)} style={{ cursor: 'pointer' }} />
+                  {evt}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => editingId ? updateWebhook.mutate() : createWebhook.mutate()} disabled={!form.name || !form.url || !form.events.length || createWebhook.isPending || updateWebhook.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+              <Check size={14} /> {editingId ? 'Update' : 'Create'}
+            </button>
+            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+              <X size={14} /> Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {testMsg && (
+        <div style={{ padding: '0.75rem 1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: '1rem', fontSize: '0.8125rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Send size={14} /> {testMsg}
+        </div>
+      )}
+
+      {!webhooks?.length ? (
+        <p style={{ color: '#64748b' }}>No webhooks configured yet.</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          {webhooks?.map((w: any) => (
+            <div key={w.id} style={{ background: '#fff', borderRadius: 10, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: w.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Webhook size={20} color={w.isActive ? '#16a34a' : '#94a3b8'} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontWeight: 600 }}>{w.name}</span>
+                    <span style={{ fontSize: '0.7rem', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600, background: w.isActive ? '#dcfce7' : '#f1f5f9', color: w.isActive ? '#16a34a' : '#94a3b8' }}>
+                      {w.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <code style={{ fontSize: '0.8125rem', color: '#64748b', wordBreak: 'break-all' }}>{w.url}</code>
+                </div>
+                <div style={{ display: 'flex', gap: '0.375rem' }}>
+                  <button onClick={() => testWebhook.mutate(w.id)} title="Send test ping" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
+                    <Send size={12} /> Test
+                  </button>
+                  <button onClick={() => openEdit(w)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer' }}>
+                    <Pencil size={14} />
+                  </button>
+                  <button onClick={() => { if (confirm('Delete this webhook?')) deleteWebhook.mutate(w.id) }} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+                {w.events.map((evt: string) => (
+                  <span key={evt} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600, background: (EVENT_COLORS[evt] || '#6b7280') + '15', color: EVENT_COLORS[evt] || '#6b7280' }}>
+                    <Activity size={10} /> {evt}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const WEBHOOK_EVENTS = ['status.updated', 'waybill.created', 'waybill.delivered', 'exception.raised']

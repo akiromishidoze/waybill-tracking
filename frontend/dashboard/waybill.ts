@@ -303,3 +303,13 @@ export interface ReportSchedule {
   isActive: boolean
   createdAt: string
 }
+
+export interface RegionPerformance {
+  region: string
+  totalShipments: number
+  deliveredCount: number
+  onTimeCount: number
+  exceptionCount: number
+  avgTransitHours: number
+  slaCompliance: number
+}

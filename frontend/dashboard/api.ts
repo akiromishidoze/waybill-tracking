@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -171,6 +171,10 @@ export const reportScheduleService = {
   update: (id: string, data: Partial<ReportSchedule>) => api.patch<ReportSchedule>(`/reports/schedules/${id}`, data),
   delete: (id: string) => api.delete(`/reports/schedules/${id}`),
   trigger: (id: string) => api.post(`/reports/schedules/${id}/trigger`),
+}
+
+export const regionService = {
+  performance: () => api.get<RegionPerformance[]>('/analytics/region-performance'),
 }
 
 export default api

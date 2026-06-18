@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, Radio, FileText,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, Radio, FileText, Globe,
 } from 'lucide-react'
 
 const navItems = [
@@ -20,6 +20,7 @@ const navItems = [
   { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
   { to: '/geofence', label: 'Geofence', icon: Radio },
   { to: '/reports/schedules', label: 'Scheduled Reports', icon: FileText },
+  { to: '/analytics/regions', label: 'Region Performance', icon: Globe },
 ]
 
 const ROLE_COLORS: Record<string, string> = {

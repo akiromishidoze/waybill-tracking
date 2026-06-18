@@ -76,7 +76,6 @@ export default function WaybillListPage() {
           <option value="hasReturn">With Return</option>
           <option value="noReturn">Without Return</option>
         </select>
-        </select>
         {teams.length > 0 && (
           <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
             style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>

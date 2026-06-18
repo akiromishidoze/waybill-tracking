@@ -2,8 +2,8 @@ import { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload } from 'lucide-react'
-import { waybillService, teamService, attachmentService } from '@/services/api'
-import type { ExceptionCode, EventType, WaybillStatus, Attachment } from '@/types/waybill'
+import { waybillService, teamService, attachmentService, analyticsService } from '@/services/api'
+import type { ExceptionCode, EventType, WaybillStatus, Attachment, ETAPrediction } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS } from '@/types/waybill'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
@@ -53,6 +53,13 @@ export default function WaybillDetailPage() {
   const assignTeam = useMutation({
     mutationFn: (teamId: string | null) => teamService.assignToWaybill(id!, teamId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['waybill', id] }),
+  })
+
+  const { data: eta } = useQuery({
+    queryKey: ['predict-eta', id],
+    queryFn: () => analyticsService.predictEta(id!).then(r => r.data),
+    enabled: !!id,
+    refetchInterval: 60000,
   })
 
   const [uploading, setUploading] = useState(false)
@@ -135,6 +142,14 @@ export default function WaybillDetailPage() {
           <DetailRow label="Destination" value={wb.destination} />
           <DetailRow label="Est. Delivery" value={wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'} />
           <DetailRow label="SLA Status" value={wb.slaBreached ? 'Breached' : 'On Time'} />
+          {eta && (
+            <>
+              <DetailRow label="Predictive ETA" value={eta.predictedDelivery ? new Date(eta.predictedDelivery).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} />
+              <DetailRow label="Confidence" value={`${eta.confidence}%`} />
+              {eta.estimatedHours !== null && <DetailRow label="Est. Transit" value={`${eta.estimatedHours} hrs`} />}
+              <DetailRow label="Based On" value={eta.basedOn} />
+            </>
+          )}
           {wb.carrierName && (
             <>
               <DetailRow label="Carrier" value={wb.carrierName} />

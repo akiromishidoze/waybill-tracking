@@ -188,3 +188,12 @@ export interface Team {
   description: string
   color: string
 }
+
+export interface ETAPrediction {
+  waybillId: string
+  trackingNumber: string
+  predictedDelivery: string | null
+  confidence: number
+  estimatedHours: number | null
+  basedOn: string
+}

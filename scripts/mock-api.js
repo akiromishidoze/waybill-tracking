@@ -609,6 +609,31 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  const predictEtaMatch = path.match(/^\/api\/analytics\/predict-eta\/([^/]+)$/)
+  if (predictEtaMatch && req.method === 'GET') {
+    if (!requireAuth()) return
+    const wbId = predictEtaMatch[1]
+    const wb = WAYBILLS.find(w => w.id === wbId)
+    if (!wb) { send(404, { error: 'waybill not found' }); return }
+    const now = Date.now()
+    const est = new Date(wb.estimatedDelivery).getTime()
+    const remaining = Math.max(0, est - now)
+    const remainingHours = remaining / 3600000
+    const delivered = wb.status === 'DELIVERED'
+    const eta = delivered ? wb.actualDelivery : new Date(now + remaining * 0.85).toISOString()
+    const confidence = delivered ? 100 : Math.min(95, 50 + (remainingHours > 0 ? Math.round((1 - remainingHours / 720) * 50) : 20))
+    const result = {
+      waybillId: wb.id,
+      trackingNumber: wb.trackingNumber,
+      predictedDelivery: eta,
+      confidence,
+      estimatedHours: delivered ? null : Math.round((remaining / 3600000) * 0.85 * 10) / 10,
+      basedOn: delivered ? 'Actual delivery recorded' : (confidence > 70 ? 'ML model (RandomForest)' : 'Historical average'),
+    }
+    send(200, result)
+    return
+  }
+
   // --- Analytics ---
   if (path === '/api/analytics/stats' && req.method === 'GET') {
     send(200, { totalActive: 3, deliveredToday: 1, inTransit: 1, pendingPickup: 0, totalVolume: 5, slaCompliance: 80.0, exceptionRate: 20.0, avgTransitTime: 72 })

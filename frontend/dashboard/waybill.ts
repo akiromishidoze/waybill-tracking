@@ -313,3 +313,16 @@ export interface RegionPerformance {
   avgTransitHours: number
   slaCompliance: number
 }
+
+export interface ErpIntegration {
+  id: string
+  name: string
+  system: 'SAP' | 'ORACLE' | 'NETSUITE' | 'OTHER'
+  endpoint: string
+  authType: 'API_KEY' | 'BASIC' | 'OAUTH2' | 'NONE'
+  syncDirection: 'IMPORT' | 'EXPORT' | 'BOTH'
+  lastSyncAt?: string
+  lastSyncStatus?: 'SUCCESS' | 'FAILED'
+  isActive: boolean
+  createdAt: string
+}

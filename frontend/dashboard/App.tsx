@@ -23,6 +23,7 @@ import DwellAlertsPage from './pages/DwellAlertsPage'
 import GeofenceEventsPage from './pages/GeofenceEventsPage'
 import ScheduledReportsPage from './pages/ScheduledReportsPage'
 import RegionPerformancePage from './pages/RegionPerformancePage'
+import ErpIntegrationsPage from './pages/ErpIntegrationsPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/geofence" element={<GeofenceEventsPage />} />
           <Route path="/reports/schedules" element={<ScheduledReportsPage />} />
           <Route path="/analytics/regions" element={<RegionPerformancePage />} />
+          <Route path="/integrations/erp" element={<ErpIntegrationsPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

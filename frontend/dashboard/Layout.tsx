@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, Radio, FileText, Globe,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, Radio, FileText, Globe, Database,
 } from 'lucide-react'
 
 const navItems = [
@@ -21,6 +21,7 @@ const navItems = [
   { to: '/geofence', label: 'Geofence', icon: Radio },
   { to: '/reports/schedules', label: 'Scheduled Reports', icon: FileText },
   { to: '/analytics/regions', label: 'Region Performance', icon: Globe },
+  { to: '/integrations/erp', label: 'ERP Integrations', icon: Database },
 ]
 
 const ROLE_COLORS: Record<string, string> = {

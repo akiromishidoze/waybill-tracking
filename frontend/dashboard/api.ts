@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -175,6 +175,15 @@ export const reportScheduleService = {
 
 export const regionService = {
   performance: () => api.get<RegionPerformance[]>('/analytics/region-performance'),
+}
+
+export const erpIntegrationService = {
+  list: () => api.get<ErpIntegration[]>('/erp-integrations'),
+  create: (data: Partial<ErpIntegration>) => api.post<ErpIntegration>('/erp-integrations', data),
+  update: (id: string, data: Partial<ErpIntegration>) => api.patch<ErpIntegration>(`/erp-integrations/${id}`, data),
+  delete: (id: string) => api.delete(`/erp-integrations/${id}`),
+  test: (id: string) => api.post<{ success: boolean; message: string }>(`/erp-integrations/${id}/test`),
+  sync: (id: string) => api.post<{ success: boolean; message: string }>(`/erp-integrations/${id}/sync`),
 }
 
 export default api

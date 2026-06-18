@@ -290,3 +290,16 @@ export interface GeofenceEvent {
   timestamp: string
   metadata?: string
 }
+
+export interface ReportSchedule {
+  id: string
+  name: string
+  format: 'PDF' | 'CSV' | 'EXCEL'
+  frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY'
+  recipients: string[]
+  filters: Record<string, string>
+  lastSentAt?: string
+  nextScheduledAt?: string
+  isActive: boolean
+  createdAt: string
+}

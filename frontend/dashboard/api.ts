@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -163,6 +163,14 @@ export const dwellTimeService = {
 export const geofenceService = {
   list: () => api.get<GeofenceEvent[]>('/geofence-events'),
   getForWaybill: (waybillId: string) => api.get<GeofenceEvent[]>(`/waybills/${waybillId}/geofence`),
+}
+
+export const reportScheduleService = {
+  list: () => api.get<ReportSchedule[]>('/reports/schedules'),
+  create: (data: Partial<ReportSchedule>) => api.post<ReportSchedule>('/reports/schedules', data),
+  update: (id: string, data: Partial<ReportSchedule>) => api.patch<ReportSchedule>(`/reports/schedules/${id}`, data),
+  delete: (id: string) => api.delete(`/reports/schedules/${id}`),
+  trigger: (id: string) => api.post(`/reports/schedules/${id}/trigger`),
 }
 
 export default api

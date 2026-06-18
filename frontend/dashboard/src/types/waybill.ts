@@ -92,6 +92,9 @@ export interface Waybill {
   carrierEvents?: CarrierEvent[]
   slaBreached?: boolean
   attachments?: Attachment[]
+  returnInfo?: ReturnInfo
+  teamId?: string
+  teamName?: string
 }
 
 export interface ScanEvent {
@@ -196,4 +199,30 @@ export interface ETAPrediction {
   confidence: number
   estimatedHours: number | null
   basedOn: string
+}
+
+export type ReturnStatus = 'RETURN_REQUESTED' | 'RETURN_IN_TRANSIT' | 'RETURN_RECEIVED' | 'RETURN_COMPLETED'
+
+export const RETURN_LABELS: Record<ReturnStatus, string> = {
+  RETURN_REQUESTED: 'Return Requested',
+  RETURN_IN_TRANSIT: 'Return In Transit',
+  RETURN_RECEIVED: 'Return Received at Warehouse',
+  RETURN_COMPLETED: 'Return Completed',
+}
+
+export const RETURN_COLORS: Record<ReturnStatus, string> = {
+  RETURN_REQUESTED: '#d97706',
+  RETURN_IN_TRANSIT: '#7c3aed',
+  RETURN_RECEIVED: '#0891b2',
+  RETURN_COMPLETED: '#16a34a',
+}
+
+export interface ReturnInfo {
+  status: ReturnStatus
+  reason: string
+  requestedAt: string
+  completedAt?: string
+  trackingNumber?: string
+  carrier?: string
+  notes?: string
 }

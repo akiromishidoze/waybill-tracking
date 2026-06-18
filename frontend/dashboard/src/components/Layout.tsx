@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight,
 } from 'lucide-react'
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
   { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
   { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
   { to: '/map', label: 'GPS Tracking', icon: MapPin },
+  { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
 ]
 
 const ROLE_COLORS: Record<string, string> = {

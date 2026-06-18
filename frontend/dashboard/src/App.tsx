@@ -14,6 +14,7 @@ import BatchStatusPage from './pages/BatchStatusPage'
 import WebhooksPage from './pages/WebhooksPage'
 import CarrierPerformancePage from './pages/CarrierPerformancePage'
 import MapViewPage from './pages/MapViewPage'
+import ReturnsPage from './pages/ReturnsPage'
 import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
 import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
 import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/webhooks" element={<WebhooksPage />} />
           <Route path="/carrier-performance" element={<CarrierPerformancePage />} />
           <Route path="/map" element={<MapViewPage />} />
+          <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

@@ -115,6 +115,14 @@ let WAYBILLS = [
     estimatedDelivery: new Date(Date.now() - 86400000).toISOString(),
     createdAt: new Date(Date.now() - 172800000).toISOString(),
     updatedAt: new Date(Date.now() - 21600000).toISOString(),
+    returnInfo: {
+      status: 'RETURN_IN_TRANSIT',
+      reason: 'Recipient not available after multiple attempts',
+      requestedAt: new Date(Date.now() - 43200000).toISOString(),
+      trackingNumber: 'RMA-2024-00001',
+      carrier: 'SpeedShip Express',
+      notes: 'Customer requested return to ACME warehouse',
+    },
     events: [
       { id: 'e11', waybillId: 'wb4', status: 'CREATED', location: 'Quezon City', timestamp: new Date(Date.now() - 172800000).toISOString(), eventType: 'MILESTONE' },
       { id: 'e12', waybillId: 'wb4', status: 'PICKED_UP', location: 'Quezon City', courierId: 'u3', courierName: 'Jane Courier', timestamp: new Date(Date.now() - 86400000).toISOString(), eventType: 'MILESTONE', remark: 'Express pickup' },
@@ -566,6 +574,77 @@ const server = http.createServer((req, res) => {
       send(200, { message: 'attachment deleted' })
       return
     }
+  }
+
+  // --- Return / Reverse Logistics ---
+  const returnInitMatch = path.match(/^\/api\/waybills\/([^/]+)\/initiate-return$/)
+  if (returnInitMatch && req.method === 'POST') {
+    const claims = requireAuth()
+    if (!claims) return
+    parseBody().then((body) => {
+      const wb = WAYBILLS.find(w => w.id === returnInitMatch[1])
+      if (!wb) { send(404, { error: 'waybill not found' }); return }
+      if (wb.returnInfo) { send(400, { error: 'return already initiated' }); return }
+      if (!['DELIVERED', 'FAILED_DELIVERY'].includes(wb.status)) { send(400, { error: 'waybill is not eligible for return' }); return }
+      wb.returnInfo = {
+        status: 'RETURN_REQUESTED',
+        reason: body.reason || 'Customer request',
+        requestedAt: new Date().toISOString(),
+        trackingNumber: 'RMA-' + Date.now().toString(36).toUpperCase(),
+        carrier: body.carrier || '',
+        notes: body.notes || '',
+      }
+      wb.updatedAt = new Date().toISOString()
+      wb.events.push({
+        id: 'e' + Date.now() + Math.random().toString(36).slice(2, 6),
+        waybillId: wb.id, status: wb.status, location: wb.destination,
+        timestamp: new Date().toISOString(), eventType: 'NOTE',
+        remark: `Return initiated: ${body.reason || 'Customer request'}`,
+      })
+      send(200, { message: 'return initiated', returnInfo: wb.returnInfo })
+    })
+    return
+  }
+
+  const returnStatusMatch = path.match(/^\/api\/waybills\/([^/]+)\/return-status$/)
+  if (returnStatusMatch && req.method === 'PATCH') {
+    const claims = requireAuth()
+    if (!claims) return
+    parseBody().then((body) => {
+      const wb = WAYBILLS.find(w => w.id === returnStatusMatch[1])
+      if (!wb) { send(404, { error: 'waybill not found' }); return }
+      if (!wb.returnInfo) { send(400, { error: 'no return initiated' }); return }
+      const validStatuses = ['RETURN_REQUESTED', 'RETURN_IN_TRANSIT', 'RETURN_RECEIVED', 'RETURN_COMPLETED']
+      if (!body.status || !validStatuses.includes(body.status)) { send(400, { error: 'invalid return status' }); return }
+      wb.returnInfo.status = body.status
+      if (body.notes !== undefined) wb.returnInfo.notes = body.notes
+      if (body.status === 'RETURN_COMPLETED') wb.returnInfo.completedAt = new Date().toISOString()
+      wb.updatedAt = new Date().toISOString()
+      wb.events.push({
+        id: 'e' + Date.now() + Math.random().toString(36).slice(2, 6),
+        waybillId: wb.id, status: wb.status, location: wb.destination,
+        timestamp: new Date().toISOString(), eventType: 'NOTE',
+        remark: `Return status updated to ${body.status.replace(/_/g, ' ')}`,
+      })
+      send(200, { message: 'return status updated', returnInfo: wb.returnInfo })
+    })
+    return
+  }
+
+  if (path === '/api/returns' && req.method === 'GET') {
+    const claims = requireAuth()
+    if (!claims) return
+    const returns = WAYBILLS.filter(w => w.returnInfo).map(w => ({
+      id: w.id,
+      trackingNumber: w.trackingNumber,
+      recipientName: w.recipientName,
+      destination: w.destination,
+      origin: w.origin,
+      status: w.status,
+      returnInfo: w.returnInfo,
+    }))
+    send(200, returns)
+    return
   }
 
   if (path === '/api/exception-codes' && req.method === 'GET') {

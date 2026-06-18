@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
-import { Truck, AlertTriangle, Clock, Shield } from 'lucide-react'
+import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight } from 'lucide-react'
 
 const statusColors: Record<string, string> = {
   CREATED: '#6b7280',
@@ -21,6 +21,7 @@ export default function WaybillListPage() {
   const [search, setSearch] = useState('')
   const [carrierFilter, setCarrierFilter] = useState('')
   const [breachFilter, setBreachFilter] = useState<'all' | 'breached' | 'ontime'>('all')
+  const [returnFilter, setReturnFilter] = useState<'all' | 'hasReturn' | 'noReturn'>('all')
   const [teamFilter, setTeamFilter] = useState('')
   const { data: waybills, isLoading } = useQuery({
     queryKey: ['waybills', search],
@@ -39,6 +40,8 @@ export default function WaybillListPage() {
     if (breachFilter === 'breached' && !wb.slaBreached) return false
     if (breachFilter === 'ontime' && wb.slaBreached) return false
     if (teamFilter && wb.teamName !== teamFilter) return false
+    if (returnFilter === 'hasReturn' && !wb.returnInfo) return false
+    if (returnFilter === 'noReturn' && wb.returnInfo) return false
     return true
   })
 
@@ -67,6 +70,13 @@ export default function WaybillListPage() {
           <option value="breached">SLA Breached</option>
           <option value="ontime">On Time</option>
         </select>
+        <select value={returnFilter} onChange={(e) => setReturnFilter(e.target.value as any)}
+          className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white min-w-[130px]">
+          <option value="all">All Returns</option>
+          <option value="hasReturn">With Return</option>
+          <option value="noReturn">Without Return</option>
+        </select>
+        </select>
         {teams.length > 0 && (
           <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
             style={{ padding: '0.75rem 1rem', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>
@@ -88,11 +98,12 @@ export default function WaybillListPage() {
               <th style={{ padding: '0.75rem 1rem' }}>Carrier</th>
               <th style={{ padding: '0.75rem 1rem' }}>Est. Delivery</th>
               <th style={{ padding: '0.75rem 1rem' }}>SLA</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Return</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={8} style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
+              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
             ) : (
               filtered?.map((wb: Waybill) => (
                 <tr key={wb.id} style={{ borderTop: '1px solid #f1f5f9', background: wb.slaBreached ? '#fef2f2' : undefined }}>
@@ -141,6 +152,15 @@ export default function WaybillListPage() {
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600, background: '#f0fdf4', color: '#16a34a' }}>
                         On Time
                       </span>
+                    )}
+                  </td>
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    {wb.returnInfo ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600, background: '#7c3aed20', color: '#7c3aed' }}>
+                        <ArrowLeftRight size={10} /> {wb.returnInfo.status.replace(/_/g, ' ')}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '0.8125rem' }}>—</span>
                     )}
                   </td>
                 </tr>

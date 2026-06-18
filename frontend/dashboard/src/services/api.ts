@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo } from '@/types/waybill'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -128,6 +128,14 @@ export const attachmentService = {
     api.post<Attachment>(`/waybills/${waybillId}/attachments`, data),
   get: (attachmentId: string) => api.get<Attachment>(`/attachments/${attachmentId}`),
   delete: (attachmentId: string) => api.delete(`/attachments/${attachmentId}`),
+}
+
+export const returnService = {
+  listReturns: () => api.get<any[]>('/returns'),
+  initiateReturn: (waybillId: string, data: { reason?: string; carrier?: string; notes?: string }) =>
+    api.post(`/waybills/${waybillId}/initiate-return`, data),
+  updateReturnStatus: (waybillId: string, data: { status: string; notes?: string }) =>
+    api.patch(`/waybills/${waybillId}/return-status`, data),
 }
 
 export default api

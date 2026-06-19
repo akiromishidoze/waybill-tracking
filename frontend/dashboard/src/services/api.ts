@@ -618,6 +618,7 @@ export const waybillService = {
   track: (trackingNumber: string) => api.get<Waybill>(`/track/${trackingNumber}`),
   create: (data: Partial<Waybill>) => api.post<Waybill>('/waybills', data),
   updateStatus: (id: string, event: Partial<ScanEvent>) => api.patch<Waybill>(`/waybills/${id}/status`, event),
+  update: (id: string, data: Partial<Waybill>) => api.patch<Waybill>(`/waybills/${id}`, data),
   batchStatusUpdate: (ids: string[], status: string, location?: string) => api.post('/waybills/batch-status', { ids, status, location }),
 }
 

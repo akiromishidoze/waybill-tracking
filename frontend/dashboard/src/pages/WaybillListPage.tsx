@@ -60,127 +60,129 @@ export default function WaybillListPage() {
     <PageContainer
       title="Waybills"
       actions={
-        <Link to="/waybills/new" className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+        <Link to="/waybills/new" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', borderRadius: 6, fontSize: '0.875rem', fontWeight: 500, textDecoration: 'none' }}>
           + New Waybill
         </Link>
       }
     >
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <input type="text" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 border border-slate-200 rounded-lg text-sm" />
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <input type="text" placeholder="Search tracking number..." value={search} onChange={(e) => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: 200, padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
         {carriers.length > 0 && (
           <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white min-w-[160px]">
+            style={{ padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>
             <option value="">All Carriers</option>
             {carriers.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
         )}
         <select value={breachFilter} onChange={(e) => setBreachFilter(e.target.value as any)}
-          className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white min-w-[130px]">
+          style={{ padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', background: '#fff', minWidth: 130 }}>
           <option value="all">All SLA</option>
           <option value="breached">SLA Breached</option>
           <option value="ontime">On Time</option>
         </select>
         <select value={returnFilter} onChange={(e) => setReturnFilter(e.target.value as any)}
-          className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white min-w-[130px]">
+          style={{ padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', background: '#fff', minWidth: 130 }}>
           <option value="all">All Returns</option>
           <option value="hasReturn">With Return</option>
           <option value="noReturn">Without Return</option>
         </select>
         {teams.length > 0 && (
           <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white min-w-[160px]">
+            style={{ padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', background: '#fff', minWidth: 160 }}>
             <option value="">All Teams</option>
             {teams.map((t) => (<option key={t} value={t}>{t}</option>))}
           </select>
         )}
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-slate-50 text-slate-600">
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left' }}>
+          <thead style={{ background: '#f8fafc', color: '#64748b' }}>
             <tr>
-              <th className="px-4 py-3">Tracking #</th>
-              <th className="px-4 py-3">Shipper</th>
-              <th className="px-4 py-3">Destination</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Team</th>
-              <th className="px-4 py-3">Carrier</th>
-              <th className="px-4 py-3">Est. Delivery</th>
-              <th className="px-4 py-3">SLA</th>
-              <th className="px-4 py-3">Dwell</th>
-              <th className="px-4 py-3">Return</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Tracking #</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Shipper</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Destination</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Status</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Team</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Carrier</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Est. Delivery</th>
+              <th style={{ padding: '0.75rem 1rem' }}>SLA</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Dwell</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Return</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody style={{ borderTop: '1px solid #f1f5f9' }}>
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} cols={10} />)
+            ) : !filtered?.length ? (
+              <tr><td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No waybills found.</td></tr>
             ) : (
               filtered?.map((wb: Waybill) => (
-                <tr key={wb.id} className={wb.slaBreached ? 'bg-red-50' : ''}>
-                  <td className="px-4 py-3">
-                    <Link to={`/waybills/${wb.id}`} className="text-blue-600 font-medium">
+                <tr key={wb.id} style={{ borderBottom: '1px solid #f1f5f9', background: wb.slaBreached ? '#fef2f2' : undefined }}>
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    <Link to={`/waybills/${wb.id}`} style={{ color: '#2563eb', fontWeight: 500, textDecoration: 'none' }}>
                       {wb.trackingNumber}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">{wb.shipperName}</td>
-                  <td className="px-4 py-3">{wb.destination}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{ background: statusColors[wb.status] + '20', color: statusColors[wb.status] }}>
+                  <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>{wb.shipperName}</td>
+                  <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>{wb.destination}</td>
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    <span style={{ display: 'inline-block', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: statusColors[wb.status] + '20', color: statusColors[wb.status] }}>
                       {wb.status.replace(/_/g, ' ')}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.teamName ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-50 text-amber-700 text-xs font-medium">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 4, background: '#fffbeb', color: '#b45309', fontSize: '0.75rem', fontWeight: 500 }}>
                         <Shield size={12} /> {wb.teamName}
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span style={{ color: '#94a3b8' }}>&mdash;</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.carrierName ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-medium">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 4, background: '#eff6ff', color: '#1d4ed8', fontSize: '0.75rem', fontWeight: 500 }}>
                         <Truck size={12} /> {wb.carrierName}
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span style={{ color: '#94a3b8' }}>&mdash;</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className="flex items-center gap-1 text-slate-500">
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#64748b', fontSize: '0.8125rem' }}>
                       <Clock size={12} />
                       {wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.slaBreached ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 700, background: '#fecaca', color: '#b91c1c', border: '1px solid #fca5a5' }}>
                         <AlertTriangle size={10} /> BREACHED
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: '#dcfce7', color: '#15803d' }}>
                         On Time
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     {dweltWaybills.has(wb.id) ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 700, background: '#fed7aa', color: '#9a3412', border: '1px solid #fdba74' }}>
                         <Clock size={10} /> DWELL
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span style={{ color: '#94a3b8' }}>&mdash;</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.returnInfo ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold" style={{ background: '#7c3aed20', color: '#7c3aed' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 700, background: '#7c3aed20', color: '#7c3aed' }}>
                         <ArrowLeftRight size={10} /> {wb.returnInfo.status.replace(/_/g, ' ')}
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span style={{ color: '#94a3b8' }}>&mdash;</span>
                     )}
                   </td>
                 </tr>

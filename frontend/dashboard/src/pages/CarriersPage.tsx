@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { carrierService } from '@/services/api'
 import type { Carrier } from '@/types/waybill'
 import { Truck, ExternalLink, CheckCircle, XCircle, Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 export default function CarriersPage() {
   const queryClient = useQueryClient()
@@ -65,7 +66,7 @@ export default function CarriersPage() {
       )}
 
       {isLoading ? (
-        <p style={{ color: '#64748b' }}>Loading carriers...</p>
+        <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !carriers?.length ? (
         <p style={{ color: '#64748b' }}>No carriers configured yet.</p>
       ) : (

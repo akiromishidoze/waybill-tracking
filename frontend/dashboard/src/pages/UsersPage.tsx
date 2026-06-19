@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/api'
 import type { User } from '@/types/waybill'
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { SkeletonTableRow } from '@/components/Skeleton'
 
 const ROLE_OPTIONS = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
 const ROLE_COLORS: Record<string, string> = {
@@ -83,7 +84,7 @@ export default function UsersPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading...</td></tr>
+              Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={5} />)
             ) : users?.length === 0 ? (
               <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No users yet.</td></tr>
             ) : (

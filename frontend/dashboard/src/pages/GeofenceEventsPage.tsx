@@ -4,6 +4,7 @@ import { geofenceService } from '@/services/api'
 import type { GeofenceEvent } from '@/types/waybill'
 import { MapPin, LogIn, LogOut } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 export default function GeofenceEventsPage() {
   const [zoneFilter, setZoneFilter] = useState('')
@@ -36,7 +37,7 @@ export default function GeofenceEventsPage() {
       }
     >
       {isLoading ? (
-        <p>Loading...</p>
+        <div style={{ display: 'grid', gap: '0.5rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !filtered?.length ? (
         <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
           <MapPin size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />

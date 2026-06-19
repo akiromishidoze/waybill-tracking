@@ -3,6 +3,7 @@ import { regionService } from '@/services/api'
 import type { RegionPerformance } from '@/types/waybill'
 import { Globe, TrendingUp } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 export default function RegionPerformancePage() {
   const { data: regions, isLoading } = useQuery({
@@ -13,7 +14,9 @@ export default function RegionPerformancePage() {
   return (
     <PageContainer title="Region Performance">
       {isLoading ? (
-        <p>Loading...</p>
+        <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          <SkeletonBlock height={180} /><SkeletonBlock height={180} /><SkeletonBlock height={180} />
+        </div>
       ) : !regions?.length ? (
         <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
           <Globe size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />

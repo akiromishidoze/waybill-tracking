@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { aggregatedTrackingService, carrierService, waybillService } from '@/services/api'
 import { Truck, ChevronRight, Plus, X, Trash2, Check } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 const CARRIER_COLORS: Record<string, string> = {
   c1: '#2563eb', c2: '#7c3aed', c3: '#d97706',
@@ -92,7 +93,7 @@ export default function AggregatedTrackingPage() {
       )}
 
       {isLoading ? (
-        <p style={{ color: '#64748b' }}>Loading...</p>
+        <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={160} /><SkeletonBlock height={160} /></div>
       ) : !items?.length ? (
         <p style={{ color: '#64748b' }}>No carrier-tracked waybills yet. Assign a carrier to get started.</p>
       ) : (

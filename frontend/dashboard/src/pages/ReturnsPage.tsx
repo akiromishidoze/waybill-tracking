@@ -6,6 +6,7 @@ import type { ReturnStatus } from '@/types/waybill'
 import { RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { RefreshCw, MapPin } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonTableRow } from '@/components/Skeleton'
 
 const NEXT_STATUS: Record<string, string> = {
   RETURN_REQUESTED: 'RETURN_IN_TRANSIT',
@@ -76,7 +77,7 @@ export default function ReturnsPage() {
           </thead>
           <tbody style={{ borderTop: '1px solid #f1f5f9' }}>
             {isLoading ? (
-              <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading...</td></tr>
+              Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={6} />)
             ) : !returns?.length ? (
               <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No returns yet.</td></tr>
             ) : (

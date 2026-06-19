@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { auditLogService } from '@/services/api'
 
 import { Search, Clock } from 'lucide-react'
+import { SkeletonTableRow } from '@/components/Skeleton'
 
 const ACTION_COLORS: Record<string, string> = {
   USER_LOGIN: '#2563eb',
@@ -68,7 +69,7 @@ export default function AuditLogPage() {
 
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         {isLoading ? (
-          <p style={{ padding: '2rem', color: '#64748b' }}>Loading audit logs...</p>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}><tbody>{Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={4} />)}</tbody></table>
         ) : filtered.length === 0 ? (
           <p style={{ padding: '2rem', color: '#64748b' }}>No matching audit logs found.</p>
         ) : (

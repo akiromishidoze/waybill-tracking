@@ -3,6 +3,7 @@ import { erpIntegrationService } from '@/services/api'
 import type { ErpIntegration } from '@/types/waybill'
 import { Database, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 const SYSTEM_COLORS: Record<string, string> = { SAP: '#1a73e8', ORACLE: '#f80000', NETSUITE: '#1a8cff', OTHER: '#64748b' }
 
@@ -15,7 +16,7 @@ export default function ErpIntegrationsPage() {
   return (
     <PageContainer title="ERP Integrations">
       {isLoading ? (
-        <p>Loading...</p>
+        <div style={{ display: 'grid', gap: '0.75rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !integrations?.length ? (
         <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
           <Database size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />

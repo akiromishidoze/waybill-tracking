@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/api'
 import { Truck, CheckCircle, XCircle, Clock, AlertTriangle, TrendingUp, BarChart3, Percent } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 export default function CarrierPerformancePage() {
   const { data: carriers, isLoading } = useQuery({
@@ -14,7 +15,7 @@ export default function CarrierPerformancePage() {
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Carrier Performance Scoreboard</h2>
 
       {isLoading ? (
-        <p style={{ color: '#64748b' }}>Loading...</p>
+        <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={120} /><SkeletonBlock height={120} /><SkeletonBlock height={120} /></div>
       ) : !carriers?.length ? (
         <p style={{ color: '#64748b' }}>No carrier data available.</p>
       ) : (

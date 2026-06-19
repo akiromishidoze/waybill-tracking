@@ -5,6 +5,7 @@ import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine,
 import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
 import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
+import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
   CREATED: Package,
@@ -150,7 +151,7 @@ export default function WaybillDetailPage() {
     return groups
   }, [wb])
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <div style={{ display: 'grid', gap: '1rem', padding: '1rem' }}><SkeletonBlock height={60} /><SkeletonLine width="60%" /><SkeletonLine width="80%" /><SkeletonLine width="40%" /><SkeletonBlock height={200} /></div>
   if (!wb) return <p>Waybill not found</p>
 
   return (

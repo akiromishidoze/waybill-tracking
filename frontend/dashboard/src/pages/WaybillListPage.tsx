@@ -5,6 +5,7 @@ import { waybillService, dwellTimeService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
 import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonTableRow } from '@/components/Skeleton'
 
 const statusColors: Record<string, string> = {
   CREATED: '#6b7280',
@@ -113,7 +114,7 @@ export default function WaybillListPage() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {isLoading ? (
-              <tr><td colSpan={10} className="p-8 text-center">Loading...</td></tr>
+              Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} cols={10} />)
             ) : (
               filtered?.map((wb: Waybill) => (
                 <tr key={wb.id} className={wb.slaBreached ? 'bg-red-50' : ''}>

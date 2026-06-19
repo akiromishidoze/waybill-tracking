@@ -3,6 +3,7 @@ import { reportScheduleService } from '@/services/api'
 import type { ReportSchedule } from '@/types/waybill'
 import { Calendar, FileText, Trash2 } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 const FREQ_LABELS: Record<string, string> = { DAILY: 'Daily', WEEKLY: 'Weekly', MONTHLY: 'Monthly' }
 const FORMAT_LABELS: Record<string, string> = { PDF: 'PDF', CSV: 'CSV', EXCEL: 'Excel' }
@@ -22,7 +23,7 @@ export default function ScheduledReportsPage() {
   return (
     <PageContainer title="Scheduled Reports">
       {isLoading ? (
-        <p>Loading...</p>
+        <div style={{ display: 'grid', gap: '0.75rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !schedules?.length ? (
         <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
           <Calendar size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { escalationService } from '@/services/api'
 import { CheckCircle, Eye } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import { SkeletonTableRow } from '@/components/Skeleton'
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: '#dc2626',
@@ -63,7 +64,7 @@ export default function EscalationsPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading...</td></tr>
+              Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={7} />)
             ) : !escalations?.length ? (
               <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No escalations.</td></tr>
             ) : (

@@ -1,24 +1,55 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map,
 } from 'lucide-react'
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/waybills', label: 'Waybills', icon: Package },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/roadmap/tracking', label: 'Tracking', icon: Eye },
-  { to: '/roadmap/operations', label: 'Operations', icon: Settings },
-  { to: '/roadmap/analytics', label: 'Reports', icon: PieChart },
-  { to: '/roadmap/integrations', label: 'Integrations', icon: Link2 },
-  { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
-  { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
-  { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
-  { to: '/map', label: 'GPS Tracking', icon: MapPin },
-  { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
-  { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
+interface NavGroup {
+  label: string
+  icon: typeof Eye
+  items: { to: string; label: string; icon: typeof Eye }[]
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: 'Tracking', icon: Eye,
+    items: [
+      { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
+      { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
+      { to: '/map', label: 'GPS Tracking', icon: MapPin },
+      { to: '/geofence', label: 'Geofence Events', icon: Map },
+      { to: '/roadmap/tracking', label: 'Roadmap', icon: Eye },
+    ],
+  },
+  {
+    label: 'Operations', icon: Settings,
+    items: [
+      { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
+      { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
+      { to: '/escalations', label: 'Escalations', icon: ArrowLeftRight },
+      { to: '/roadmap/operations', label: 'Roadmap', icon: Settings },
+    ],
+  },
+  {
+    label: 'Reports', icon: PieChart,
+    items: [
+      { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
+      { to: '/reports/schedules', label: 'Scheduled Reports', icon: PieChart },
+      { to: '/analytics/regions', label: 'Region Performance', icon: BarChart3 },
+      { to: '/roadmap/analytics', label: 'Roadmap', icon: PieChart },
+    ],
+  },
+  {
+    label: 'Integrations', icon: Link2,
+    items: [
+      { to: '/webhooks', label: 'Webhooks', icon: Webhook },
+      { to: '/integrations/erp', label: 'ERP Integrations', icon: Link2 },
+      { to: '/audit-logs', label: 'Audit Log', icon: ClipboardList },
+      { to: '/roadmap/integrations', label: 'Roadmap', icon: Link2 },
+    ],
+  },
 ]
 
 const ROLE_COLORS: Record<string, string> = {
@@ -40,6 +71,49 @@ const navLinkStyle = (isActive: boolean): React.CSSProperties => ({
   fontWeight: isActive ? 600 : 400,
   fontSize: '0.75rem',
 })
+
+const subLinkStyle = (isActive: boolean): React.CSSProperties => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  padding: '0.5rem 1rem 0.5rem 2.5rem',
+  borderRadius: 6,
+  textDecoration: 'none',
+  color: isActive ? '#fff' : '#94a3b8',
+  background: isActive ? '#334155' : 'transparent',
+  fontWeight: isActive ? 600 : 400,
+  fontSize: '0.75rem',
+})
+
+function NavGroupSection({ group }: { group: NavGroup }) {
+  const location = useLocation()
+  const isActiveGroup = group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
+  const [open, setOpen] = useState(isActiveGroup)
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
+          borderRadius: 8, border: 'none', background: 'transparent', color: isActiveGroup ? '#fff' : '#94a3b8',
+          fontWeight: isActiveGroup ? 600 : 400, fontSize: '0.75rem', cursor: 'pointer', width: '100%', textAlign: 'left',
+        }}
+        className="nav-link"
+      >
+        <group.icon size={20} />
+        {group.label}
+        <span style={{ marginLeft: 'auto' }}>{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
+      </button>
+      {open && group.items.map(item => (
+        <NavLink key={item.to} to={item.to} style={({ isActive }) => subLinkStyle(isActive)} className="nav-link" end>
+          <item.icon size={16} />
+          {item.label}
+        </NavLink>
+      ))}
+    </div>
+  )
+}
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -68,27 +142,28 @@ export default function Layout() {
           )}
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
-          {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-              <item.icon size={20} />
-              {item.label}
-            </NavLink>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
+          <NavLink to="/dashboard" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
+            <LayoutDashboard size={20} /> Dashboard
+          </NavLink>
+          <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
+            <Package size={20} /> Waybills
+          </NavLink>
+          <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
+            <BarChart3 size={20} /> Analytics
+          </NavLink>
+          <div style={{ borderTop: '1px solid #334155', margin: '0.25rem 0' }} />
+          {navGroups.map(group => (
+            <NavGroupSection key={group.label} group={group} />
           ))}
           {user?.role === 'ADMIN' && (
             <>
-              <div style={{ borderTop: '1px solid #334155', marginTop: '0.5rem', paddingTop: '0.5rem' }} />
+              <div style={{ borderTop: '1px solid #334155', marginTop: '0.25rem', paddingTop: '0.25rem' }} />
               <NavLink to="/users" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
                 <Shield size={20} /> Users
               </NavLink>
               <NavLink to="/carriers" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
                 <Truck size={20} /> Carriers
-              </NavLink>
-              <NavLink to="/audit-logs" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-                <ClipboardList size={20} /> Audit Log
-              </NavLink>
-              <NavLink to="/webhooks" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-                <Webhook size={20} /> Webhooks
               </NavLink>
               <NavLink to="/settings" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
                 <Settings size={20} /> Settings

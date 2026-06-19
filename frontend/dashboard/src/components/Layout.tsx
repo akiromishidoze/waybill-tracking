@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import {
   Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock,
 } from 'lucide-react'
@@ -108,7 +109,9 @@ export default function Layout() {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
       `}</style>
       <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   )

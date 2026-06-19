@@ -13,7 +13,7 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     api.get<Features>('/features')
       .then((res) => setFeatures(res.data))
-      .catch(() => {})
+      .catch(() => console.warn('[useFeatures] Failed to load features'))
   }, [])
 
   return (

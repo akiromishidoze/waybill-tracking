@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -331,6 +331,24 @@ const seedRegionPerformance: RegionPerformance[] = [
   { region: 'Mindanao', totalShipments: 340, deliveredCount: 323, onTimeCount: 260, exceptionCount: 18, avgTransitHours: 40.2, slaCompliance: 80.5 },
 ]
 
+const seedDriverAssignments: DriverAssignment[] = [
+  { id: 'drv-001', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-001', trackingNumber: 'LBC-2024-1001', status: 'DELIVERED', assignedAt: ago(12), pickedUpAt: ago(10), deliveredAt: ago(8), recipientName: 'Ricardo Dimagiba', recipientAddress: '45 P. Gomez St, Brgy. San Lorenzo, Makati City', recipientPhone: '+63 917 555 1212', origin: 'Manila', destination: 'Makati City' },
+  { id: 'drv-002', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-006', trackingNumber: 'LBC-2024-1006', status: 'FAILED', assignedAt: ago(8), pickedUpAt: ago(6), recipientName: 'Leticia Chua', recipientAddress: '303 Ortigas Ave, Brgy. San Antonio, Pasig City', recipientPhone: '+63 915 333 7788', origin: 'Manila', destination: 'Pasig City', notes: 'Recipient not home after 3 attempts' },
+  { id: 'drv-003', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-005', trackingNumber: 'GOGO-2024-5001', status: 'PICKED_UP', assignedAt: ago(8), pickedUpAt: ago(6), recipientName: 'Roberto Gonzales', recipientAddress: '200 Subic Bay Gateway Park, Zambales', recipientPhone: '+63 927 444 5566', origin: 'Cebu', destination: 'Subic Bay' },
+  { id: 'drv-004', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-009', trackingNumber: 'GOGO-2024-5009', status: 'DELIVERED', assignedAt: ago(20), pickedUpAt: ago(18), deliveredAt: ago(14), recipientName: 'Sofia Alcantara', recipientAddress: '22 Bonifacio St, Brgy. 8, Legazpi City', recipientPhone: '+63 918 111 2233', origin: 'Manila', destination: 'Legazpi City' },
+  { id: 'drv-005', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', status: 'FAILED', assignedAt: ago(10), pickedUpAt: ago(8), recipientName: 'Grace Villar', recipientAddress: '15 Luna St, Brgy. 3, Iloilo City', recipientPhone: '+63 919 888 1122', origin: 'Manila', destination: 'Iloilo City', notes: 'Wrong address provided' },
+  { id: 'drv-006', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-010', trackingNumber: 'DHL-PH-45127', status: 'IN_TRANSIT', assignedAt: ago(6), pickedUpAt: ago(4), recipientName: 'Miguel Tan', recipientAddress: '5th Floor, XYZ Building, 25th St, BGC, Taguig', recipientPhone: '+63 921 777 8899', origin: 'Cebu', destination: 'Taguig' },
+]
+
+const seedDriverScans: DriverScanEvent[] = [
+  { id: 'scn-001', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-001', trackingNumber: 'LBC-2024-1001', scanType: 'PICKUP', location: 'Manila Warehouse', timestamp: ago(10), latitude: 14.5995, longitude: 120.9842 },
+  { id: 'scn-002', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-001', trackingNumber: 'LBC-2024-1001', scanType: 'DELIVERY', location: '45 P. Gomez St, Makati City', timestamp: ago(8), latitude: 14.5532, longitude: 121.0211, signature: 'Ricardo D.', remark: 'Delivered to recipient' },
+  { id: 'scn-003', driverId: 'usr-003', driverName: 'Juan Dela Cruz', waybillId: 'wb-006', trackingNumber: 'LBC-2024-1006', scanType: 'ATTEMPT', location: '303 Ortigas Ave, Pasig City', timestamp: ago(5), latitude: 14.5861, longitude: 121.0625, remark: 'No answer at door, left notice card' },
+  { id: 'scn-004', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-005', trackingNumber: 'GOGO-2024-5001', scanType: 'PICKUP', location: 'Cebu Warehouse', timestamp: ago(6), latitude: 10.3157, longitude: 123.8854 },
+  { id: 'scn-005', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-010', trackingNumber: 'DHL-PH-45127', scanType: 'PICKUP', location: 'Cebu', timestamp: ago(4), latitude: 10.3157, longitude: 123.8854, remark: 'Package scanned at pickup' },
+  { id: 'scn-006', driverId: 'usr-007', driverName: 'Pedro Lim', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', scanType: 'ATTEMPT', location: '15 Luna St, Iloilo City', timestamp: ago(6), latitude: 10.7202, longitude: 122.5621, remark: 'Address not found' },
+]
+
 const seedSettings: AppSettings = {
   companyName: 'WaybillTrack',
   timezone: 'Asia/Manila',
@@ -364,6 +382,8 @@ const db: Record<string, any[]> = {
   'tracking/aggregated': seedAggregatedTracking,
   webhooks: seedWebhooks,
   attachments: seedAttachments,
+  'driver-assignments': seedDriverAssignments,
+  'driver-scans': seedDriverScans,
 }
 
 let dbSettings: AppSettings = { ...seedSettings }
@@ -396,7 +416,7 @@ api.interceptors.request.use((config) => {
   const collKey = idMatch?.[1] || ''
   const itemId = idMatch?.[2] || ''
 
-  if (method === 'get' && idMatch && db[collKey]) {
+  if (method === 'get' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
     const item = db[collKey].find((x: any) => x.id === itemId || x.waybillId === itemId)
     if (item) mock(item)
     return config
@@ -501,6 +521,29 @@ api.interceptors.request.use((config) => {
     return config
   }
 
+  if (method === 'post' && idMatch && url.endsWith('/status') && db[collKey]) {
+    const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
+    const now = new Date().toISOString()
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) {
+      const updated = { ...db[collKey][idx], status: body.status, updatedAt: now }
+      if (body.status === 'PICKED_UP') updated.pickedUpAt = now
+      if (body.status === 'DELIVERED') updated.deliveredAt = now
+      db[collKey][idx] = updated
+      if (body.scanType && db['driver-scans']) {
+        db['driver-scans'].push({
+          id: uid(), driverId: updated.driverId, driverName: updated.driverName,
+          waybillId: updated.waybillId, trackingNumber: updated.trackingNumber,
+          scanType: body.scanType, location: body.location || updated.destination,
+          timestamp: now, latitude: body.latitude, longitude: body.longitude,
+          photoUrl: body.photoUrl, signature: body.signature, remark: body.remark,
+        })
+      }
+      mock(updated)
+    }
+    return config
+  }
+
   if (method === 'post' && idMatch && url.endsWith('/resolve') && db[collKey]) {
     const now = new Date().toISOString()
     const idx = db[collKey].findIndex((x: any) => x.id === itemId)
@@ -515,7 +558,7 @@ api.interceptors.request.use((config) => {
     const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
     const now = new Date().toISOString()
 
-    if (idMatch && db[collKey]) {
+    if (idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
       const idx = db[collKey].findIndex((x: any) => x.id === itemId)
       if (idx >= 0) {
         db[collKey][idx] = { ...db[collKey][idx], ...body, updatedAt: now }
@@ -541,7 +584,7 @@ api.interceptors.request.use((config) => {
     return config
   }
 
-  if (method === 'delete' && idMatch && db[collKey]) {
+  if (method === 'delete' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
     const idx = db[collKey].findIndex((x: any) => x.id === itemId)
     if (idx >= 0) db[collKey].splice(idx, 1)
     mock({ success: true })
@@ -680,6 +723,16 @@ export const reportScheduleService = {
   update: (id: string, data: Partial<ReportSchedule>) => api.patch<ReportSchedule>(`/reports/schedules/${id}`, data),
   delete: (id: string) => api.delete(`/reports/schedules/${id}`),
   trigger: (id: string) => api.post(`/reports/schedules/${id}/trigger`),
+}
+
+export const driverService = {
+  listAssignments: () => api.get<DriverAssignment[]>('/driver-assignments'),
+  getAssignment: (id: string) => api.get<DriverAssignment>(`/driver-assignments/${id}`),
+  updateStatus: (id: string, data: {
+    status: string; scanType?: string; location?: string;
+    latitude?: number; longitude?: number; photoUrl?: string; signature?: string; remark?: string
+  }) => api.post<DriverAssignment>(`/driver-assignments/${id}/status`, data),
+  listScans: () => api.get<DriverScanEvent[]>('/driver-scans'),
 }
 
 export const regionService = { performance: () => api.get<RegionPerformance[]>('/analytics/region-performance') }

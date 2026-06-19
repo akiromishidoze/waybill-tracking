@@ -27,6 +27,7 @@ const navGroups: NavGroup[] = [
     label: 'Operations', icon: Settings,
     items: [
       { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
+      { to: '/driver-app', label: 'Driver App', icon: Truck },
       { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
       { to: '/escalations', label: 'Escalations', icon: ArrowLeftRight },
       { to: '/roadmap/operations', label: 'Roadmap', icon: Settings },

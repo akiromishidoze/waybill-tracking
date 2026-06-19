@@ -314,6 +314,40 @@ export interface RegionPerformance {
   slaCompliance: number
 }
 
+export interface DriverAssignment {
+  id: string
+  driverId: string
+  driverName: string
+  waybillId: string
+  trackingNumber: string
+  status: 'ASSIGNED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED'
+  assignedAt: string
+  pickedUpAt?: string
+  deliveredAt?: string
+  recipientName: string
+  recipientAddress: string
+  recipientPhone: string
+  origin: string
+  destination: string
+  notes?: string
+}
+
+export interface DriverScanEvent {
+  id: string
+  driverId: string
+  driverName: string
+  waybillId: string
+  trackingNumber: string
+  scanType: 'PICKUP' | 'ARRIVAL' | 'DELIVERY' | 'ATTEMPT' | 'RETURN'
+  location: string
+  timestamp: string
+  latitude?: number
+  longitude?: number
+  photoUrl?: string
+  signature?: string
+  remark?: string
+}
+
 export interface ErpIntegration {
   id: string
   name: string

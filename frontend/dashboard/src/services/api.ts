@@ -331,6 +331,15 @@ const seedRegionPerformance: RegionPerformance[] = [
   { region: 'Mindanao', totalShipments: 340, deliveredCount: 323, onTimeCount: 260, exceptionCount: 18, avgTransitHours: 40.2, slaCompliance: 80.5 },
 ]
 
+const seedSettings: AppSettings = {
+  companyName: 'WaybillTrack',
+  timezone: 'Asia/Manila',
+  sessionTimeout: 480,
+  emailNotifications: true,
+  defaultServiceType: 'STANDARD',
+  logoUrl: '',
+}
+
 const seedErpIntegrations: ErpIntegration[] = [
   { id: 'erp-001', name: 'SAP Finance Sync', system: 'SAP', endpoint: 'https://sap-prod.waybilltrack.com/api/orders', authType: 'BASIC', syncDirection: 'EXPORT', lastSyncAt: ago(4), lastSyncStatus: 'SUCCESS', isActive: true, createdAt: ago(720) },
   { id: 'erp-002', name: 'Oracle WMS Import', system: 'ORACLE', endpoint: 'https://oracle-wms.waybilltrack.com/api/shipments', authType: 'OAUTH2', syncDirection: 'IMPORT', lastSyncAt: ago(12), lastSyncStatus: 'FAILED', isActive: true, createdAt: ago(720) },
@@ -356,6 +365,8 @@ const db: Record<string, any[]> = {
   webhooks: seedWebhooks,
   attachments: seedAttachments,
 }
+
+let dbSettings: AppSettings = { ...seedSettings }
 
 api.interceptors.request.use((config) => {
   let url: string = (config.url || '').replace(/^\/api/, '') || '/'
@@ -445,6 +456,16 @@ api.interceptors.request.use((config) => {
     mock({ success: true, updatedCount: 2 })
     return config
   }
+  if (method === 'get' && key === 'settings') {
+    mock(dbSettings)
+    return config
+  }
+  if (method === 'get' && collKey === 'track') {
+    const wb = seedWaybills.find(w => w.trackingNumber === itemId)
+    if (wb) mock(wb)
+    else mock({ error: 'Waybill not found' }, 404)
+    return config
+  }
   if (method === 'get' && key === 'analytics/sla') {
     const from = config.params?.from || ago(168)
     const to = config.params?.to || ago(0)
@@ -456,6 +477,37 @@ api.interceptors.request.use((config) => {
       return acc
     }, [])
     mock(rows)
+    return config
+  }
+
+  if (method === 'put' && key === 'settings') {
+    dbSettings = { ...dbSettings, ...(typeof config.data === 'string' ? JSON.parse(config.data) : config.data) }
+    mock(dbSettings)
+    return config
+  }
+
+  if (method === 'put' && key === 'settings/dwell-threshold') {
+    mock({ success: true })
+    return config
+  }
+
+  if (method === 'post' && idMatch && url.endsWith('/acknowledge') && db[collKey]) {
+    const now = new Date().toISOString()
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) {
+      db[collKey][idx] = { ...db[collKey][idx], acknowledged: true, acknowledgedAt: now, acknowledgedBy: 'Admin User', updatedAt: now }
+      mock(db[collKey][idx])
+    }
+    return config
+  }
+
+  if (method === 'post' && idMatch && url.endsWith('/resolve') && db[collKey]) {
+    const now = new Date().toISOString()
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) {
+      db[collKey][idx] = { ...db[collKey][idx], status: 'RESOLVED', resolvedAt: now, resolvedBy: 'Admin User', updatedAt: now }
+      mock(db[collKey][idx])
+    }
     return config
   }
 

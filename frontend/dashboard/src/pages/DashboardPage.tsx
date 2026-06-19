@@ -24,7 +24,7 @@ export default function DashboardPage() {
     refetchInterval: 30000,
   })
 
-  const openEscalations = escalations?.filter((e: any) => e.status === 'OPEN').length || 0
+  const openEscalations = escalations?.filter((e: any) => e?.status === 'OPEN').length || 0
 
   return (
     <div>

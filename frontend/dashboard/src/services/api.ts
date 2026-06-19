@@ -260,8 +260,8 @@ const seedWaybills: Waybill[] = [
 ]
 
 const seedReturns: any[] = [
-  { id: 'ret-001', waybillId: 'wb-006', trackingNumber: 'LBC-2024-1006', status: 'RETURN_REQUESTED', reason: 'Delivery failed — recipient not available after 3 attempts', requestedAt: ago(1), carrier: 'LBC Express', notes: 'Recipient requested re-delivery to office address, pending confirmation' },
-  { id: 'ret-002', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', status: 'RETURN_IN_TRANSIT', reason: 'Wrong address provided by shipper', requestedAt: ago(2), carrier: 'GoGo Xpress', notes: 'Shipper contacted — awaiting corrected address' },
+  { id: 'ret-001', waybillId: 'wb-006', trackingNumber: 'LBC-2024-1006', recipientName: 'Leticia Chua', origin: 'Manila', destination: 'Pasig City', status: 'RETURN_REQUESTED', returnInfo: { status: 'RETURN_REQUESTED', reason: 'Delivery failed — recipient not available after 3 attempts', requestedAt: ago(1), carrier: 'LBC Express', notes: 'Recipient requested re-delivery to office address, pending confirmation' }, reason: 'Delivery failed — recipient not available after 3 attempts', requestedAt: ago(1), carrier: 'LBC Express', notes: 'Recipient requested re-delivery to office address, pending confirmation' },
+  { id: 'ret-002', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', recipientName: 'Grace Villar', origin: 'Manila', destination: 'Iloilo City', status: 'RETURN_IN_TRANSIT', returnInfo: { status: 'RETURN_IN_TRANSIT', reason: 'Wrong address provided by shipper', requestedAt: ago(2), carrier: 'GoGo Xpress', notes: 'Shipper contacted — awaiting corrected address' }, reason: 'Wrong address provided by shipper', requestedAt: ago(2), carrier: 'GoGo Xpress', notes: 'Shipper contacted — awaiting corrected address' },
 ]
 
 const seedDwellAlerts: DwellAlert[] = [
@@ -416,15 +416,7 @@ api.interceptors.request.use((config) => {
   const collKey = idMatch?.[1] || ''
   const itemId = idMatch?.[2] || ''
 
-  if (method === 'get' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
-    const item = db[collKey].find((x: any) => x.id === itemId || x.waybillId === itemId)
-    if (item) mock(item)
-    return config
-  }
-  if (method === 'get' && db[key]) {
-    mock(db[key])
-    return config
-  }
+  // --- Specific path handlers (must run before generic idMatch) ---
   if (method === 'get' && key === 'analytics/stats') {
     const wbs = seedWaybills
     const totalActive = wbs.filter(w => !['DELIVERED', 'CANCELLED', 'RETURNED'].includes(w.status)).length
@@ -500,6 +492,16 @@ api.interceptors.request.use((config) => {
     return config
   }
 
+  // --- Generic collection/item handlers (run after specific path handlers) ---
+  if (method === 'get' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
+    const item = db[collKey].find((x: any) => x.id === itemId || x.waybillId === itemId)
+    if (item) { mock(item); return config }
+  }
+  if (method === 'get' && db[key]) {
+    mock(db[key])
+    return config
+  }
+
   if (method === 'put' && key === 'settings') {
     dbSettings = { ...dbSettings, ...(typeof config.data === 'string' ? JSON.parse(config.data) : config.data) }
     mock(dbSettings)
@@ -558,7 +560,7 @@ api.interceptors.request.use((config) => {
     const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
     const now = new Date().toISOString()
 
-    if (idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
+    if (idMatch && db[collKey]) {
       const idx = db[collKey].findIndex((x: any) => x.id === itemId)
       if (idx >= 0) {
         db[collKey][idx] = { ...db[collKey][idx], ...body, updatedAt: now }
@@ -584,7 +586,7 @@ api.interceptors.request.use((config) => {
     return config
   }
 
-  if (method === 'delete' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
+  if (method === 'delete' && idMatch && db[collKey]) {
     const idx = db[collKey].findIndex((x: any) => x.id === itemId)
     if (idx >= 0) db[collKey].splice(idx, 1)
     mock({ success: true })

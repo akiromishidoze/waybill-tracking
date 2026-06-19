@@ -36,8 +36,8 @@ export default function EscalationsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['escalations'] }),
   })
 
-  const openCount = escalations?.filter((e: any) => e.status === 'OPEN').length || 0
-  const ackCount = escalations?.filter((e: any) => e.status === 'ACKNOWLEDGED').length || 0
+  const openCount = escalations?.filter((e: any) => e?.status === 'OPEN').length || 0
+  const ackCount = escalations?.filter((e: any) => e?.status === 'ACKNOWLEDGED').length || 0
 
   return (
     <PageContainer

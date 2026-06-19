@@ -58,10 +58,10 @@ export default function AggregatedTrackingPage() {
       </div>
 
       {showAssign && (
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: 'var(--shadow-sm)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Waybill</label>
-            <select value={assignForm.waybillId} onChange={e => setAssignForm({ ...assignForm, waybillId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', minWidth: 200 }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Waybill</label>
+            <select value={assignForm.waybillId} onChange={e => setAssignForm({ ...assignForm, waybillId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', minWidth: 200 }}>
               <option value="">Select waybill...</option>
               {unassignedWbs.map((wb: any) => (
                 <option key={wb.id} value={wb.id}>{wb.trackingNumber} — {wb.recipientName}</option>
@@ -69,8 +69,8 @@ export default function AggregatedTrackingPage() {
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Carrier</label>
-            <select value={assignForm.carrierId} onChange={e => setAssignForm({ ...assignForm, carrierId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', minWidth: 180 }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Carrier</label>
+            <select value={assignForm.carrierId} onChange={e => setAssignForm({ ...assignForm, carrierId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', minWidth: 180 }}>
               <option value="">Select carrier...</option>
               {(carriers || []).filter((c: any) => c.isActive).map((c: any) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -78,14 +78,14 @@ export default function AggregatedTrackingPage() {
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Carrier Tracking #</label>
-            <input value={assignForm.carrierTrackingNumber} onChange={e => setAssignForm({ ...assignForm, carrierTrackingNumber: e.target.value })} placeholder="e.g. FD-123456" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Carrier Tracking #</label>
+            <input value={assignForm.carrierTrackingNumber} onChange={e => setAssignForm({ ...assignForm, carrierTrackingNumber: e.target.value })} placeholder="e.g. FD-123456" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button onClick={() => assignCarrier.mutate()} disabled={!assignForm.waybillId || !assignForm.carrierId || !assignForm.carrierTrackingNumber || assignCarrier.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <Check size={14} /> Assign
             </button>
-            <button onClick={() => setShowAssign(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+            <button onClick={() => setShowAssign(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <X size={14} /> Cancel
             </button>
           </div>
@@ -95,45 +95,45 @@ export default function AggregatedTrackingPage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={160} /><SkeletonBlock height={160} /></div>
       ) : !items?.length ? (
-        <p style={{ color: '#64748b' }}>No carrier-tracked waybills yet. Assign a carrier to get started.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>No carrier-tracked waybills yet. Assign a carrier to get started.</p>
       ) : (
         Object.entries(grouped).map(([carrierId, group]: [string, any]) => (
-          <div key={carrierId} style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: '1.5rem', overflow: 'hidden' }}>
+          <div key={carrierId} style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', marginBottom: '1.5rem', overflow: 'hidden' }}>
             <div style={{ padding: '0.75rem 1rem', background: (CARRIER_COLORS[carrierId] || '#6b7280') + '10', borderBottom: `2px solid ${CARRIER_COLORS[carrierId] || '#6b7280'}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Truck size={18} color={CARRIER_COLORS[carrierId] || '#6b7280'} />
               <span style={{ fontWeight: 600 }}>{group.name}</span>
-              <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>({group.items.length} shipments)</span>
+              <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>({group.items.length} shipments)</span>
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>Waybill</th>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>Carrier Tracking</th>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>Recipient</th>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>Destination</th>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }}>Last Event</th>
-                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontWeight: 600 }} />
+                <tr style={{ background: 'var(--color-surface-hover)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Waybill</th>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Carrier Tracking</th>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Recipient</th>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Destination</th>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Last Event</th>
+                  <th style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontWeight: 600 }} />
                 </tr>
               </thead>
               <tbody>
                 {group.items.map((item: any) => (
-                  <tr key={item.waybillId} style={{ borderTop: '1px solid #f1f5f9' }}>
+                  <tr key={item.waybillId} style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                     <td style={{ padding: '0.625rem 1rem' }}>
-                      <Link to={`/waybills/${item.waybillId}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem' }}>{item.trackingNumber}</Link>
+                      <Link to={`/waybills/${item.waybillId}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem' }}>{item.trackingNumber}</Link>
                     </td>
-                    <td style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', fontFamily: 'monospace', color: '#334155' }}>{item.carrierTrackingNumber}</td>
+                    <td style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', fontFamily: 'monospace', color: 'var(--color-text-primary)' }}>{item.carrierTrackingNumber}</td>
                     <td style={{ padding: '0.625rem 1rem', fontSize: '0.875rem' }}>{item.recipientName}</td>
-                    <td style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', color: '#64748b' }}>{item.destination}</td>
+                    <td style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{item.destination}</td>
                     <td style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem' }}>
                       {item.lastCarrierEvent ? (
-                        <div><span style={{ fontWeight: 500 }}>{item.lastCarrierEvent.status}</span><span style={{ color: '#94a3b8' }}> — {item.lastCarrierEvent.location}</span></div>
+                        <div><span style={{ fontWeight: 500 }}>{item.lastCarrierEvent.status}</span><span style={{ color: 'var(--color-text-muted-lighter)' }}> — {item.lastCarrierEvent.location}</span></div>
                       ) : (
-                        <span style={{ color: '#94a3b8' }}>No events yet</span>
+                        <span style={{ color: 'var(--color-text-muted-lighter)' }}>No events yet</span>
                       )}
                     </td>
                     <td style={{ padding: '0.625rem 1rem' }}>
                       <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
-                        <Link to={`/waybills/${item.waybillId}`} style={{ display: 'flex', color: '#2563eb' }}><ChevronRight size={16} /></Link>
+                        <Link to={`/waybills/${item.waybillId}`} style={{ display: 'flex', color: 'var(--color-primary)' }}><ChevronRight size={16} /></Link>
                         <button onClick={() => { if (confirm('Remove carrier from this waybill?')) removeCarrier.mutate(item.waybillId) }} style={{ display: 'flex', padding: '0.25rem', background: 'transparent', color: '#dc2626', border: 'none', borderRadius: 4, cursor: 'pointer' }} title="Remove carrier">
                           <Trash2 size={14} />
                         </button>

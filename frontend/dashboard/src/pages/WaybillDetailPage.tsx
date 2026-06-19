@@ -157,7 +157,7 @@ export default function WaybillDetailPage() {
   return (
     <div>
       {wb.slaBreached && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: '1rem', color: '#dc2626', fontSize: '0.875rem', fontWeight: 500 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 8, marginBottom: '1rem', color: '#dc2626', fontSize: '0.875rem', fontWeight: 500 }}>
           <AlertTriangle size={18} />
           SLA Breached — Estimated delivery was {new Date(wb.estimatedDelivery).toLocaleDateString()}
         </div>
@@ -167,7 +167,7 @@ export default function WaybillDetailPage() {
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Shipment Info</h3>
           <DetailRow label="Status" value={wb.status} />
           <DetailRow label="Service Type" value={wb.serviceType} />
@@ -193,12 +193,12 @@ export default function WaybillDetailPage() {
           )}
         </div>
 
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Recipient</h3>
           <DetailRow label="Name" value={wb.recipientName} />
           <DetailRow label="Phone" value={wb.recipientPhone} />
           <DetailRow label="Address" value={wb.recipientAddress} />
-          <div style={{ borderTop: '1px solid #f1f5f9', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
+          <div style={{ borderTop: '1px solid var(--color-border-subtle)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <Shield size={16} color="#d97706" />
               <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Team Assignment</span>
@@ -207,7 +207,7 @@ export default function WaybillDetailPage() {
               <select
                 value={wb.teamId || ''}
                 onChange={(e) => assignTeam.mutate(e.target.value || null)}
-                style={{ flex: 1, padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', background: '#fff' }}
+                style={{ flex: 1, padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }}
                 disabled={assignTeam.isPending}
               >
                 <option value="">Unassigned</option>
@@ -215,7 +215,7 @@ export default function WaybillDetailPage() {
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
-              {assignTeam.isPending && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Saving...</span>}
+              {assignTeam.isPending && <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Saving...</span>}
             </div>
             {wb.teamName && (
               <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: '#d97706' }}>
@@ -227,12 +227,12 @@ export default function WaybillDetailPage() {
         </div>
       </div>
 
-      <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
+      <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Paperclip size={18} color="#6b7280" />
             <h3 style={{ fontWeight: 600 }}>Proof of Delivery Attachments</h3>
-            <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>({attachments?.length || 0})</span>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)' }}>({attachments?.length || 0})</span>
           </div>
           <div>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} />
@@ -243,23 +243,23 @@ export default function WaybillDetailPage() {
           </div>
         </div>
         {(!attachments || attachments.length === 0) ? (
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No attachments yet.</p>
+          <p style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.875rem' }}>No attachments yet.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {attachments.map((att: Attachment) => (
-              <div key={att.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.75rem', background: '#f8fafc', borderRadius: 8, border: '1px solid #f1f5f9' }}>
+              <div key={att.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.75rem', background: 'var(--color-surface-hover)', borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
                   <FileText size={16} color="#64748b" />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontWeight: 500, fontSize: '0.875rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.fileName}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>{formatFileSize(att.fileSize)} · {new Date(att.uploadedAt).toLocaleDateString()}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)', margin: 0 }}>{formatFileSize(att.fileSize)} · {new Date(att.uploadedAt).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.375rem' }}>
-                  <button onClick={() => { const a = document.createElement('a'); a.href = `data:${att.fileType};base64,${att.data}`; a.download = att.fileName; a.click() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#475569' }}>
+                  <button onClick={() => { const a = document.createElement('a'); a.href = `data:${att.fileType};base64,${att.data}`; a.download = att.fileName; a.click() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
                     <Download size={12} /> Download
                   </button>
-                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: '#fff', border: '1px solid #fecaca', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#dc2626' }}>
+                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#dc2626' }}>
                     <Trash2 size={12} /> Delete
                   </button>
                 </div>
@@ -270,7 +270,7 @@ export default function WaybillDetailPage() {
       </div>
 
       {wb.returnInfo ? (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <ArrowLeftRight size={18} color="#7c3aed" />
@@ -307,7 +307,7 @@ export default function WaybillDetailPage() {
           </div>
         </div>
       ) : (['DELIVERED', 'FAILED_DELIVERY'].includes(wb.status) && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <ArrowLeftRight size={18} color="#d97706" />
@@ -321,26 +321,26 @@ export default function WaybillDetailPage() {
           </div>
           {initiatingReturn && (
             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 400 }}>
-              <input placeholder="Return reason (e.g. Damaged, Wrong item)" value={returnReason} onChange={e => setReturnReason(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
-              <input placeholder="Return carrier (optional)" value={returnCarrier} onChange={e => setReturnCarrier(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
+              <input placeholder="Return reason (e.g. Damaged, Wrong item)" value={returnReason} onChange={e => setReturnReason(e.target.value)} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
+              <input placeholder="Return carrier (optional)" value={returnCarrier} onChange={e => setReturnCarrier(e.target.value)} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={() => initiateReturn.mutate()} disabled={!returnReason || initiateReturn.isPending} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
                   {initiateReturn.isPending ? 'Initiating...' : 'Confirm Return'}
                 </button>
-                <button onClick={() => setInitiatingReturn(false)} style={{ padding: '0.5rem 1rem', background: '#fff', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>Cancel</button>
+                <button onClick={() => setInitiatingReturn(false)} style={{ padding: '0.5rem 1rem', background: 'var(--color-surface)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>Cancel</button>
               </div>
             </div>
           )}
         </div>
       ))}
 
-      <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
+      <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
         <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Milestone Event Log</h3>
         {groupedEvents.length ? (
           <div style={{ position: 'relative', paddingLeft: '2rem' }}>
             {groupedEvents.map((group) => (
               <div key={group.dateLabel} style={{ marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '0.75rem', marginLeft: '-2rem', paddingLeft: '2rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted-lighter)', marginBottom: '0.75rem', marginLeft: '-2rem', paddingLeft: '2rem' }}>
                   {group.dateLabel}
                 </div>
                 {group.events.map((evt) => {
@@ -361,22 +361,22 @@ export default function WaybillDetailPage() {
                             {EXCEPTION_LABELS[evt.exceptionCode as ExceptionCode] || evt.exceptionCode}
                           </span>
                         )}
-                        <span style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 500 }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted-lighter)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 500 }}>
                           {evt.eventType}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.8125rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                      <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                         <MapPin size={12} /> {evt.location}
-                        <span style={{ color: '#cbd5e1' }}>·</span>
+                        <span style={{ color: 'var(--color-border-input)' }}>·</span>
                         {new Date(evt.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                       {evt.courierName && (
-                        <div style={{ fontSize: '0.8125rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.125rem' }}>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.125rem' }}>
                           <User size={12} /> {evt.courierName}
                         </div>
                       )}
                       {evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: '#dc2626', margin: '0.125rem 0 0 0' }}>{evt.exceptionDetail}</p>}
-                      {evt.remark && !evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: '#475569', margin: '0.125rem 0 0 0', fontStyle: 'italic' }}>"{evt.remark}"</p>}
+                      {evt.remark && !evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', margin: '0.125rem 0 0 0', fontStyle: 'italic' }}>"{evt.remark}"</p>}
                     </div>
                   )
                 })}
@@ -384,16 +384,16 @@ export default function WaybillDetailPage() {
             ))}
           </div>
         ) : (
-          <p style={{ color: '#64748b' }}>No scan events yet.</p>
+          <p style={{ color: 'var(--color-text-muted)' }}>No scan events yet.</p>
         )}
       </div>
 
       {wb.carrierEvents && wb.carrierEvents.length > 0 && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10 }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <Truck size={18} color="#2563eb" />
             <h3 style={{ fontWeight: 600, fontSize: '1rem' }}>{wb.carrierName} Tracking</h3>
-            {wb.carrierTrackingNumber && <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>({wb.carrierTrackingNumber})</span>}
+            {wb.carrierTrackingNumber && <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>({wb.carrierTrackingNumber})</span>}
           </div>
           <div style={{ position: 'relative', paddingLeft: '2rem' }}>
             {(wb.carrierEvents || []).map((evt, i, arr) => (
@@ -402,12 +402,12 @@ export default function WaybillDetailPage() {
                   <Truck size={9} color="#fff" strokeWidth={3} />
                 </div>
                 <p style={{ fontWeight: 600, fontSize: '0.875rem', margin: 0 }}>{evt.status}</p>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.125rem' }}>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.125rem' }}>
                   <MapPin size={12} /> {evt.location}
-                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <span style={{ color: 'var(--color-border-input)' }}>·</span>
                   {new Date(evt.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </div>
-                {evt.remark && <p style={{ fontSize: '0.8125rem', color: '#475569', margin: '0.125rem 0 0 0', fontStyle: 'italic' }}>"{evt.remark}"</p>}
+                {evt.remark && <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', margin: '0.125rem 0 0 0', fontStyle: 'italic' }}>"{evt.remark}"</p>}
               </div>
             ))}
           </div>
@@ -415,12 +415,12 @@ export default function WaybillDetailPage() {
       )}
 
       {dwellSegments && dwellSegments.length > 0 && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <Clock size={18} color={activeDwell ? '#dc2626' : '#6b7280'} />
             <h3 style={{ fontWeight: 600 }}>Dwell Time at Facilities</h3>
             {activeDwell && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: 'var(--badge-red-bg)', color: '#dc2626', border: '1px solid var(--badge-red-border)' }}>
                 <AlertTriangle size={10} /> Active Dwell
               </span>
             )}
@@ -435,7 +435,7 @@ export default function WaybillDetailPage() {
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: seg.isActive ? '#dc2626' : '#16a34a', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{seg.facility}</div>
-                    <div style={{ fontSize: '0.8125rem', color: '#64748b', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <span>Arrived: {new Date(seg.arrivedAt).toLocaleString()}</span>
                       {seg.departedAt ? (
                         <span>Departed: {new Date(seg.departedAt).toLocaleString()}</span>
@@ -455,29 +455,29 @@ export default function WaybillDetailPage() {
       )}
 
       {geofenceEvents && geofenceEvents.length > 0 && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <MapPin size={18} color="#0891b2" />
             <h3 style={{ fontWeight: 600 }}>Geofence Events</h3>
-            <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>({geofenceEvents.length})</span>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)' }}>({geofenceEvents.length})</span>
           </div>
           <div style={{ display: 'grid', gap: '0.5rem' }}>
             {geofenceEvents.map((evt: GeofenceEvent) => (
-              <div key={evt.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.75rem', background: '#f8fafc', borderRadius: 8 }}>
+              <div key={evt.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.75rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: evt.eventType === 'ENTRY' ? '#16a34a20' : '#dc262620', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {evt.eventType === 'ENTRY' ? <LogIn size={12} color="#16a34a" /> : <LogOut size={12} color="#dc2626" />}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{evt.eventType === 'ENTRY' ? 'Entered' : 'Exited'} {evt.zone}</span>
-                    <span style={{ display: 'inline-flex', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 500, background: '#e2e8f0', color: '#475569' }}>
+                    <span style={{ display: 'inline-flex', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 500, background: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
                       {evt.zoneType.replace(/_/g, ' ')}
                     </span>
-                    <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)' }}>
                       {new Date(evt.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  {evt.metadata && <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.125rem 0 0 0' }}>{evt.metadata}</p>}
+                  {evt.metadata && <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)', margin: '0.125rem 0 0 0' }}>{evt.metadata}</p>}
                 </div>
               </div>
             ))}
@@ -491,7 +491,7 @@ export default function WaybillDetailPage() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
-      <span style={{ width: 140, color: '#64748b', fontSize: '0.875rem' }}>{label}</span>
+      <span style={{ width: 140, color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>{label}</span>
       <span style={{ fontWeight: 500 }}>{value}</span>
     </div>
   )

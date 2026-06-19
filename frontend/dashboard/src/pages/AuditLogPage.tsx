@@ -50,7 +50,7 @@ export default function AuditLogPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Audit Log</h2>
         <div style={{ position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted-lighter)' }} />
           <input
             type="text"
             placeholder="Search logs..."
@@ -58,7 +58,7 @@ export default function AuditLogPage() {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               padding: '0.5rem 0.75rem 0.5rem 2rem',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--color-border-input)',
               borderRadius: 6,
               fontSize: '0.875rem',
               width: 280,
@@ -67,25 +67,25 @@ export default function AuditLogPage() {
         </div>
       </div>
 
-      <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
         {isLoading ? (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}><tbody>{Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={4} />)}</tbody></table>
         ) : filtered.length === 0 ? (
-          <p style={{ padding: '2rem', color: '#64748b' }}>No matching audit logs found.</p>
+          <p style={{ padding: '2rem', color: 'var(--color-text-muted)' }}>No matching audit logs found.</p>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: '#64748b' }}>Action</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: '#64748b' }}>User</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: '#64748b' }}>Details</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: '#64748b' }}>IP Address</th>
-                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: '#64748b' }}>Timestamp</th>
+              <tr style={{ background: 'var(--color-surface-hover)', textAlign: 'left' }}>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Action</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>User</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Details</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>IP Address</th>
+                <th style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Timestamp</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((log) => (
-                <tr key={log.id} style={{ borderTop: '1px solid #f1f5f9' }}>
+                <tr key={log.id} style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <span
                       style={{
@@ -105,11 +105,11 @@ export default function AuditLogPage() {
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ fontWeight: 500, fontSize: '0.875rem' }}>{log.userName}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{log.userRole}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>{log.userRole}</div>
                   </td>
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: '#334155' }}>{log.details}</td>
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#64748b', fontFamily: 'monospace' }}>{log.ipAddress}</td>
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#64748b' }}>
+                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--color-text-primary)' }}>{log.details}</td>
+                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{log.ipAddress}</td>
+                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                       <Clock size={14} />
                       {new Date(log.createdAt).toLocaleString()}

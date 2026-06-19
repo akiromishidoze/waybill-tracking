@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -383,6 +383,27 @@ const seedCustomsShipments: CustomsShipment[] = [
   { id: 'cst-006', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', origin: 'Manila', destination: 'Iloilo City', originCountry: 'Philippines', destinationCountry: 'Philippines', customsStatus: 'NOT_REQUIRED', documents: [], estimatedClearance: '', lastUpdated: ago(10) },
 ]
 
+const seedBiIntegrations: BiIntegration[] = [
+  { id: 'bi-001', name: 'Power BI - Executive Dashboard', platform: 'POWER_BI', status: 'CONNECTED', endpoint: 'https://app.powerbi.com/groups/me/dashboards/abc123', datasets: ['waybills', 'analytics/stats', 'carrier-performance'], lastSyncAt: ago(2), refreshInterval: 15, createdAt: ago(720) },
+  { id: 'bi-002', name: 'Looker - Operations Analytics', platform: 'LOOKER', status: 'CONNECTED', endpoint: 'https://waybilltrack.looker.com/dashboards/456', datasets: ['waybills', 'analytics/stats'], lastSyncAt: ago(6), refreshInterval: 30, createdAt: ago(540) },
+  { id: 'bi-003', name: 'Tableau - Carrier Performance', platform: 'TABLEAU', status: 'DISCONNECTED', datasets: ['carrier-performance'], refreshInterval: 60, createdAt: ago(360) },
+  { id: 'bi-004', name: 'Grafana - Real-time Monitoring', platform: 'GRAFANA', status: 'ERROR', endpoint: 'https://grafana.waybilltrack.com/d/789', datasets: ['waybills/map-data'], lastSyncAt: ago(48), refreshInterval: 5, createdAt: ago(180) },
+  { id: 'bi-005', name: 'Superset - Regional Analytics', platform: 'SUPERSET', status: 'CONNECTED', endpoint: 'https://superset.waybilltrack.com/superset/dashboard/321/', datasets: ['analytics/region-performance', 'analytics/stats'], lastSyncAt: ago(12), refreshInterval: 60, createdAt: ago(90) },
+]
+
+const seedCodPayments: CodPayment[] = [
+  { id: 'cod-001', waybillId: 'wb-001', trackingNumber: 'LBC-2024-1001', shipperName: 'Juan Dela Cruz Trading', recipientName: 'Ricardo Dimagiba', amount: 2500.00, fee: 75.00, netAmount: 2425.00, currency: 'PHP', collectedAt: ago(48), status: 'SETTLED', settledAt: ago(36), carrierName: 'LBC Express' },
+  { id: 'cod-002', waybillId: 'wb-002', trackingNumber: 'LBC-2024-1002', shipperName: 'Maria Santos Enterprises', recipientName: 'Antonio Lopez', amount: 4750.00, fee: 142.50, netAmount: 4607.50, currency: 'PHP', collectedAt: ago(36), status: 'SETTLED', settledAt: ago(24), carrierName: 'LBC Express' },
+  { id: 'cod-003', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', shipperName: 'Global Trade Corp', recipientName: 'ABC Trading Co.', amount: 15200.00, fee: 456.00, netAmount: 14744.00, currency: 'PHP', collectedAt: ago(24), status: 'PENDING_SETTLEMENT', carrierName: 'DHL Express' },
+  { id: 'cod-004', waybillId: 'wb-006', trackingNumber: '2GO-2024-6001', shipperName: 'Luzon Distributors Inc.', recipientName: 'Carmen Villanueva', amount: 3800.00, fee: 114.00, netAmount: 3686.00, currency: 'PHP', collectedAt: ago(12), status: 'PENDING_SETTLEMENT', carrierName: '2Go Logistics' },
+  { id: 'cod-005', waybillId: 'wb-007', trackingNumber: 'FD-PH-78901', shipperName: 'Visayan Food Products', recipientName: 'Fernando Reyes', amount: 1820.00, fee: 54.60, netAmount: 1765.40, currency: 'PHP', collectedAt: ago(72), status: 'DISPUTED', disputeReason: 'Customer claims overpayment', carrierName: 'Flash Delivery' },
+  { id: 'cod-006', waybillId: 'wb-008', trackingNumber: 'LBC-2024-1008', shipperName: 'Mindanao Exports Co.', recipientName: 'Elena Martinez', amount: 6200.00, fee: 186.00, netAmount: 6014.00, currency: 'PHP', collectedAt: ago(96), status: 'COLLECTED', carrierName: 'LBC Express' },
+  { id: 'cod-007', waybillId: 'wb-009', trackingNumber: 'DHL-PH-45228', shipperName: 'Asian Tech Supplies', recipientName: 'Gregorio Hernandez', amount: 28900.00, fee: 867.00, netAmount: 28033.00, currency: 'PHP', collectedAt: ago(8), status: 'COLLECTED', carrierName: 'DHL Express' },
+  { id: 'cod-008', waybillId: 'wb-011', trackingNumber: 'LBC-2024-1011', shipperName: 'Island Hardware Supply', recipientName: 'Luis Mendoza', amount: 1450.00, fee: 43.50, netAmount: 1406.50, currency: 'PHP', collectedAt: ago(120), status: 'REFUNDED', notes: 'Customer returned item', carrierName: 'LBC Express' },
+  { id: 'cod-009', waybillId: 'wb-012', trackingNumber: 'JT-2024-3002', shipperName: 'Bicol Agri Traders', recipientName: 'Sofia Dela Cruz', amount: 5600.00, fee: 168.00, netAmount: 5432.00, currency: 'PHP', collectedAt: ago(16), status: 'PENDING_SETTLEMENT', carrierName: 'J&T Express' },
+  { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
+]
+
 const db: Record<string, any[]> = {
   waybills: seedWaybills,
   users: seedUsers,
@@ -399,6 +420,8 @@ const db: Record<string, any[]> = {
   'analytics/region-performance': seedRegionPerformance,
   'erp-integrations': seedErpIntegrations,
   'customs-shipments': seedCustomsShipments,
+  'cod-payments': seedCodPayments,
+  'bi-integrations': seedBiIntegrations,
   'tracking/aggregated': seedAggregatedTracking,
   webhooks: seedWebhooks,
   attachments: seedAttachments,
@@ -576,6 +599,22 @@ api.interceptors.request.use((config) => {
     return config
   }
 
+  if (method === 'post' && collKey === 'cod-payments' && url.includes('/settle') && db[collKey]) {
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'SETTLED', settledAt: new Date().toISOString() }; mock(db[collKey][idx]) }
+    return config
+  }
+  if (method === 'post' && collKey === 'cod-payments' && url.includes('/dispute') && db[collKey]) {
+    const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'DISPUTED', disputeReason: body.reason || 'Flagged for dispute' }; mock(db[collKey][idx]) }
+    return config
+  }
+  if (method === 'post' && collKey === 'cod-payments' && url.includes('/refund') && db[collKey]) {
+    const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+    if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'REFUNDED', notes: 'Refunded' }; mock(db[collKey][idx]) }
+    return config
+  }
   if (method === 'post' || method === 'put' || method === 'patch') {
     const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
     const now = new Date().toISOString()
@@ -759,6 +798,13 @@ export const driverService = {
 }
 
 export const regionService = { performance: () => api.get<RegionPerformance[]>('/analytics/region-performance') }
+
+export const codService = {
+  list: () => api.get<CodPayment[]>('/cod-payments'),
+  settle: (id: string) => api.post<CodPayment>(`/cod-payments/${id}/settle`),
+  dispute: (id: string, reason: string) => api.post<CodPayment>(`/cod-payments/${id}/dispute`, { reason }),
+  refund: (id: string) => api.post<CodPayment>(`/cod-payments/${id}/refund`),
+}
 
 export const erpIntegrationService = {
   list: () => api.get<ErpIntegration[]>('/erp-integrations'),

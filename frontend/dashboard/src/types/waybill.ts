@@ -391,3 +391,34 @@ export interface CustomsShipment {
   estimatedClearance: string
   lastUpdated: string
 }
+
+export interface BiIntegration {
+  id: string
+  name: string
+  platform: 'POWER_BI' | 'LOOKER' | 'TABLEAU' | 'SUPERSET' | 'GRAFANA' | 'OTHER'
+  status: 'CONNECTED' | 'DISCONNECTED' | 'ERROR'
+  endpoint?: string
+  apiKey?: string
+  datasets: string[]
+  lastSyncAt?: string
+  refreshInterval: number
+  createdAt: string
+}
+
+export interface CodPayment {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  shipperName: string
+  recipientName: string
+  amount: number
+  fee: number
+  netAmount: number
+  currency: string
+  collectedAt: string
+  status: 'COLLECTED' | 'PENDING_SETTLEMENT' | 'SETTLED' | 'DISPUTED' | 'REFUNDED'
+  settledAt?: string
+  disputeReason?: string
+  notes?: string
+  carrierName: string
+}

@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { useTheme } from '@/contexts/ThemeContext'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign,
 } from 'lucide-react'
 
 interface NavGroup {
@@ -32,6 +33,7 @@ const navGroups: NavGroup[] = [
       { to: '/rerouting', label: 'Re-routing', icon: Navigation },
       { to: '/auto-comms', label: 'Auto Comms', icon: Bell },
       { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
+      { to: '/cod', label: 'COD Reconciliation', icon: DollarSign },
       { to: '/escalations', label: 'Escalations', icon: ArrowLeftRight },
       { to: '/roadmap/operations', label: 'Roadmap', icon: Settings },
     ],
@@ -42,6 +44,7 @@ const navGroups: NavGroup[] = [
       { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
       { to: '/reports/schedules', label: 'Scheduled Reports', icon: PieChart },
       { to: '/analytics/regions', label: 'Region Performance', icon: BarChart3 },
+      { to: '/analytics/bi-tools', label: 'BI Integrations', icon: BarChart3 },
       { to: '/roadmap/analytics', label: 'Roadmap', icon: PieChart },
     ],
   },
@@ -122,6 +125,7 @@ function NavGroupSection({ group }: { group: NavGroup }) {
 export default function Layout() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   const handleLogout = () => {
     localStorage.removeItem('access_token')
@@ -175,6 +179,9 @@ export default function Layout() {
             </>
           )}
         </nav>
+        <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />} {theme === 'dark' ? 'Light' : 'Dark'} Mode
+        </button>
         <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
           <LogOut size={20} /> Logout
         </button>

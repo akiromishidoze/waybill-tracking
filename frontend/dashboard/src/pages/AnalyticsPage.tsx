@@ -21,19 +21,19 @@ function KpiCard({
   return (
     <div
       style={{
-        background: '#fff',
+        background: 'var(--color-surface)',
         padding: '1.25rem',
         borderRadius: 10,
         borderLeft: `4px solid ${color}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.25rem' }}>{label}</p>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>{label}</p>
           <p style={{ fontSize: '1.75rem', fontWeight: 700 }}>{value}</p>
           {sublabel && (
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.125rem' }}>{sublabel}</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)', marginTop: '0.125rem' }}>{sublabel}</p>
           )}
         </div>
         <Icon size={24} color={color} />
@@ -43,7 +43,7 @@ function KpiCard({
           <div
             style={{
               height: 6,
-              background: '#e2e8f0',
+              background: 'var(--color-border)',
               borderRadius: 3,
               overflow: 'hidden',
             }}

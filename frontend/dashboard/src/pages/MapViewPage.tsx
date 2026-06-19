@@ -101,7 +101,7 @@ export default function MapViewPage() {
         </ErrorBoundary>
 
         {selectedWaybill && (
-          <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem', background: '#fff', borderRadius: 8, padding: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 1000 }}>
+          <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem', background: 'var(--color-surface)', borderRadius: 8, padding: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 1000 }}>
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold text-lg">Waybill #{selectedWaybill.trackingNumber}</h3>
               <button onClick={() => setSelectedWaybill(null)} className="px-3 py-1 border rounded text-sm hover:bg-slate-50">Close</button>

@@ -49,9 +49,9 @@ export default function EscalationsPage() {
         </div>
       }
     >
-      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: 10, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left' }}>
-          <thead style={{ background: '#f8fafc', color: '#64748b' }}>
+          <thead style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }}>
             <tr>
               <th style={{ padding: '0.75rem 1rem' }}>Tracking #</th>
               <th style={{ padding: '0.75rem 1rem' }}>Rule</th>
@@ -66,12 +66,12 @@ export default function EscalationsPage() {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={7} />)
             ) : !escalations?.length ? (
-              <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No escalations.</td></tr>
+              <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No escalations.</td></tr>
             ) : (
               escalations.map((esc: any) => (
-                <tr key={esc.id} style={{ borderBottom: '1px solid #f1f5f9', background: esc.status === 'OPEN' ? '#fef2f2' : undefined }}>
+                <tr key={esc.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: esc.status === 'OPEN' ? '#fef2f2' : undefined }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    <Link to={`/waybills/${esc.waybillId}`} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>
+                    <Link to={`/waybills/${esc.waybillId}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>
                       {esc.trackingNumber}
                     </Link>
                   </td>
@@ -83,7 +83,7 @@ export default function EscalationsPage() {
                     </span>
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>{esc.escalatedTo}</td>
-                  <td style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.8125rem' }}>{new Date(esc.createdAt).toLocaleDateString()}</td>
+                  <td style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)', fontSize: '0.8125rem' }}>{new Date(esc.createdAt).toLocaleDateString()}</td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.375rem' }}>
                       {esc.status === 'OPEN' && (
@@ -97,8 +97,8 @@ export default function EscalationsPage() {
                         </button>
                       )}
                     </div>
-                    {esc.acknowledgedBy && <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem' }}>by {esc.acknowledgedBy}</div>}
-                    {esc.resolvedBy && <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem' }}>by {esc.resolvedBy}</div>}
+                    {esc.acknowledgedBy && <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted-lighter)', marginTop: '0.25rem' }}>by {esc.acknowledgedBy}</div>}
+                    {esc.resolvedBy && <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted-lighter)', marginTop: '0.25rem' }}>by {esc.resolvedBy}</div>}
                   </td>
                 </tr>
               ))

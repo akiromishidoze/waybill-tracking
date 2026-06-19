@@ -69,28 +69,28 @@ export default function SettingsPage() {
 
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         {/* User Credentials */}
-        <section style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <section style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <UserPlus size={20} color="#7c3aed" />
             <h3 style={{ fontWeight: 600, fontSize: '1.125rem' }}>User Credentials</h3>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.75rem' }}>Create new user accounts with login credentials and role assignment.</p>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>Create new user accounts with login credentials and role assignment.</p>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Email *</label>
-              <input type="text" value={createUserForm.email} onChange={e => setCreateUserForm({ ...createUserForm, email: e.target.value })} placeholder="e.g. juan@company.com" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Email *</label>
+              <input type="text" value={createUserForm.email} onChange={e => setCreateUserForm({ ...createUserForm, email: e.target.value })} placeholder="e.g. juan@company.com" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label>
-              <input type="text" value={createUserForm.name} onChange={e => setCreateUserForm({ ...createUserForm, name: e.target.value })} placeholder="e.g. Juan Dela Cruz" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Name *</label>
+              <input type="text" value={createUserForm.name} onChange={e => setCreateUserForm({ ...createUserForm, name: e.target.value })} placeholder="e.g. Juan Dela Cruz" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Password *</label>
-              <input type="text" value={createUserForm.password} onChange={e => setCreateUserForm({ ...createUserForm, password: e.target.value })} placeholder="e.g. securePass123" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Password *</label>
+              <input type="text" value={createUserForm.password} onChange={e => setCreateUserForm({ ...createUserForm, password: e.target.value })} placeholder="e.g. securePass123" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Role</label>
-              <select value={createUserForm.role} onChange={e => setCreateUserForm({ ...createUserForm, role: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 140 }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Role</label>
+              <select value={createUserForm.role} onChange={e => setCreateUserForm({ ...createUserForm, role: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 140 }}>
                 <option value="SHIPPER">Shipper</option>
                 <option value="COURIER">Courier</option>
                 <option value="OPS">Operations</option>
@@ -98,8 +98,8 @@ export default function SettingsPage() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Company</label>
-              <input type="text" value={createUserForm.company} onChange={e => setCreateUserForm({ ...createUserForm, company: e.target.value })} placeholder="Optional" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Company</label>
+              <input type="text" value={createUserForm.company} onChange={e => setCreateUserForm({ ...createUserForm, company: e.target.value })} placeholder="Optional" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
             </div>
             <button onClick={() => createUser.mutate()} disabled={!createUserForm.email || !createUserForm.name || !createUserForm.password || createUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
               <UserPlus size={14} /> Create User
@@ -109,31 +109,31 @@ export default function SettingsPage() {
         </section>
 
         {/* General Settings */}
-        <section style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <section style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <Save size={20} color="#2563eb" />
             <h3 style={{ fontWeight: 600, fontSize: '1.125rem' }}>General Settings</h3>
           </div>
           {settings && !settingsForm && (
-            <button onClick={() => setSettingsForm({ ...settings })} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+            <button onClick={() => setSettingsForm({ ...settings })} style={{ padding: '0.5rem 1rem', background: 'var(--color-bg)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               Edit Settings
             </button>
           )}
           {settings && !settingsForm && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem', fontSize: '0.875rem' }}>
-              <div><span style={{ color: '#64748b' }}>Company:</span> <strong>{settings.companyName}</strong></div>
-              <div><span style={{ color: '#64748b' }}>Timezone:</span> <strong>{settings.timezone}</strong></div>
-              <div><span style={{ color: '#64748b' }}>Session Timeout:</span> <strong>{settings.sessionTimeout} min</strong></div>
-              <div><span style={{ color: '#64748b' }}>Email Notifications:</span> <strong>{settings.emailNotifications ? 'On' : 'Off'}</strong></div>
-              <div><span style={{ color: '#64748b' }}>Default Service:</span> <strong>{settings.defaultServiceType}</strong></div>
+              <div><span style={{ color: 'var(--color-text-muted)' }}>Company:</span> <strong>{settings.companyName}</strong></div>
+              <div><span style={{ color: 'var(--color-text-muted)' }}>Timezone:</span> <strong>{settings.timezone}</strong></div>
+              <div><span style={{ color: 'var(--color-text-muted)' }}>Session Timeout:</span> <strong>{settings.sessionTimeout} min</strong></div>
+              <div><span style={{ color: 'var(--color-text-muted)' }}>Email Notifications:</span> <strong>{settings.emailNotifications ? 'On' : 'Off'}</strong></div>
+              <div><span style={{ color: 'var(--color-text-muted)' }}>Default Service:</span> <strong>{settings.defaultServiceType}</strong></div>
             </div>
           )}
           {settingsForm && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Company Name</label><input value={settingsForm.companyName} onChange={e => setSettingsForm({ ...settingsForm, companyName: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 220 }} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Timezone</label>
-                  <select value={settingsForm.timezone} onChange={e => setSettingsForm({ ...settingsForm, timezone: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }}>
+                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Company Name</label><input value={settingsForm.companyName} onChange={e => setSettingsForm({ ...settingsForm, companyName: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 220 }} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Timezone</label>
+                  <select value={settingsForm.timezone} onChange={e => setSettingsForm({ ...settingsForm, timezone: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }}>
                     <option value="Asia/Manila">Asia/Manila</option>
                     <option value="Asia/Singapore">Asia/Singapore</option>
                     <option value="Asia/Tokyo">Asia/Tokyo</option>
@@ -141,11 +141,11 @@ export default function SettingsPage() {
                     <option value="UTC">UTC</option>
                   </select>
                 </div>
-                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Session Timeout (min)</label><input type="number" value={settingsForm.sessionTimeout} onChange={e => setSettingsForm({ ...settingsForm, sessionTimeout: +e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 100 }} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Session Timeout (min)</label><input type="number" value={settingsForm.sessionTimeout} onChange={e => setSettingsForm({ ...settingsForm, sessionTimeout: +e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 100 }} /></div>
               </div>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Default Service Type</label>
-                  <select value={settingsForm.defaultServiceType} onChange={e => setSettingsForm({ ...settingsForm, defaultServiceType: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 160 }}>
+                <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Default Service Type</label>
+                  <select value={settingsForm.defaultServiceType} onChange={e => setSettingsForm({ ...settingsForm, defaultServiceType: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }}>
                     <option value="STANDARD">Standard</option>
                     <option value="EXPRESS">Express</option>
                     <option value="OVERNIGHT">Overnight</option>
@@ -160,7 +160,7 @@ export default function SettingsPage() {
                 <button onClick={() => saveSettings.mutate()} disabled={saveSettings.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
                   <Save size={14} /> Save Settings
                 </button>
-                <button onClick={() => setSettingsForm(null)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer' }}>
+                <button onClick={() => setSettingsForm(null)} style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer' }}>
                   Cancel
                 </button>
               </div>
@@ -170,7 +170,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Teams / Branches */}
-        <section style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <section style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Shield size={20} color="#d97706" />
@@ -181,34 +181,34 @@ export default function SettingsPage() {
             </button>
           </div>
           {(showTeamForm) && (
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem', padding: '1rem', background: '#fffbeb', borderRadius: 8, border: '1px solid #fde68a' }}>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label><input value={teamForm.name} onChange={e => setTeamForm({ ...teamForm, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Description</label><input value={teamForm.description} onChange={e => setTeamForm({ ...teamForm, description: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} /></div>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Color</label><input type="color" value={teamForm.color} onChange={e => setTeamForm({ ...teamForm, color: e.target.value })} style={{ padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: 6, width: 60, height: 36 }} /></div>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem', padding: '1rem', background: 'var(--badge-warm-bg)', borderRadius: 8, border: '1px solid var(--badge-amber-border)' }}>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Name *</label><input value={teamForm.name} onChange={e => setTeamForm({ ...teamForm, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Description</label><input value={teamForm.description} onChange={e => setTeamForm({ ...teamForm, description: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }} /></div>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Color</label><input type="color" value={teamForm.color} onChange={e => setTeamForm({ ...teamForm, color: e.target.value })} style={{ padding: '0.25rem', border: '1px solid var(--color-border-input)', borderRadius: 6, width: 60, height: 36 }} /></div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={() => editingTeamId ? updateTeam.mutate() : createTeam.mutate()} disabled={!teamForm.name || createTeam.isPending || updateTeam.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
                   <Check size={14} /> {editingTeamId ? 'Update' : 'Create'}
                 </button>
-                <button onClick={() => { setShowTeamForm(false); setEditingTeamId(null) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+                <button onClick={() => { setShowTeamForm(false); setEditingTeamId(null) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
                   <X size={14} /> Cancel
                 </button>
               </div>
             </div>
           )}
           {(!teams || teams.length === 0) ? (
-            <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No teams created yet.</p>
+            <p style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.875rem' }}>No teams created yet.</p>
           ) : (
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {(teams || []).map((t: any) => (
-                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: 8 }}>
+                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: t.color }} />
                   <div style={{ flex: 1 }}>
                     <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.name}</span>
-                    {t.description && <span style={{ color: '#64748b', fontSize: '0.8125rem', marginLeft: '0.5rem' }}>— {t.description}</span>}
+                    {t.description && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginLeft: '0.5rem' }}>— {t.description}</span>}
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem' }}>
-                    <button onClick={() => { setEditingTeamId(t.id); setTeamForm({ name: t.name, description: t.description, color: t.color }); setShowTeamForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
-                    <button onClick={() => { if (confirm('Delete team "' + t.name + '"?')) deleteTeam.mutate(t.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid #dc2626', color: '#dc2626', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
+                    <button onClick={() => { setEditingTeamId(t.id); setTeamForm({ name: t.name, description: t.description, color: t.color }); setShowTeamForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
+                    <button onClick={() => { if (confirm('Delete team "' + t.name + '"?')) deleteTeam.mutate(t.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Escalation Rules */}
-        <section style={{ background: '#fff', borderRadius: 10, padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <section style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <AlertTriangle size={20} color="#dc2626" />
@@ -230,18 +230,18 @@ export default function SettingsPage() {
             </button>
           </div>
           {showRuleForm && (
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem', padding: '1rem', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca' }}>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label><input value={ruleForm.name} onChange={e => setRuleForm({ ...ruleForm, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Condition</label>
-                <select value={ruleForm.condition} onChange={e => setRuleForm({ ...ruleForm, condition: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }}>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem', padding: '1rem', background: 'var(--badge-red-bg)', borderRadius: 8, border: '1px solid var(--badge-red-border)' }}>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Name *</label><input value={ruleForm.name} onChange={e => setRuleForm({ ...ruleForm, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Condition</label>
+                <select value={ruleForm.condition} onChange={e => setRuleForm({ ...ruleForm, condition: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }}>
                   <option value="SLA_BREACHED">SLA Breached</option>
                   <option value="EXCEPTION_AGE">Exception Age (hours)</option>
                   <option value="STATUS_STUCK">Stuck in Status (hours)</option>
                 </select>
               </div>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Threshold</label><input type="number" value={ruleForm.threshold} onChange={e => setRuleForm({ ...ruleForm, threshold: +e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 80 }} /></div>
-              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Target Role</label>
-                <select value={ruleForm.targetRole} onChange={e => setRuleForm({ ...ruleForm, targetRole: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 120 }}>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Threshold</label><input type="number" value={ruleForm.threshold} onChange={e => setRuleForm({ ...ruleForm, threshold: +e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 80 }} /></div>
+              <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Target Role</label>
+                <select value={ruleForm.targetRole} onChange={e => setRuleForm({ ...ruleForm, targetRole: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 120 }}>
                   <option value="OPS">Operations</option>
                   <option value="ADMIN">Admin</option>
                   <option value="COURIER">Courier</option>
@@ -255,27 +255,27 @@ export default function SettingsPage() {
                 <button onClick={() => editingRuleId ? updateRule.mutate() : createRule.mutate()} disabled={!ruleForm.name || createRule.isPending || updateRule.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
                   <Check size={14} /> {editingRuleId ? 'Update' : 'Create'}
                 </button>
-                <button onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+                <button onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
                   <X size={14} /> Cancel
                 </button>
               </div>
             </div>
           )}
           {(!rules || rules.length === 0) ? (
-            <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No escalation rules configured.</p>
+            <p style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.875rem' }}>No escalation rules configured.</p>
           ) : (
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {(rules || []).map((r: any) => (
-                <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: 8 }}>
+                <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                   <AlertTriangle size={14} color={r.isActive ? '#dc2626' : '#94a3b8'} />
                   <div style={{ flex: 1 }}>
                     <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{r.name}</span>
-                    <span style={{ color: '#64748b', fontSize: '0.8125rem', marginLeft: '0.5rem' }}>— {CONDITION_LABELS[r.condition] || r.condition} ({r.threshold}) → {r.targetRole}</span>
-                    {!r.isActive && <span style={{ color: '#94a3b8', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(disabled)</span>}
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginLeft: '0.5rem' }}>— {CONDITION_LABELS[r.condition] || r.condition} ({r.threshold}) → {r.targetRole}</span>
+                    {!r.isActive && <span style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(disabled)</span>}
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem' }}>
-                    <button onClick={() => { setEditingRuleId(r.id); setRuleForm({ name: r.name, condition: r.condition, threshold: r.threshold, targetRole: r.targetRole, isActive: r.isActive }); setShowRuleForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
-                    <button onClick={() => { if (confirm('Delete rule "' + r.name + '"?')) deleteRule.mutate(r.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid #dc2626', color: '#dc2626', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
+                    <button onClick={() => { setEditingRuleId(r.id); setRuleForm({ name: r.name, condition: r.condition, threshold: r.threshold, targetRole: r.targetRole, isActive: r.isActive }); setShowRuleForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
+                    <button onClick={() => { if (confirm('Delete rule "' + r.name + '"?')) deleteRule.mutate(r.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
                       <Trash2 size={12} />
                     </button>
                   </div>

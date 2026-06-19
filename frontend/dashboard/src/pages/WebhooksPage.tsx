@@ -56,31 +56,31 @@ export default function WebhooksPage() {
         </button>
       </div>
 
-      <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '1rem' }}>
+      <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
         Configure webhooks to notify external systems when shipment events occur. Events are sent as HTTP POST requests with a JSON payload.
       </p>
 
       {(showForm) && (
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label>
-              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Slack Notifier" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Name *</label>
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Slack Notifier" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }} />
             </div>
             <div style={{ flex: 1, minWidth: 300 }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Webhook URL *</label>
-              <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://hooks.example.com/events" style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: '100%' }} />
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Webhook URL *</label>
+              <input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://hooks.example.com/events" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: '100%' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Active</label>
-              <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm({ ...form, isActive: e.target.value === 'true' })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 100 }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Active</label>
+              <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm({ ...form, isActive: e.target.value === 'true' })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 100 }}>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>
             </div>
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.5rem' }}>Subscribe to Events</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Subscribe to Events</label>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {(events || WEBHOOK_EVENTS).map((evt: string) => (
                 <label key={evt} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', borderRadius: 6, border: `1px solid ${form.events.includes(evt) ? EVENT_COLORS[evt] || '#2563eb' : '#e2e8f0'}`, background: form.events.includes(evt) ? (EVENT_COLORS[evt] || '#2563eb') + '10' : '#fff', cursor: 'pointer', fontSize: '0.8125rem' }}>
@@ -94,7 +94,7 @@ export default function WebhooksPage() {
             <button onClick={() => editingId ? updateWebhook.mutate() : createWebhook.mutate()} disabled={!form.name || !form.url || !form.events.length || createWebhook.isPending || updateWebhook.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <Check size={14} /> {editingId ? 'Update' : 'Create'}
             </button>
-            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <X size={14} /> Cancel
             </button>
           </div>
@@ -108,11 +108,11 @@ export default function WebhooksPage() {
       )}
 
       {!webhooks?.length ? (
-        <p style={{ color: '#64748b' }}>No webhooks configured yet.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>No webhooks configured yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {webhooks?.map((w: any) => (
-            <div key={w.id} style={{ background: '#fff', borderRadius: 10, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <div key={w.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: w.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Webhook size={20} color={w.isActive ? '#16a34a' : '#94a3b8'} />
@@ -124,13 +124,13 @@ export default function WebhooksPage() {
                       {w.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <code style={{ fontSize: '0.8125rem', color: '#64748b', wordBreak: 'break-all' }}>{w.url}</code>
+                  <code style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', wordBreak: 'break-all' }}>{w.url}</code>
                 </div>
                 <div style={{ display: 'flex', gap: '0.375rem' }}>
-                  <button onClick={() => testWebhook.mutate(w.id)} title="Send test ping" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
+                  <button onClick={() => testWebhook.mutate(w.id)} title="Send test ping" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
                     <Send size={12} /> Test
                   </button>
-                  <button onClick={() => openEdit(w)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer' }}>
+                  <button onClick={() => openEdit(w)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer' }}>
                     <Pencil size={14} />
                   </button>
                   <button onClick={() => { if (confirm('Delete this webhook?')) deleteWebhook.mutate(w.id) }} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>

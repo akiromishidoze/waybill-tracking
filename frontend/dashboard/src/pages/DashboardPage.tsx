@@ -43,14 +43,14 @@ export default function DashboardPage() {
           <div
             key={card.key}
             style={{
-              background: '#fff',
+              background: 'var(--color-surface)',
               padding: '1.25rem',
               borderRadius: 10,
               borderLeft: `4px solid ${card.color}`,
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
-            <p style={{ fontSize: '0.875rem', color: '#64748b' }}>{card.label}</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{card.label}</p>
             <p style={{ fontSize: '1.75rem', fontWeight: 700 }}>
               {stats?.[card.key as keyof typeof stats] ?? '—'}
             </p>
@@ -59,11 +59,11 @@ export default function DashboardPage() {
       </div>
 
       {openEscalations > 0 && (
-        <div onClick={() => navigate('/escalations')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem', padding: '1rem 1.25rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, cursor: 'pointer' }}>
+        <div onClick={() => navigate('/escalations')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem', padding: '1rem 1.25rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 10, cursor: 'pointer' }}>
           <AlertTriangle size={20} color="#dc2626" />
           <div>
             <p style={{ fontWeight: 600, color: '#dc2626', fontSize: '0.9375rem' }}>{openEscalations} Open Escalation{openEscalations > 1 ? 's' : ''}</p>
-            <p style={{ fontSize: '0.8125rem', color: '#b91c1c' }}>Click to view and resolve.</p>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--badge-red-text)' }}>Click to view and resolve.</p>
           </div>
         </div>
       )}

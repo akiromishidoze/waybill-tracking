@@ -46,12 +46,12 @@ export default function DwellAlertsPage() {
       actions={
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-            <label style={{ color: '#64748b' }}>Threshold (min):</label>
+            <label style={{ color: 'var(--color-text-muted)' }}>Threshold (min):</label>
             <input
               type="number"
               value={threshold}
               onChange={e => setThreshold(+e.target.value)}
-              style={{ width: 80, padding: '0.375rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.8125rem' }}
+              style={{ width: 80, padding: '0.375rem 0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.8125rem' }}
             />
             <button
               onClick={() => updateThreshold.mutate()}
@@ -61,7 +61,7 @@ export default function DwellAlertsPage() {
               {updateThreshold.isPending ? 'Saving...' : 'Update'}
             </button>
           </div>
-          <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
+          <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
             Active: <strong style={{ color: '#dc2626' }}>{activeAlerts.length}</strong>
             {' · '}Acknowledged: <strong>{acknowledgedAlerts.length}</strong>
           </span>
@@ -71,7 +71,7 @@ export default function DwellAlertsPage() {
       {isLoading ? (
         <p>Loading...</p>
       ) : alerts && alerts.length === 0 ? (
-        <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 10, textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>
           <Clock size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
           <p style={{ fontWeight: 500 }}>No dwell time alerts</p>
           <p style={{ fontSize: '0.875rem' }}>All shipments are moving through hubs within the threshold.</p>
@@ -85,26 +85,26 @@ export default function DwellAlertsPage() {
               </h3>
               <div style={{ display: 'grid', gap: '0.5rem' }}>
                 {activeAlerts.map((alert: DwellAlert) => (
-                  <div key={alert.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#fef2f2', borderRadius: 10, border: '1px solid #fecaca' }}>
+                  <div key={alert.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--badge-red-bg)', borderRadius: 10, border: '1px solid var(--badge-red-border)' }}>
                     <Clock size={20} color="#dc2626" />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        <Link to={`/waybills/${alert.waybillId}`} style={{ fontWeight: 600, color: '#1e293b', textDecoration: 'none', fontSize: '0.9375rem' }}>
+                        <Link to={`/waybills/${alert.waybillId}`} style={{ fontWeight: 600, color: 'var(--color-text-primary)', textDecoration: 'none', fontSize: '0.9375rem' }}>
                           #{alert.trackingNumber}
                         </Link>
-                        <span style={{ color: '#64748b', fontSize: '0.875rem' }}>at</span>
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>at</span>
                         <strong style={{ fontSize: '0.875rem' }}>{alert.facility}</strong>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.8125rem', color: '#64748b' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
                         <span>Dwelling: <strong style={{ color: '#dc2626' }}>{formatDuration(alert.durationMinutes)}</strong></span>
-                        <span style={{ color: '#cbd5e1' }}>·</span>
+                        <span style={{ color: 'var(--color-border-input)' }}>·</span>
                         <span>Threshold: {formatDuration(alert.thresholdMinutes)}</span>
-                        <span style={{ color: '#cbd5e1' }}>·</span>
+                        <span style={{ color: 'var(--color-border-input)' }}>·</span>
                         <span>Since: {new Date(alert.arrivedAt).toLocaleString()}</span>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.375rem' }}>
-                      <Link to={`/waybills/${alert.waybillId}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.75rem', textDecoration: 'none', color: '#475569' }}>
+                      <Link to={`/waybills/${alert.waybillId}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.75rem', textDecoration: 'none', color: 'var(--color-text-secondary)' }}>
                         <Eye size={12} /> View
                       </Link>
                       <button
@@ -123,21 +123,21 @@ export default function DwellAlertsPage() {
 
           {acknowledgedAlerts.length > 0 && (
             <section>
-              <h3 style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h3 style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '0.75rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <CheckCircle size={16} /> Acknowledged
               </h3>
               <div style={{ display: 'grid', gap: '0.375rem' }}>
                 {acknowledgedAlerts.map((alert: DwellAlert) => (
-                  <div key={alert.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: 8 }}>
+                  <div key={alert.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                     <Clock size={16} color="#94a3b8" />
                     <div style={{ flex: 1, fontSize: '0.875rem' }}>
-                      <Link to={`/waybills/${alert.waybillId}`} style={{ fontWeight: 500, color: '#475569', textDecoration: 'none' }}>
+                      <Link to={`/waybills/${alert.waybillId}`} style={{ fontWeight: 500, color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
                         #{alert.trackingNumber}
                       </Link>
-                      <span style={{ color: '#94a3b8' }}> at {alert.facility} — {formatDuration(alert.durationMinutes)}</span>
+                      <span style={{ color: 'var(--color-text-muted-lighter)' }}> at {alert.facility} — {formatDuration(alert.durationMinutes)}</span>
                     </div>
                     {alert.acknowledgedBy && (
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>
                         by {alert.acknowledgedBy} {alert.acknowledgedAt && new Date(alert.acknowledgedAt).toLocaleDateString()}
                       </span>
                     )}

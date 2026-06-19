@@ -47,25 +47,25 @@ export default function ReturnsPage() {
   return (
     <PageContainer title="Returns & Reverse Logistics">
       {initiatingId && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem', border: '1px solid var(--color-border)' }}>
           <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>Initiate Return for {initiatingId}</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 400 }}>
-            <input placeholder="Reason (e.g. Damaged, Wrong item)" value={reason} onChange={e => setReason(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
-            <input placeholder="Return Carrier (optional)" value={carrier} onChange={e => setCarrier(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
-            <input placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
+            <input placeholder="Reason (e.g. Damaged, Wrong item)" value={reason} onChange={e => setReason(e.target.value)} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
+            <input placeholder="Return Carrier (optional)" value={carrier} onChange={e => setCarrier(e.target.value)} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
+            <input placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={() => initiateReturn.mutate(initiatingId)} disabled={!reason || initiateReturn.isPending} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
                 {initiateReturn.isPending ? 'Initiating...' : 'Confirm Return'}
               </button>
-              <button onClick={() => setInitiatingId(null)} style={{ padding: '0.5rem 1rem', background: '#fff', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setInitiatingId(null)} style={{ padding: '0.5rem 1rem', background: 'var(--color-surface)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: 10, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left' }}>
-          <thead style={{ background: '#f8fafc', color: '#64748b' }}>
+          <thead style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }}>
             <tr>
               <th style={{ padding: '0.75rem 1rem' }}>Tracking #</th>
               <th style={{ padding: '0.75rem 1rem' }}>Recipient</th>
@@ -75,16 +75,16 @@ export default function ReturnsPage() {
               <th style={{ padding: '0.75rem 1rem' }}>Actions</th>
             </tr>
           </thead>
-          <tbody style={{ borderTop: '1px solid #f1f5f9' }}>
+          <tbody style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={6} />)
             ) : !returns?.length ? (
-              <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No returns yet.</td></tr>
+              <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No returns yet.</td></tr>
             ) : (
               returns.map((r: any) => (
-                <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <tr key={r.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    <Link to={`/waybills/${r.id}`} style={{ color: '#2563eb', fontWeight: 500, textDecoration: 'none' }}>{r.trackingNumber}</Link>
+                    <Link to={`/waybills/${r.id}`} style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>{r.trackingNumber}</Link>
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>{r.recipientName}</td>
                   <td style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
@@ -95,7 +95,7 @@ export default function ReturnsPage() {
                       {RETURN_LABELS[r.returnInfo.status as ReturnStatus] || r.returnInfo.status}
                     </span>
                   </td>
-                  <td style={{ padding: '0.75rem 1rem', color: '#475569', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.returnInfo.reason}</td>
+                  <td style={{ padding: '0.75rem 1rem', color: 'var(--color-text-secondary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.returnInfo.reason}</td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     {NEXT_STATUS[r.returnInfo.status] && (
                       <button onClick={() => advanceReturn.mutate({ id: r.id, status: NEXT_STATUS[r.returnInfo.status] })} disabled={advanceReturn.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer' }}>

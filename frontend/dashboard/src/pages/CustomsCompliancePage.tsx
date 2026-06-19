@@ -6,12 +6,12 @@ import { FileText, Globe, CheckCircle, XCircle, Clock, Upload, Download, Search 
 import { SkeletonBlock } from '@/components/Skeleton'
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  NOT_REQUIRED: { label: 'Not Required', bg: '#f1f5f9', color: '#64748b' },
-  DOCUMENTS_PENDING: { label: 'Docs Pending', bg: '#fef3c7', color: '#92400e' },
-  DOCUMENTS_SUBMITTED: { label: 'Docs Submitted', bg: '#dbeafe', color: '#1e40af' },
-  CLEARANCE_IN_PROGRESS: { label: 'Clearance In Progress', bg: '#e0e7ff', color: '#4338ca' },
-  CLEARED: { label: 'Cleared', bg: '#dcfce7', color: '#15803d' },
-  HELD: { label: 'Held', bg: '#fecaca', color: '#b91c1c' },
+  NOT_REQUIRED: { label: 'Not Required', bg: 'var(--color-bg)', color: 'var(--color-text-muted)' },
+  DOCUMENTS_PENDING: { label: 'Docs Pending', bg: '#fef3c7', color: 'var(--badge-amber-text)' },
+  DOCUMENTS_SUBMITTED: { label: 'Docs Submitted', bg: '#dbeafe', color: 'var(--badge-blue-text)' },
+  CLEARANCE_IN_PROGRESS: { label: 'Clearance In Progress', bg: '#e0e7ff', color: 'var(--badge-indigo-text)' },
+  CLEARED: { label: 'Cleared', bg: '#dcfce7', color: 'var(--badge-green-text)' },
+  HELD: { label: 'Held', bg: '#fecaca', color: 'var(--badge-red-text)' },
 }
 
 const DOC_LABELS: Record<string, string> = {
@@ -25,10 +25,10 @@ const DOC_LABELS: Record<string, string> = {
 }
 
 const DOC_STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  PENDING: { label: 'Pending', bg: '#fef3c7', color: '#92400e' },
-  SUBMITTED: { label: 'Submitted', bg: '#dbeafe', color: '#1e40af' },
-  APPROVED: { label: 'Approved', bg: '#dcfce7', color: '#15803d' },
-  REJECTED: { label: 'Rejected', bg: '#fecaca', color: '#b91c1c' },
+  PENDING: { label: 'Pending', bg: '#fef3c7', color: 'var(--badge-amber-text)' },
+  SUBMITTED: { label: 'Submitted', bg: '#dbeafe', color: 'var(--badge-blue-text)' },
+  APPROVED: { label: 'Approved', bg: '#dcfce7', color: 'var(--badge-green-text)' },
+  REJECTED: { label: 'Rejected', bg: '#fecaca', color: 'var(--badge-red-text)' },
 }
 
 const formatSize = (bytes: number) => {
@@ -66,7 +66,7 @@ export default function CustomsCompliancePage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Customs & Compliance</h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
             {international.length} international · {domestic.filter((s: CustomsShipment) => s.customsStatus !== 'NOT_REQUIRED').length} with compliance docs
           </p>
         </div>
@@ -74,12 +74,12 @@ export default function CustomsCompliancePage() {
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
-          <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted-lighter)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search tracking number or shipper..."
-            style={{ width: '100%', padding: '0.625rem 0.75rem 0.625rem 2.25rem', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: '0.875rem' }} />
+            style={{ width: '100%', padding: '0.625rem 0.75rem 0.625rem 2.25rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem' }} />
         </div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          style={{ padding: '0.625rem 1rem', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: '0.875rem', background: '#fff', minWidth: 180 }}>
+          style={{ padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', minWidth: 180 }}>
           <option value="">All Statuses</option>
           {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
@@ -88,9 +88,9 @@ export default function CustomsCompliancePage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={120} /><SkeletonBlock height={120} /></div>
       ) : !filtered.length ? (
-        <div style={{ background: '#fff', borderRadius: 12, padding: '2rem', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+        <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '2rem', textAlign: 'center', border: '1px solid var(--color-border)' }}>
           <Globe size={40} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
-          <p style={{ color: '#64748b', margin: 0 }}>No customs shipments found.</p>
+          <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>No customs shipments found.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
@@ -99,7 +99,7 @@ export default function CustomsCompliancePage() {
             const isIntl = s.originCountry !== s.destinationCountry
             const pendingDocs = s.documents.filter(d => d.status !== 'APPROVED').length
             return (
-              <div key={s.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+              <div key={s.id} style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
                 <div style={{ padding: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', flex: 1 }}>
@@ -110,12 +110,12 @@ export default function CustomsCompliancePage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontWeight: 600, fontSize: '1rem' }}>{s.trackingNumber}</span>
                           <span style={{ display: 'inline-block', padding: '0.2rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-                          {isIntl && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 500, background: '#eff6ff', color: '#2563eb' }}><Globe size={10} /> International</span>}
+                          {isIntl && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 500, background: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}><Globe size={10} /> International</span>}
                         </div>
-                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: '#64748b' }}>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
                           {s.shipperName} &middot; {s.originCountry} &rarr; {s.destinationCountry}
                         </p>
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.375rem', fontSize: '0.8125rem', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.375rem', fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)' }}>
                           <span>{s.recipientName}</span>
                           <span>{s.destination}</span>
                           {s.estimatedClearance && <span><Clock size={12} style={{ marginRight: '0.25rem' }} />Est. clearance: {new Date(s.estimatedClearance).toLocaleDateString()}</span>}
@@ -124,12 +124,12 @@ export default function CustomsCompliancePage() {
                     </div>
                     <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center', marginLeft: '1rem' }}>
                       {pendingDocs > 0 && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, background: '#fef3c7', color: '#92400e' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, background: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' }}>
                           <Clock size={12} /> {pendingDocs} pending
                         </span>
                       )}
                       <button onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
-                        style={{ padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid #cbd5e1', background: 'transparent', color: '#475569' }}>
+                        style={{ padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-secondary)' }}>
                         {expandedId === s.id ? 'Hide Docs' : `${s.documents.length} Documents`}
                       </button>
                     </div>
@@ -137,21 +137,21 @@ export default function CustomsCompliancePage() {
                 </div>
 
                 {expandedId === s.id && (
-                  <div style={{ borderTop: '1px solid #f1f5f9', padding: '1rem 1.25rem', background: '#f8fafc' }}>
+                  <div style={{ borderTop: '1px solid var(--color-border-subtle)', padding: '1rem 1.25rem', background: 'var(--color-surface-hover)' }}>
                     <div style={{ display: 'grid', gap: '0.75rem' }}>
                       {s.documents.length === 0 ? (
-                        <p style={{ fontSize: '0.8125rem', color: '#94a3b8', margin: 0 }}>No documents required for domestic shipments.</p>
+                        <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)', margin: 0 }}>No documents required for domestic shipments.</p>
                       ) : (
                         s.documents.map((doc: CustomsDocument) => {
                           const dcfg = DOC_STATUS_CONFIG[doc.status] || DOC_STATUS_CONFIG.PENDING
                           return (
-                            <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: '#fff', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: 'var(--color-surface)', borderRadius: 8, border: '1px solid var(--color-border)' }}>
+                              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <FileText size={18} color="#64748b" />
                               </div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{doc.title}</div>
-                                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.125rem', fontSize: '0.75rem', color: '#94a3b8' }}>
+                                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.125rem', fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>
                                   <span>{DOC_LABELS[doc.docType] || doc.docType}</span>
                                   <span>{formatSize(doc.fileSize)}</span>
                                   {doc.submittedAt && <span>Submitted: {new Date(doc.submittedAt).toLocaleDateString()}</span>}
@@ -161,7 +161,7 @@ export default function CustomsCompliancePage() {
                                 {doc.status === 'APPROVED' ? <CheckCircle size={10} /> : doc.status === 'REJECTED' ? <XCircle size={10} /> : <Clock size={10} />}
                                 {dcfg.label}
                               </span>
-                              <button style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid #cbd5e1', background: 'transparent', color: '#475569' }}>
+                              <button style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-secondary)' }}>
                                 <Download size={12} /> Download
                               </button>
                             </div>
@@ -169,7 +169,7 @@ export default function CustomsCompliancePage() {
                         })
                       )}
                       {['DOCUMENTS_PENDING', 'DOCUMENTS_SUBMITTED'].includes(s.customsStatus) && (
-                        <button style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer', border: '1px dashed #2563eb', background: '#eff6ff', color: '#2563eb', justifyContent: 'center', width: '100%' }}>
+                        <button style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer', border: '1px dashed #2563eb', background: 'var(--color-primary-soft)', color: 'var(--color-primary)', justifyContent: 'center', width: '100%' }}>
                           <Upload size={14} /> Upload Document
                         </button>
                       )}

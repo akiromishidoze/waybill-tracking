@@ -26,13 +26,13 @@ export default function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        background: '#f1f5f9',
+        background: 'var(--color-bg)',
       }}
     >
       <form
         onSubmit={handleSubmit}
         style={{
-          background: '#fff',
+          background: 'var(--color-surface)',
           padding: '2.5rem',
           borderRadius: 12,
           boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
@@ -41,7 +41,7 @@ export default function LoginPage() {
         }}
       >
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
-        <p style={{ color: '#64748b', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
           Email: <strong>Admin</strong> / Password: <strong>admin</strong>
         </p>
         {error && (
@@ -61,7 +61,7 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '0.625rem',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--color-border-input)',
               borderRadius: 6,
               fontSize: '1rem',
             }}
@@ -79,7 +79,7 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '0.625rem',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--color-border-input)',
               borderRadius: 6,
               fontSize: '1rem',
             }}

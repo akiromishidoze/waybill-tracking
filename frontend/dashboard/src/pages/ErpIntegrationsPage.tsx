@@ -18,14 +18,14 @@ export default function ErpIntegrationsPage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '0.75rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !integrations?.length ? (
-        <div style={{ background: '#fff', padding: '2rem', borderRadius: 10, textAlign: 'center', color: '#94a3b8' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 10, textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>
           <Database size={40} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
           <p style={{ fontWeight: 500 }}>No ERP integrations configured</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '0.75rem' }}>
           {integrations.map((i: ErpIntegration) => (
-            <div key={i.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+            <div key={i.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--color-surface)', borderRadius: 10, border: '1px solid var(--color-border)' }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: (SYSTEM_COLORS[i.system] || '#64748b') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Database size={20} color={SYSTEM_COLORS[i.system] || '#64748b'} />
               </div>
@@ -34,7 +34,7 @@ export default function ErpIntegrationsPage() {
                   {i.name}
                   {i.lastSyncStatus === 'SUCCESS' ? <CheckCircle size={14} color="#16a34a" /> : i.lastSyncStatus === 'FAILED' ? <XCircle size={14} color="#dc2626" /> : null}
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <span>{i.system}</span>
                   <span>{i.authType}</span>
                   <span>{i.syncDirection}</span>

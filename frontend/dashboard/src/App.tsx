@@ -29,11 +29,15 @@ import DriverAppPage from './pages/DriverAppPage'
 import DynamicReroutingPage from './pages/DynamicReroutingPage'
 import AutoCommunicationsPage from './pages/AutoCommunicationsPage'
 import CustomsCompliancePage from './pages/CustomsCompliancePage'
+import CODPage from './pages/CODPage'
+import BiIntegrationsPage from './pages/BiIntegrationsPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 export default function App() {
   return (
+    <ThemeProvider>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/track/:trackingNumber" element={<TrackingPage />} />
@@ -57,12 +61,14 @@ export default function App() {
           <Route path="/escalations" element={<EscalationsPage />} />
           <Route path="/driver-app" element={<DriverAppPage />} />
            <Route path="/rerouting" element={<DynamicReroutingPage />} />
-          <Route path="/customs" element={<CustomsCompliancePage />} />
+           <Route path="/customs" element={<CustomsCompliancePage />} />
+          <Route path="/cod" element={<CODPage />} />
           <Route path="/auto-comms" element={<AutoCommunicationsPage />} />
           <Route path="/dwell-alerts" element={<DwellAlertsPage />} />
           <Route path="/geofence" element={<GeofenceEventsPage />} />
           <Route path="/reports/schedules" element={<ScheduledReportsPage />} />
           <Route path="/analytics/regions" element={<RegionPerformancePage />} />
+          <Route path="/analytics/bi-tools" element={<BiIntegrationsPage />} />
           <Route path="/integrations/erp" element={<ErpIntegrationsPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
@@ -71,5 +77,6 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </ThemeProvider>
   )
 }

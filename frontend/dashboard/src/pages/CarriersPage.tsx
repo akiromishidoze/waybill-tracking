@@ -43,13 +43,13 @@ export default function CarriersPage() {
       </div>
 
       {(showForm) && (
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Name *</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
-          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>API Endpoint</label><input value={form.apiEndpoint} onChange={e => setForm({ ...form, apiEndpoint: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 240 }} /></div>
-          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>API Key</label><input value={form.apiKey} onChange={e => setForm({ ...form, apiKey: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 140 }} /></div>
-          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Tracking URL</label><input value={form.trackingUrlTemplate} onChange={e => setForm({ ...form, trackingUrlTemplate: e.target.value })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 200 }} /></div>
-          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Active</label>
-            <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm({ ...form, isActive: e.target.value === 'true' })} style={{ padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', width: 100 }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.25rem', borderRadius: 10, marginBottom: '1rem', boxShadow: 'var(--shadow-sm)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Name *</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }} /></div>
+          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>API Endpoint</label><input value={form.apiEndpoint} onChange={e => setForm({ ...form, apiEndpoint: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 240 }} /></div>
+          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>API Key</label><input value={form.apiKey} onChange={e => setForm({ ...form, apiKey: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 140 }} /></div>
+          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Tracking URL</label><input value={form.trackingUrlTemplate} onChange={e => setForm({ ...form, trackingUrlTemplate: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 200 }} /></div>
+          <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Active</label>
+            <select value={form.isActive ? 'true' : 'false'} onChange={e => setForm({ ...form, isActive: e.target.value === 'true' })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 100 }}>
               <option value="true">Yes</option>
               <option value="false">No</option>
             </select>
@@ -58,7 +58,7 @@ export default function CarriersPage() {
             <button onClick={() => editingId ? updateCarrier.mutate() : createCarrier.mutate()} disabled={!form.name || createCarrier.isPending || updateCarrier.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <Check size={14} /> {editingId ? 'Update' : 'Create'}
             </button>
-            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <X size={14} /> Cancel
             </button>
           </div>
@@ -68,11 +68,11 @@ export default function CarriersPage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !carriers?.length ? (
-        <p style={{ color: '#64748b' }}>No carriers configured yet.</p>
+        <p style={{ color: 'var(--color-text-muted)' }}>No carriers configured yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {carriers?.map((c) => (
-            <div key={c.id} style={{ background: '#fff', borderRadius: 10, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div key={c.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: 44, height: 44, borderRadius: 10, background: c.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Truck size={22} color={c.isActive ? '#16a34a' : '#94a3b8'} />
               </div>
@@ -84,21 +84,21 @@ export default function CarriersPage() {
                       <CheckCircle size={12} /> Active
                     </span>
                   ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)', fontWeight: 500 }}>
                       <XCircle size={12} /> Inactive
                     </span>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.375rem', fontSize: '0.8125rem', color: '#64748b' }}>
-                  <span>API: <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: 3 }}>{c.apiEndpoint || '—'}</code></span>
-                  <span>Key: <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: 3 }}>{c.apiKey ? c.apiKey.slice(0, 8) + '****' : '—'}</code></span>
+                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.375rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+                  <span>API: <code style={{ background: 'var(--color-bg)', padding: '0.125rem 0.375rem', borderRadius: 3 }}>{c.apiEndpoint || '—'}</code></span>
+                  <span>Key: <code style={{ background: 'var(--color-bg)', padding: '0.125rem 0.375rem', borderRadius: 3 }}>{c.apiKey ? c.apiKey.slice(0, 8) + '****' : '—'}</code></span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <a href={c.trackingUrlTemplate?.replace('{{number}}', 'DEMO') || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, color: '#2563eb', textDecoration: 'none', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>
+                <a href={c.trackingUrlTemplate?.replace('{{number}}', 'DEMO') || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, color: 'var(--color-primary)', textDecoration: 'none', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>
                   Tracking <ExternalLink size={14} />
                 </a>
-                <button onClick={() => openEdit(c)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: '#2563eb', border: '1px solid #2563eb', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
+                <button onClick={() => openEdit(c)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <Pencil size={14} /> Edit
                 </button>
                 <button onClick={() => { if (confirm('Delete this carrier?')) deleteCarrier.mutate(c.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: '#dc2626', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>

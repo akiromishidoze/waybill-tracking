@@ -87,7 +87,7 @@ export default function AutoCommunicationsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Automated Customer Communications</h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
             {rules.filter(r => r.isActive).length} active notification rules
           </p>
         </div>
@@ -103,36 +103,36 @@ export default function AutoCommunicationsPage() {
       </div>
 
       {showForm && (
-        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 12, marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+        <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 12, marginBottom: '1.5rem', border: '1px solid var(--color-border)' }}>
           <h4 style={{ fontWeight: 600, margin: '0 0 1rem' }}>{editingId ? 'Edit Rule' : 'New Notification Rule'}</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.375rem' }}>Trigger Event</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Trigger Event</label>
               <select value={form.trigger} onChange={e => setForm({ ...form, trigger: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }}>
+                style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }}>
                 {Object.entries(TRIGGER_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.375rem' }}>Channel</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Channel</label>
               <select value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value as any })}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }}>
+                style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }}>
                 <option value="EMAIL">Email</option>
                 <option value="SMS">SMS</option>
               </select>
             </div>
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.375rem' }}>Subject Line</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Subject Line</label>
             <input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}
-              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} placeholder="e.g. Your package {tracking} is out for delivery" />
+              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} placeholder="e.g. Your package {tracking} is out for delivery" />
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.375rem' }}>Message Template</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Message Template</label>
             <textarea value={form.template} onChange={e => setForm({ ...form, template: e.target.value })}
-              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', minHeight: 80, resize: 'vertical', fontFamily: 'inherit' }}
+              style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', minHeight: 80, resize: 'vertical', fontFamily: 'inherit' }}
               placeholder='Available variables: {tracking}, {recipient}, {shipper}, {origin}, {destination}, {eta}, {carrier}, {exception}, {reason}' />
-            <p style={{ margin: '0.375rem 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>Use {'{variable}'} placeholders: tracking, recipient, shipper, origin, destination, eta, carrier, exception, reason</p>
+            <p style={{ margin: '0.375rem 0 0', fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>Use {'{variable}'} placeholders: tracking, recipient, shipper, origin, destination, eta, carrier, exception, reason</p>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
@@ -148,7 +148,7 @@ export default function AutoCommunicationsPage() {
               <Check size={14} /> {editingId ? 'Update' : 'Create'} Rule
             </button>
             <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
               <X size={14} /> Cancel
             </button>
           </div>
@@ -161,7 +161,7 @@ export default function AutoCommunicationsPage() {
             const ChanIcon = CHANNEL_ICONS[rule.channel]
             const TriggerIcon = rule.trigger === 'DELIVERED' ? Package : rule.trigger === 'SLA_BREACHED' ? AlertTriangle : rule.trigger === 'OUT_FOR_DELIVERY' ? Truck : Bell
             return (
-              <div key={rule.id} style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', border: '1px solid #e2e8f0', opacity: rule.isActive ? 1 : 0.5 }}>
+              <div key={rule.id} style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.25rem', border: '1px solid var(--color-border)', opacity: rule.isActive ? 1 : 0.5 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: '0.75rem', flex: 1 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 10, background: rule.isActive ? '#eff6ff' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -170,26 +170,26 @@ export default function AutoCommunicationsPage() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{ fontWeight: 600, fontSize: '1rem' }}>{rule.subject}</span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: '#eff6ff', color: '#2563eb' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}>
                           <TriggerIcon size={10} /> {TRIGGER_LABELS[rule.trigger] || rule.trigger}
                         </span>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: rule.channel === 'EMAIL' ? '#f0fdf4' : '#fef2f2', color: rule.channel === 'EMAIL' ? '#16a34a' : '#dc2626' }}>
                           <ChanIcon size={10} /> {rule.channel}
                         </span>
                       </div>
-                      <p style={{ margin: '0.375rem 0 0', fontSize: '0.8125rem', color: '#64748b', fontFamily: 'monospace' }}>{rule.template}</p>
-                      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', color: '#94a3b8' }}>
+                      <p style={{ margin: '0.375rem 0 0', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>{rule.template}</p>
+                      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>
                         <span>To: {rule.sendToShipper ? 'Shipper' : ''}{rule.sendToShipper && rule.sendToRecipient ? ' + ' : ''}{rule.sendToRecipient ? 'Recipient' : ''}</span>
                       </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', marginLeft: '1rem' }}>
                     <button onClick={() => toggleActive(rule.id)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid #cbd5e1', background: 'transparent', color: '#64748b' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-muted)' }}>
                       {rule.isActive ? 'Deactivate' : 'Activate'}
                     </button>
                     <button onClick={() => { setForm({ trigger: rule.trigger, channel: rule.channel, subject: rule.subject, template: rule.template, sendToShipper: rule.sendToShipper, sendToRecipient: rule.sendToRecipient }); setEditingId(rule.id); setShowForm(true) }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid #2563eb', background: 'transparent', color: '#2563eb' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'transparent', color: 'var(--color-primary)' }}>
                       Edit
                     </button>
                   </div>
@@ -201,30 +201,30 @@ export default function AutoCommunicationsPage() {
       )}
 
       {activeTab === 'log' && (
-        <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
           <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Tracking #</th>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Channel</th>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Recipient</th>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Subject</th>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Sent At</th>
-                <th style={{ padding: '0.875rem 1.25rem', background: '#f8fafc', color: '#64748b', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Status</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Tracking #</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Channel</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Recipient</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Subject</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Sent At</th>
+                <th style={{ padding: '0.875rem 1.25rem', background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '2px solid #e2e8f0', whiteSpace: 'nowrap' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {logs.map(log => (
-                <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '0.875rem 1.25rem', fontWeight: 500, color: '#2563eb' }}>{log.trackingNumber}</td>
+                <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                  <td style={{ padding: '0.875rem 1.25rem', fontWeight: 500, color: 'var(--color-primary)' }}>{log.trackingNumber}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, background: log.channel === 'EMAIL' ? '#f0fdf4' : '#fef2f2', color: log.channel === 'EMAIL' ? '#16a34a' : '#dc2626' }}>
                       {log.channel === 'EMAIL' ? <Mail size={12} /> : <MessageSquare size={12} />} {log.channel}
                     </span>
                   </td>
-                  <td style={{ padding: '0.875rem 1.25rem', color: '#334155' }}>{log.recipient}</td>
-                  <td style={{ padding: '0.875rem 1.25rem', color: '#475569', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.subject}</td>
-                  <td style={{ padding: '0.875rem 1.25rem', color: '#64748b', whiteSpace: 'nowrap' }}>{new Date(log.sentAt).toLocaleString()}</td>
+                  <td style={{ padding: '0.875rem 1.25rem', color: 'var(--color-text-primary)' }}>{log.recipient}</td>
+                  <td style={{ padding: '0.875rem 1.25rem', color: 'var(--color-text-secondary)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.subject}</td>
+                  <td style={{ padding: '0.875rem 1.25rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{new Date(log.sentAt).toLocaleString()}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: log.status === 'SENT' ? '#dcfce7' : '#fef2f2', color: log.status === 'SENT' ? '#16a34a' : '#dc2626' }}>
                       {log.status === 'SENT' ? <Check size={10} /> : <X size={10} />} {log.status}

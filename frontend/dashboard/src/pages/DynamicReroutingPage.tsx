@@ -45,7 +45,7 @@ export default function DynamicReroutingPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Dynamic Re-routing</h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#64748b' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
             {rerouteCandidates.length} shipments eligible for re-routing
           </p>
         </div>
@@ -54,14 +54,14 @@ export default function DynamicReroutingPage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={100} /><SkeletonBlock height={100} /><SkeletonBlock height={100} /></div>
       ) : !rerouteCandidates.length ? (
-        <div style={{ background: '#fff', borderRadius: 10, padding: '2rem', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '2rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
           <Navigation size={40} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
-          <p style={{ color: '#64748b', margin: 0 }}>No shipments currently in transit. Re-routing is only available for active shipments.</p>
+          <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>No shipments currently in transit. Re-routing is only available for active shipments.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {rerouteCandidates.map((wb: Waybill) => (
-            <div key={wb.id} style={{ background: '#fff', borderRadius: 10, padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: reroutingId === wb.id ? '2px solid #2563eb' : '1px solid transparent' }}>
+            <div key={wb.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)', border: reroutingId === wb.id ? '2px solid #2563eb' : '1px solid transparent' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -70,14 +70,14 @@ export default function DynamicReroutingPage() {
                       {wb.status.replace(/_/g, ' ')}
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                     {wb.shipperName} &middot; {wb.origin}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.375rem' }}>
                   {reroutingId === wb.id ? (
                     <button onClick={() => setReroutingId(null)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
                       <X size={12} /> Cancel
                     </button>
                   ) : (
@@ -89,7 +89,7 @@ export default function DynamicReroutingPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem', color: '#475569' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                   <MapPin size={14} color="#94a3b8" /> Destination: <strong>{wb.destination}</strong>
                 </div>
@@ -105,25 +105,25 @@ export default function DynamicReroutingPage() {
               </div>
 
               {reroutingId === wb.id && (
-                <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: 8, display: 'grid', gap: '0.75rem' }}>
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--color-surface-hover)', borderRadius: 8, display: 'grid', gap: '0.75rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>New Destination *</label>
-                      <input value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} placeholder="City, Province" />
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>New Destination *</label>
+                      <input value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} placeholder="City, Province" />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>New Carrier</label>
-                      <input value={form.carrierName} onChange={e => setForm({ ...form, carrierName: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} placeholder="Optional" />
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>New Carrier</label>
+                      <input value={form.carrierName} onChange={e => setForm({ ...form, carrierName: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} placeholder="Optional" />
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Revised ETA</label>
-                      <input type="date" value={form.estimatedDelivery?.slice(0, 10)} onChange={e => setForm({ ...form, estimatedDelivery: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} />
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Revised ETA</label>
+                      <input type="date" value={form.estimatedDelivery?.slice(0, 10)} onChange={e => setForm({ ...form, estimatedDelivery: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>Re-routing Notes</label>
-                      <input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: '0.875rem' }} placeholder="Reason for re-route" />
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Re-routing Notes</label>
+                      <input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }} placeholder="Reason for re-route" />
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '0.25rem' }}>

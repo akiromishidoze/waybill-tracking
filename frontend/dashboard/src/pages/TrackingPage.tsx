@@ -26,14 +26,14 @@ export default function TrackingPage() {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        background: '#f1f5f9',
+        background: 'var(--color-bg)',
       }}
     >
       <div style={{ width: '100%', maxWidth: 600, padding: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, textAlign: 'center', marginBottom: '0.5rem' }}>
           Track Your Shipment
         </h1>
-        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '1.5rem' }}>
+        <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
           Enter your tracking number to get real-time status
         </p>
 
@@ -46,7 +46,7 @@ export default function TrackingPage() {
             style={{
               flex: 1,
               padding: '0.75rem 1rem',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--color-border)',
               borderRadius: 8,
               fontSize: '1rem',
             }}
@@ -76,16 +76,16 @@ export default function TrackingPage() {
         )}
 
         {wb && (
-          <div style={{ background: '#fff', borderRadius: 12, padding: '1.5rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Status</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Status</p>
                 <p style={{ fontWeight: 700, fontSize: '1.125rem' }}>
                   {wb.status.replace(/_/g, ' ')}
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '0.875rem', color: '#64748b' }}>Est. Delivery</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Est. Delivery</p>
                 <p style={{ fontWeight: 600 }}>
                   {wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'}
                 </p>
@@ -99,7 +99,7 @@ export default function TrackingPage() {
                   style={{
                     position: 'relative',
                     paddingBottom: '1rem',
-                    borderLeft: idx < wb.events.length - 1 ? '2px solid #e2e8f0' : 'none',
+                    borderLeft: idx < wb.events.length - 1 ? '2px solid var(--color-border)' : 'none',
                     paddingLeft: '1.5rem',
                     marginLeft: '-0.75rem',
                   }}
@@ -118,7 +118,7 @@ export default function TrackingPage() {
                   <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>
                     {evt.status.replace(/_/g, ' ')}
                   </p>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
                     {evt.location} — {new Date(evt.timestamp).toLocaleString()}
                   </p>
                 </div>

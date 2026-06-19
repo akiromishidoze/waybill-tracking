@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock } from 'lucide-react'
-import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService } from '@/services/api'
-import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment } from '@/types/waybill'
+import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
+import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
+import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
@@ -82,6 +82,7 @@ export default function WaybillDetailPage() {
   })
 
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data: dwellSegments } = useQuery({
@@ -91,6 +92,12 @@ export default function WaybillDetailPage() {
   })
 
   const activeDwell = dwellSegments?.find(s => s.isActive)
+
+  const { data: geofenceEvents } = useQuery({
+    queryKey: ['geofence', id],
+    queryFn: () => geofenceService.getForWaybill(id!).then(r => r.data),
+    enabled: !!id,
+  })
 
   const { data: attachments, refetch: refetchAttachments } = useQuery({
     queryKey: ['attachments', id],
@@ -118,7 +125,7 @@ export default function WaybillDetailPage() {
           data: base64,
         })
         refetchAttachments()
-      } catch { }
+      } catch { setUploadError('Upload failed. Please try again.') }
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
@@ -231,6 +238,7 @@ export default function WaybillDetailPage() {
             <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer' }}>
               <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload File'}
             </button>
+            {uploadError && <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.375rem' }}>{uploadError}</p>}
           </div>
         </div>
         {(!attachments || attachments.length === 0) ? (
@@ -441,6 +449,37 @@ export default function WaybillDetailPage() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {geofenceEvents && geofenceEvents.length > 0 && (
+        <div style={{ background: '#fff', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+            <MapPin size={18} color="#0891b2" />
+            <h3 style={{ fontWeight: 600 }}>Geofence Events</h3>
+            <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>({geofenceEvents.length})</span>
+          </div>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            {geofenceEvents.map((evt: GeofenceEvent) => (
+              <div key={evt.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.75rem', background: '#f8fafc', borderRadius: 8 }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: evt.eventType === 'ENTRY' ? '#16a34a20' : '#dc262620', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {evt.eventType === 'ENTRY' ? <LogIn size={12} color="#16a34a" /> : <LogOut size={12} color="#dc2626" />}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{evt.eventType === 'ENTRY' ? 'Entered' : 'Exited'} {evt.zone}</span>
+                    <span style={{ display: 'inline-flex', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 500, background: '#e2e8f0', color: '#475569' }}>
+                      {evt.zoneType.replace(/_/g, ' ')}
+                    </span>
+                    <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+                      {new Date(evt.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  {evt.metadata && <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '0.125rem 0 0 0' }}>{evt.metadata}</p>}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

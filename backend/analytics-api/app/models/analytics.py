@@ -2,12 +2,29 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-class SLAReport(BaseModel):
-    period: str
-    totalShipments: int
-    deliveredOnTime: int
-    slaPercentage: float
-    avgTransitHours: float
+
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+class DashboardStats(BaseModel):
+    totalActive: int
+    deliveredToday: int
+    inTransit: int
+    pendingPickup: int
+    totalVolume: int
+    slaCompliance: float
+    exceptionRate: float
+    avgTransitTime: float
+
+
+class SLAReportRow(BaseModel):
+    date: str
+    total: int
+    onTime: int
+    sla: float
+
 
 class AnomalyDetection(BaseModel):
     waybillId: str
@@ -17,9 +34,10 @@ class AnomalyDetection(BaseModel):
     description: str
     detectedAt: datetime
 
+
 class PredictiveETA(BaseModel):
     waybillId: str
     trackingNumber: str
-    predictedDelivery: datetime
+    predictedDelivery: Optional[str] = None
     confidence: float
     basedOn: str

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { api } from '@/services/api'
+import api from '@/services/api'
 
 interface Features {
   [key: string]: boolean

@@ -7,26 +7,22 @@ from app.core.config import settings
 
 app = FastAPI(
     title="Waybill Analytics API",
-    version="1.0.0",
+    description="Provides dashboard statistics, SLA compliance reports, anomaly detection, ETA predictions, and Excel report exports for the Waybill Tracking system.",
+    version="2.0.0",
     docs_url="/docs",
-)
-
-origins = (
-    settings.ALLOWED_ORIGINS.split(",")
-    if settings.ALLOWED_ORIGINS
-    else ["http://localhost:3010"]
+    contact={"name": "WaybillTrack Support", "email": "support@waybilltrack.com"},
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(health.router)
-app.include_router(analytics.router)
-app.include_router(reports.router)
+app.include_router(analytics.router, prefix="/api/analytics")
+app.include_router(reports.router, prefix="/api/reports")
 
 Instrumentator().instrument(app).expose(app)

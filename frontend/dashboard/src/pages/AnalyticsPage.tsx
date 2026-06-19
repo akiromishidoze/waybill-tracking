@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/api'
 import { Package, Clock, AlertTriangle, TrendingUp, CheckCircle, Truck } from 'lucide-react'
@@ -69,9 +70,11 @@ export default function AnalyticsPage() {
     queryFn: () => analyticsService.stats().then((r) => r.data),
     refetchInterval: 30000,
   })
+  const [exportError, setExportError] = useState('')
 
   const handleExport = async () => {
     try {
+      setExportError('')
       const res = await analyticsService.exportExcel('2024-01-01', '2024-12-31')
       const url = URL.createObjectURL(new Blob([res.data]))
       const a = document.createElement('a')
@@ -79,7 +82,7 @@ export default function AnalyticsPage() {
       a.download = 'waybill-report.xlsx'
       a.click()
     } catch {
-      console.error('Export failed')
+      setExportError('Export failed. Please try again.')
     }
   }
 
@@ -87,20 +90,23 @@ export default function AnalyticsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>KPI Dashboard</h2>
-        <button
-          onClick={handleExport}
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#16a34a',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          Export Report
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            onClick={handleExport}
+            style={{
+              padding: '0.5rem 1rem',
+              background: '#16a34a',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            Export Report
+          </button>
+          {exportError && <span style={{ fontSize: '0.8125rem', color: '#dc2626' }}>{exportError}</span>}
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>

@@ -226,3 +226,103 @@ export interface ReturnInfo {
   carrier?: string
   notes?: string
 }
+
+export interface EscalationRule {
+  id: string
+  name: string
+  condition: 'SLA_BREACHED' | 'EXCEPTION_AGE' | 'STATUS_STUCK' | 'HIGH_VALUE'
+  threshold: number
+  targetRole: string
+  isActive: boolean
+  createdAt: string
+}
+
+export interface Escalation {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  ruleId: string
+  ruleName: string
+  reason: string
+  status: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED'
+  escalatedTo: string
+  createdAt: string
+  acknowledgedAt?: string
+  resolvedAt?: string
+  acknowledgedBy?: string
+  resolvedBy?: string
+}
+
+export interface DwellSegment {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  facility: string
+  arrivedAt: string
+  departedAt?: string
+  durationMinutes?: number
+  isActive: boolean
+}
+
+export interface DwellAlert {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  facility: string
+  arrivedAt: string
+  durationMinutes: number
+  thresholdMinutes: number
+  acknowledged: boolean
+  acknowledgedAt?: string
+  acknowledgedBy?: string
+  createdAt: string
+}
+
+export interface GeofenceEvent {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  eventType: 'ENTRY' | 'EXIT'
+  zone: string
+  zoneType: string
+  latitude: number
+  longitude: number
+  timestamp: string
+  metadata?: string
+}
+
+export interface ReportSchedule {
+  id: string
+  name: string
+  format: 'PDF' | 'CSV' | 'EXCEL'
+  frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY'
+  recipients: string[]
+  filters: Record<string, string>
+  lastSentAt?: string
+  nextScheduledAt?: string
+  isActive: boolean
+  createdAt: string
+}
+
+export interface RegionPerformance {
+  region: string
+  totalShipments: number
+  deliveredCount: number
+  onTimeCount: number
+  exceptionCount: number
+  avgTransitHours: number
+  slaCompliance: number
+}
+
+export interface ErpIntegration {
+  id: string
+  name: string
+  system: 'SAP' | 'ORACLE' | 'NETSUITE' | 'OTHER'
+  endpoint: string
+  authType: 'API_KEY' | 'BASIC' | 'OAUTH2' | 'NONE'
+  syncDirection: 'IMPORT' | 'EXPORT' | 'BOTH'
+  lastSyncAt?: string
+  lastSyncStatus?: 'SUCCESS' | 'FAILED'
+  isActive: boolean
+  createdAt: string
+}

@@ -2,8 +2,7 @@ import axios from 'axios'
 import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, ReturnInfo, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
-
-const MOCK_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi0wMDEiLCJlbWFpbCI6ImFkbWluQHdheWJpbGx0cmFjay5jb20iLCJyb2xlIjoiQURNSU4iLCJleHAiOjk5OTk5OTk5OTl9.mock'
+const MOCK_TOKEN = 'mock-jwt-token-admin'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -14,34 +13,6 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
-api.interceptors.request.use((config) => {
-  if (config.url === '/auth/login' && config.method === 'post') {
-    const { email, password } = JSON.parse(config.data || '{}')
-    if (email?.toLowerCase() === 'admin' && password === 'admin') {
-      config.adapter = () => Promise.resolve({
-        data: { accessToken: MOCK_TOKEN, user: MOCK_USER },
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        config,
-      })
-    }
-  }
-  if (config.url === '/auth/me' && config.method === 'get') {
-    const token = localStorage.getItem('access_token')
-    if (token === MOCK_TOKEN) {
-      config.adapter = () => Promise.resolve({
-        data: MOCK_USER,
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        config,
-      })
-    }
   }
   return config
 })
@@ -57,6 +28,21 @@ api.interceptors.response.use(
   },
 )
 
+export const authService = {
+  login: async (email: string, password: string) => {
+    if (String(email).toLowerCase() === 'admin' && password === 'admin') {
+      return { data: { accessToken: MOCK_TOKEN, user: MOCK_USER }, status: 200, statusText: 'OK', headers: {}, config: {} as any }
+    }
+    return await api.post('/auth/login', { email, password })
+  },
+  me: async () => {
+    if (localStorage.getItem('access_token') === MOCK_TOKEN) {
+      return { data: MOCK_USER, status: 200, statusText: 'OK', headers: {}, config: {} as any }
+    }
+    return await api.get('/auth/me')
+  },
+}
+
 export const waybillService = {
   list: (params?: Record<string, string>) =>
     api.get<Waybill[]>('/waybills', { params }),
@@ -68,15 +54,6 @@ export const waybillService = {
     api.patch<Waybill>(`/waybills/${id}/status`, event),
   batchStatusUpdate: (ids: string[], status: string, location?: string) =>
     api.post('/waybills/batch-status', { ids, status, location }),
-}
-
-export const authService = {
-  login: (email: string, password: string) =>
-    api.post<{ accessToken: string; user: User }>('/auth/login', {
-      email,
-      password,
-    }),
-  me: () => api.get<User>('/auth/me'),
 }
 
 export const exceptionCodeService = {

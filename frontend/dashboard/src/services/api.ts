@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -364,6 +364,25 @@ const seedErpIntegrations: ErpIntegration[] = [
   { id: 'erp-003', name: 'QuickBooks Billing Export', system: 'OTHER', endpoint: 'https://quickbooks.api.intuit.com/v3/company/123', authType: 'OAUTH2', syncDirection: 'EXPORT', lastSyncAt: ago(48), lastSyncStatus: 'SUCCESS', isActive: true, createdAt: ago(360) },
 ]
 
+const seedCustomsShipments: CustomsShipment[] = [
+  { id: 'cst-001', waybillId: 'wb-001', trackingNumber: 'LBC-2024-1001', shipperName: 'Juan Dela Cruz Trading', recipientName: 'Ricardo Dimagiba', origin: 'Manila', destination: 'Makati City', originCountry: 'Philippines', destinationCountry: 'Philippines', customsStatus: 'NOT_REQUIRED', documents: [], estimatedClearance: '', lastUpdated: ago(12) },
+  { id: 'cst-002', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', shipperName: 'Global Trade Corp', recipientName: 'ABC Trading Co.', origin: 'Shanghai', destination: 'Manila', originCountry: 'China', destinationCountry: 'Philippines', customsStatus: 'CLEARANCE_IN_PROGRESS', documents: [
+    { id: 'cdoc-001', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', docType: 'COMMERCIAL_INVOICE', title: 'Commercial Invoice INV-2024-8912', status: 'APPROVED', fileName: 'invoice_8912.pdf', fileSize: 245760, notes: 'Value declared correctly', submittedAt: ago(48), approvedAt: ago(36), createdAt: ago(72) },
+    { id: 'cdoc-002', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', docType: 'PACKING_LIST', title: 'Packing List PL-2024-8912', status: 'APPROVED', fileName: 'packing_list_8912.pdf', fileSize: 122880, submittedAt: ago(48), approvedAt: ago(36), createdAt: ago(72) },
+    { id: 'cdoc-003', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', docType: 'CERT_OF_ORIGIN', title: 'Certificate of Origin CO-2024-8912', status: 'SUBMITTED', fileName: 'cert_of_origin_8912.pdf', fileSize: 184320, submittedAt: ago(24), createdAt: ago(72) },
+    { id: 'cdoc-004', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', docType: 'CUSTOMS_DECLARATION', title: 'Customs Declaration Form BOC-2024-8912', status: 'PENDING', fileName: 'customs_decl_8912.pdf', fileSize: 307200, createdAt: ago(12) },
+  ], estimatedClearance: new Date(Date.now() + 86400000 * 2).toISOString(), lastUpdated: ago(4) },
+  { id: 'cst-003', waybillId: 'wb-010', trackingNumber: 'DHL-PH-45127', shipperName: 'Worldwide Logistics HK', recipientName: 'Miguel Tan', origin: 'Hong Kong', destination: 'Taguig', originCountry: 'Hong Kong', destinationCountry: 'Philippines', customsStatus: 'DOCUMENTS_PENDING', documents: [
+    { id: 'cdoc-005', waybillId: 'wb-010', trackingNumber: 'DHL-PH-45127', docType: 'COMMERCIAL_INVOICE', title: 'Commercial Invoice INV-2024-45127', status: 'PENDING', fileName: 'invoice_45127.pdf', fileSize: 198656, createdAt: ago(6) },
+  ], estimatedClearance: new Date(Date.now() + 86400000 * 3).toISOString(), lastUpdated: ago(6) },
+  { id: 'cst-004', waybillId: 'wb-003', trackingNumber: 'JT-2024-3001', shipperName: 'Davao Agri Enterprises', recipientName: 'Josefa Mercado', origin: 'Davao City', destination: 'Manila', originCountry: 'Philippines', destinationCountry: 'Philippines', customsStatus: 'NOT_REQUIRED', documents: [], estimatedClearance: '', lastUpdated: ago(16) },
+  { id: 'cst-005', waybillId: 'wb-005', trackingNumber: 'GOGO-2024-5001', shipperName: 'Cebu Electronics Inc.', recipientName: 'Roberto Gonzales', origin: 'Cebu', destination: 'Subic Bay', originCountry: 'Philippines', destinationCountry: 'Philippines', customsStatus: 'CLEARED', documents: [
+    { id: 'cdoc-006', waybillId: 'wb-005', trackingNumber: 'GOGO-2024-5001', docType: 'COMMERCIAL_INVOICE', title: 'Commercial Invoice INV-2024-5001', status: 'APPROVED', fileName: 'invoice_5001.pdf', fileSize: 159744, submittedAt: ago(96), approvedAt: ago(84), createdAt: ago(120) },
+    { id: 'cdoc-007', waybillId: 'wb-005', trackingNumber: 'GOGO-2024-5001', docType: 'BILL_OF_LADING', title: 'Bill of Lading BL-2024-5001', status: 'APPROVED', fileName: 'bol_5001.pdf', fileSize: 278528, submittedAt: ago(96), approvedAt: ago(84), createdAt: ago(120) },
+  ], estimatedClearance: ago(80), lastUpdated: ago(80) },
+  { id: 'cst-006', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', origin: 'Manila', destination: 'Iloilo City', originCountry: 'Philippines', destinationCountry: 'Philippines', customsStatus: 'NOT_REQUIRED', documents: [], estimatedClearance: '', lastUpdated: ago(10) },
+]
+
 const db: Record<string, any[]> = {
   waybills: seedWaybills,
   users: seedUsers,
@@ -379,6 +398,7 @@ const db: Record<string, any[]> = {
   'reports/schedules': seedReportSchedules,
   'analytics/region-performance': seedRegionPerformance,
   'erp-integrations': seedErpIntegrations,
+  'customs-shipments': seedCustomsShipments,
   'tracking/aggregated': seedAggregatedTracking,
   webhooks: seedWebhooks,
   attachments: seedAttachments,

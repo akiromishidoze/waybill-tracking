@@ -28,6 +28,7 @@ import ErpIntegrationsPage from './pages/ErpIntegrationsPage'
 import DriverAppPage from './pages/DriverAppPage'
 import DynamicReroutingPage from './pages/DynamicReroutingPage'
 import AutoCommunicationsPage from './pages/AutoCommunicationsPage'
+import CustomsCompliancePage from './pages/CustomsCompliancePage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -55,7 +56,8 @@ export default function App() {
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/escalations" element={<EscalationsPage />} />
           <Route path="/driver-app" element={<DriverAppPage />} />
-          <Route path="/rerouting" element={<DynamicReroutingPage />} />
+           <Route path="/rerouting" element={<DynamicReroutingPage />} />
+          <Route path="/customs" element={<CustomsCompliancePage />} />
           <Route path="/auto-comms" element={<AutoCommunicationsPage />} />
           <Route path="/dwell-alerts" element={<DwellAlertsPage />} />
           <Route path="/geofence" element={<GeofenceEventsPage />} />

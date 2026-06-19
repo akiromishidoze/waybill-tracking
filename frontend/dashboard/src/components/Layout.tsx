@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe,
 } from 'lucide-react'
 
 interface NavGroup {
@@ -28,6 +28,7 @@ const navGroups: NavGroup[] = [
     items: [
       { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
       { to: '/driver-app', label: 'Driver App', icon: Truck },
+      { to: '/customs', label: 'Customs & Compliance', icon: Globe },
       { to: '/rerouting', label: 'Re-routing', icon: Navigation },
       { to: '/auto-comms', label: 'Auto Comms', icon: Bell },
       { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },

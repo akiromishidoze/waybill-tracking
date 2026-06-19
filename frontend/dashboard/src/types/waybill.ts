@@ -360,3 +360,34 @@ export interface ErpIntegration {
   isActive: boolean
   createdAt: string
 }
+
+export interface CustomsDocument {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  docType: 'COMMERCIAL_INVOICE' | 'PACKING_LIST' | 'CERT_OF_ORIGIN' | 'BILL_OF_LADING' | 'CUSTOMS_DECLARATION' | 'IMPORT_PERMIT' | 'OTHER'
+  title: string
+  status: 'PENDING' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
+  fileName: string
+  fileSize: number
+  notes?: string
+  submittedAt?: string
+  approvedAt?: string
+  createdAt: string
+}
+
+export interface CustomsShipment {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  shipperName: string
+  recipientName: string
+  origin: string
+  destination: string
+  originCountry: string
+  destinationCountry: string
+  customsStatus: 'NOT_REQUIRED' | 'DOCUMENTS_PENDING' | 'DOCUMENTS_SUBMITTED' | 'CLEARANCE_IN_PROGRESS' | 'CLEARED' | 'HELD'
+  documents: CustomsDocument[]
+  estimatedClearance: string
+  lastUpdated: string
+}

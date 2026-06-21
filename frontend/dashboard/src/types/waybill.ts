@@ -611,3 +611,34 @@ export interface IotSensorDashboard {
     lastReading: string | null
   }[]
 }
+
+export interface ChatbotMessage {
+  id: string
+  role: 'user' | 'bot'
+  content: string
+  timestamp: string
+  intent?: string
+}
+
+export interface ChatbotConversation {
+  id: string
+  customerName: string
+  query: string
+  intent: string
+  resolved: boolean
+  messages: number
+  timestamp: string
+}
+
+export interface ChatbotDashboard {
+  summary: {
+    totalConversations: number
+    totalMessages: number
+    avgSatisfaction: number
+    resolvedWithoutAgent: number
+    activeNow: number
+  }
+  recentConversations: ChatbotConversation[]
+  sampleConversation: ChatbotMessage[]
+  quickReplies: { label: string; response: string }[]
+}

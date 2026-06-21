@@ -34,6 +34,7 @@ import BiIntegrationsPage from './pages/BiIntegrationsPage'
 import CostAnalyticsPage from './pages/CostAnalyticsPage'
 import DemandForecastingPage from './pages/DemandForecastingPage'
 import CarbonFootprintPage from './pages/CarbonFootprintPage'
+import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/analytics/demand-forecast" element={<DemandForecastingPage />} />
           <Route path="/analytics/carbon-footprint" element={<CarbonFootprintPage />} />
           <Route path="/integrations/erp" element={<ErpIntegrationsPage />} />
+          <Route path="/integrations/ecommerce" element={<ECommerceIntegrationsPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

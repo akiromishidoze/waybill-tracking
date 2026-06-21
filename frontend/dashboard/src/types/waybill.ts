@@ -517,3 +517,37 @@ export interface CarbonFootprint {
     shipments: number
   }[]
 }
+
+export interface ECommercePlatform {
+  id: string
+  platform: string
+  storeName: string
+  connected: boolean
+  lastSync: string | null
+  totalOrders: number
+  syncedOrders: number
+  webhookUrl: string | null
+  storeUrl: string | null
+}
+
+export interface ECommerceSyncLog {
+  id: string
+  platformId: string
+  platform: string
+  storeName: string
+  status: 'success' | 'failed' | 'in_progress'
+  ordersSynced: number
+  errorsCount: number
+  syncedAt: string
+}
+
+export interface ECommerceDashboard {
+  platforms: ECommercePlatform[]
+  recentSyncs: ECommerceSyncLog[]
+  summary: {
+    totalConnected: number
+    totalDisconnected: number
+    totalOrdersSynced: number
+    lastSyncAt: string | null
+  }
+}

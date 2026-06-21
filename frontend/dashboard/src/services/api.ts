@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -404,6 +404,27 @@ const seedCodPayments: CodPayment[] = [
   { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
 ]
 
+const seedECommerceDashboard: ECommerceDashboard = {
+  platforms: [
+    { id: 'ec-001', platform: 'Shopify', storeName: 'Philippine Treasures PH', connected: true, lastSync: ago(1), totalOrders: 12800, syncedOrders: 12750, webhookUrl: 'https://hooks.waybilltrack.com/shopify/treasures', storeUrl: 'https://philippine-treasures.myshopify.com' },
+    { id: 'ec-002', platform: 'Lazada', storeName: 'Manila Lifestyle Store', connected: true, lastSync: ago(2), totalOrders: 9500, syncedOrders: 9400, webhookUrl: null, storeUrl: 'https://www.lazada.com.ph/shop/manila-lifestyle' },
+    { id: 'ec-003', platform: 'Shopee', storeName: 'Cebu Gadget Hub', connected: true, lastSync: ago(4), totalOrders: 7200, syncedOrders: 7180, webhookUrl: null, storeUrl: 'https://shopee.ph/cebugadgethub' },
+    { id: 'ec-004', platform: 'Amazon', storeName: 'GlobalExports PH', connected: false, lastSync: ago(360), totalOrders: 2100, syncedOrders: 2080, webhookUrl: null, storeUrl: 'https://www.amazon.com/shops/globalexportsph' },
+    { id: 'ec-005', platform: 'WooCommerce', storeName: 'Davao Organic Market', connected: true, lastSync: ago(3), totalOrders: 3400, syncedOrders: 3390, webhookUrl: 'https://hooks.waybilltrack.com/woo/davao-organic', storeUrl: 'https://davao-organic-market.com' },
+    { id: 'ec-006', platform: 'Shopify', storeName: 'Baguio Crafts & Co.', connected: false, lastSync: ago(720), totalOrders: 1800, syncedOrders: 1750, webhookUrl: null, storeUrl: 'https://baguio-crafts.myshopify.com' },
+  ],
+  recentSyncs: [
+    { id: 'sync-001', platformId: 'ec-001', platform: 'Shopify', storeName: 'Philippine Treasures PH', status: 'success', ordersSynced: 145, errorsCount: 0, syncedAt: ago(1) },
+    { id: 'sync-002', platformId: 'ec-002', platform: 'Lazada', storeName: 'Manila Lifestyle Store', status: 'success', ordersSynced: 98, errorsCount: 2, syncedAt: ago(2) },
+    { id: 'sync-003', platformId: 'ec-005', platform: 'WooCommerce', storeName: 'Davao Organic Market', status: 'success', ordersSynced: 42, errorsCount: 0, syncedAt: ago(3) },
+    { id: 'sync-004', platformId: 'ec-003', platform: 'Shopee', storeName: 'Cebu Gadget Hub', status: 'success', ordersSynced: 76, errorsCount: 1, syncedAt: ago(4) },
+    { id: 'sync-005', platformId: 'ec-001', platform: 'Shopify', storeName: 'Philippine Treasures PH', status: 'failed', ordersSynced: 0, errorsCount: 12, syncedAt: ago(8) },
+    { id: 'sync-006', platformId: 'ec-005', platform: 'WooCommerce', storeName: 'Davao Organic Market', status: 'in_progress', ordersSynced: 18, errorsCount: 0, syncedAt: ago(0.5) },
+    { id: 'sync-007', platformId: 'ec-004', platform: 'Amazon', storeName: 'GlobalExports PH', status: 'failed', ordersSynced: 0, errorsCount: 5, syncedAt: ago(72) },
+  ],
+  summary: { totalConnected: 4, totalDisconnected: 2, totalOrdersSynced: 36850, lastSyncAt: ago(1) },
+}
+
 const seedCarbonFootprint: CarbonFootprint = {
   summary: { totalEmissions: 28450, avgPerShipment: 38.2, totalShipments: 745, offsetCredits: 5000, netEmissions: 23450, vsLastMonth: -5.2 },
   byCarrier: [
@@ -629,6 +650,10 @@ api.interceptors.request.use((config) => {
   }
   if (method === 'get' && key === 'analytics/carbon-footprint') {
     mock(seedCarbonFootprint)
+    return config
+  }
+  if (method === 'get' && key === 'integrations/ecommerce') {
+    mock(seedECommerceDashboard)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -919,6 +944,10 @@ export const demandForecastService = {
 
 export const carbonFootprintService = {
   get: () => api.get<CarbonFootprint>('/analytics/carbon-footprint'),
+}
+
+export const eCommerceService = {
+  getDashboard: () => api.get<ECommerceDashboard>('/integrations/ecommerce'),
 }
 
 export const codService = {

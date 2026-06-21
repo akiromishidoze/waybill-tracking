@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf,
 } from 'lucide-react'
 
 interface NavGroup {
@@ -47,6 +47,7 @@ const navGroups: NavGroup[] = [
       { to: '/analytics/bi-tools', label: 'BI Integrations', icon: BarChart3 },
       { to: '/analytics/cost-per-shipment', label: 'Cost Analytics', icon: Calculator },
       { to: '/analytics/demand-forecast', label: 'Demand Forecast', icon: BarChart3 },
+      { to: '/analytics/carbon-footprint', label: 'Carbon Footprint', icon: Leaf },
       { to: '/roadmap/analytics', label: 'Roadmap', icon: PieChart },
     ],
   },

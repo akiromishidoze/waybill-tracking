@@ -487,3 +487,33 @@ export interface DemandForecast {
     capacity: number
   }[]
 }
+
+export interface CarbonFootprint {
+  summary: {
+    totalEmissions: number
+    avgPerShipment: number
+    totalShipments: number
+    offsetCredits: number
+    netEmissions: number
+    vsLastMonth: number
+  }
+  byCarrier: {
+    carrierId: string
+    carrierName: string
+    totalEmissions: number
+    shipmentCount: number
+    avgPerShipment: number
+    efficiency: string
+  }[]
+  byRegion: {
+    region: string
+    totalEmissions: number
+    shipmentCount: number
+    avgPerShipment: number
+  }[]
+  monthlyTrend: {
+    month: string
+    emissions: number
+    shipments: number
+  }[]
+}

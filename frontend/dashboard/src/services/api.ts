@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -404,6 +404,35 @@ const seedCodPayments: CodPayment[] = [
   { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
 ]
 
+const seedCarbonFootprint: CarbonFootprint = {
+  summary: { totalEmissions: 28450, avgPerShipment: 38.2, totalShipments: 745, offsetCredits: 5000, netEmissions: 23450, vsLastMonth: -5.2 },
+  byCarrier: [
+    { carrierId: 'car-1', carrierName: 'GoGo Xpress', totalEmissions: 8250, shipmentCount: 180, avgPerShipment: 45.8, efficiency: 'average' },
+    { carrierId: 'car-2', carrierName: 'LBC Express', totalEmissions: 6200, shipmentCount: 190, avgPerShipment: 32.6, efficiency: 'good' },
+    { carrierId: 'car-3', carrierName: '2Go Logistics', totalEmissions: 5100, shipmentCount: 110, avgPerShipment: 46.4, efficiency: 'average' },
+    { carrierId: 'car-4', carrierName: 'DHL Express', totalEmissions: 3200, shipmentCount: 95, avgPerShipment: 33.7, efficiency: 'good' },
+    { carrierId: 'car-5', carrierName: 'FedEx', totalEmissions: 2850, shipmentCount: 80, avgPerShipment: 35.6, efficiency: 'good' },
+    { carrierId: 'car-6', carrierName: 'Ninja Van', totalEmissions: 1850, shipmentCount: 50, avgPerShipment: 37.0, efficiency: 'average' },
+    { carrierId: 'car-7', carrierName: 'Flash Express', totalEmissions: 1000, shipmentCount: 40, avgPerShipment: 25.0, efficiency: 'good' },
+  ],
+  byRegion: [
+    { region: 'NCR', totalEmissions: 10200, shipmentCount: 280, avgPerShipment: 36.4 },
+    { region: 'Luzon', totalEmissions: 7200, shipmentCount: 180, avgPerShipment: 40.0 },
+    { region: 'Visayas', totalEmissions: 5800, shipmentCount: 155, avgPerShipment: 37.4 },
+    { region: 'Mindanao', totalEmissions: 3800, shipmentCount: 90, avgPerShipment: 42.2 },
+    { region: 'Remote', totalEmissions: 1450, shipmentCount: 40, avgPerShipment: 36.3 },
+  ],
+  monthlyTrend: [
+    { month: 'Aug', emissions: 3100, shipments: 82 },
+    { month: 'Sep', emissions: 3400, shipments: 88 },
+    { month: 'Oct', emissions: 3750, shipments: 96 },
+    { month: 'Nov', emissions: 4100, shipments: 105 },
+    { month: 'Dec', emissions: 4500, shipments: 115 },
+    { month: 'Jan', emissions: 4800, shipments: 122 },
+    { month: 'Feb', emissions: 4600, shipments: 118 },
+  ],
+}
+
 const seedDemandForecast: DemandForecast = {
   summary: { totalForecast: 84500, totalCapacity: 102000, utilizationRate: 82.8, nextMonthGrowth: 12.5 },
   byLane: [
@@ -596,6 +625,10 @@ api.interceptors.request.use((config) => {
   }
   if (method === 'get' && key === 'analytics/demand-forecast') {
     mock(seedDemandForecast)
+    return config
+  }
+  if (method === 'get' && key === 'analytics/carbon-footprint') {
+    mock(seedCarbonFootprint)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -882,6 +915,10 @@ export const costAnalyticsService = {
 
 export const demandForecastService = {
   get: () => api.get<DemandForecast>('/analytics/demand-forecast'),
+}
+
+export const carbonFootprintService = {
+  get: () => api.get<CarbonFootprint>('/analytics/carbon-footprint'),
 }
 
 export const codService = {

@@ -22,6 +22,9 @@
   --color-input-bg: #ffffff;
   --color-table-header-bg: #f8fafc;
   --color-primary-soft: #eff6ff;
+  --color-sidebar-bg: #1e293b;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-hover: #334155;
   --badge-red-bg: #fef2f2;
   --badge-red-text: #b91c1c;
   --badge-red-border: #fecaca;
@@ -82,6 +85,9 @@
   --color-input-bg: #0f172a;
   --color-table-header-bg: #334155;
   --color-primary-soft: #172554;
+  --color-sidebar-bg: #1e293b;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-hover: #334155;
   --badge-red-bg: #450a0a;
   --badge-red-text: #fca5a5;
   --badge-red-border: #7f1d1d;

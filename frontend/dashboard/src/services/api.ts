@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -404,6 +404,45 @@ const seedCodPayments: CodPayment[] = [
   { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
 ]
 
+const seedCostAnalytics: CostAnalytics = {
+  summary: { totalCost: 284750.50, totalRevenue: 421500.00, totalShipments: 71, avgCostPerShipment: 4010.57, avgRevenuePerShipment: 5936.62, profitMargin: 32.45 },
+  byCarrier: [
+    { carrierId: 'carrier-001', carrierName: 'LBC Express', totalCost: 89500.00, totalRevenue: 135000.00, shipmentCount: 22, avgCost: 4068.18 },
+    { carrierId: 'carrier-002', carrierName: 'DHL Express', totalCost: 62300.00, totalRevenue: 98500.00, shipmentCount: 14, avgCost: 4450.00 },
+    { carrierId: 'carrier-003', carrierName: 'J&T Express', totalCost: 41200.50, totalRevenue: 62000.00, shipmentCount: 12, avgCost: 3433.38 },
+    { carrierId: 'carrier-004', carrierName: '2Go Logistics', totalCost: 35400.00, totalRevenue: 52000.00, shipmentCount: 9, avgCost: 3933.33 },
+    { carrierId: 'carrier-005', carrierName: 'GoGo Xpress', totalCost: 28600.00, totalRevenue: 38000.00, shipmentCount: 7, avgCost: 4085.71 },
+    { carrierId: 'carrier-006', carrierName: 'Flash Delivery', totalCost: 18750.00, totalRevenue: 24000.00, shipmentCount: 4, avgCost: 4687.50 },
+    { carrierId: 'carrier-007', carrierName: 'Ninja Van', totalCost: 9000.00, totalRevenue: 12000.00, shipmentCount: 3, avgCost: 3000.00 },
+  ],
+  byRegion: [
+    { region: 'NCR', totalCost: 98500.00, totalRevenue: 148000.00, shipmentCount: 25 },
+    { region: 'Luzon', totalCost: 72450.00, totalRevenue: 108000.00, shipmentCount: 18 },
+    { region: 'Visayas', totalCost: 56800.50, totalRevenue: 82500.00, shipmentCount: 14 },
+    { region: 'Mindanao', totalCost: 45000.00, totalRevenue: 63000.00, shipmentCount: 10 },
+    { region: 'Remote', totalCost: 12000.00, totalRevenue: 20000.00, shipmentCount: 4 },
+  ],
+  byStatus: [
+    { status: 'DELIVERED', totalCost: 152300.00, shipmentCount: 38 },
+    { status: 'IN_TRANSIT', totalCost: 53450.00, shipmentCount: 12 },
+    { status: 'CREATED', totalCost: 22100.00, shipmentCount: 6 },
+    { status: 'OUT_FOR_DELIVERY', totalCost: 19800.50, shipmentCount: 5 },
+    { status: 'FAILED_DELIVERY', totalCost: 15600.00, shipmentCount: 4 },
+    { status: 'RETURNED', totalCost: 12500.00, shipmentCount: 3 },
+    { status: 'CANCELLED', totalCost: 9000.00, shipmentCount: 3 },
+  ],
+  monthlyTrend: [
+    { month: 'Jan', cost: 42500.00, revenue: 62000.00, count: 10 },
+    { month: 'Feb', cost: 38200.00, revenue: 57500.00, count: 9 },
+    { month: 'Mar', cost: 45100.00, revenue: 68000.00, count: 11 },
+    { month: 'Apr', cost: 39800.50, revenue: 59000.00, count: 10 },
+    { month: 'May', cost: 43200.00, revenue: 63500.00, count: 11 },
+    { month: 'Jun', cost: 36750.00, revenue: 55500.00, count: 8 },
+    { month: 'Jul', cost: 39200.00, revenue: 58000.00, count: 9 },
+    { month: 'Aug', cost: 0, revenue: 0, count: 0 },
+  ],
+}
+
 const db: Record<string, any[]> = {
   waybills: seedWaybills,
   users: seedUsers,
@@ -519,6 +558,10 @@ api.interceptors.request.use((config) => {
     const wb = seedWaybills.find(w => w.trackingNumber === itemId)
     if (wb) mock(wb)
     else mock({ error: 'Waybill not found' }, 404)
+    return config
+  }
+  if (method === 'get' && key === 'analytics/cost-per-shipment') {
+    mock(seedCostAnalytics)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -798,6 +841,10 @@ export const driverService = {
 }
 
 export const regionService = { performance: () => api.get<RegionPerformance[]>('/analytics/region-performance') }
+
+export const costAnalyticsService = {
+  get: () => api.get<CostAnalytics>('/analytics/cost-per-shipment'),
+}
 
 export const codService = {
   list: () => api.get<CodPayment[]>('/cod-payments'),

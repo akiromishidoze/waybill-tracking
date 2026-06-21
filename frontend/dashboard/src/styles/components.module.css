@@ -10,13 +10,13 @@
 }
 
 .pageSubtitle {
-    color: #666;
+    color: var(--color-text-secondary);
     margin-bottom: 2rem;
 }
 
 .roadmapItem {
     padding: 0.625rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--color-border-subtle);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -25,14 +25,14 @@
 
 .roadmapCheckbox {
     font-size: 1.1rem;
-    color: #999;
+    color: var(--color-text-muted);
     flex-shrink: 0;
 }
 
 .card {
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sm);
 }
 
 .cardPadded {
@@ -66,7 +66,7 @@
 /* == Sidebar == */
 .sidebar {
     width: 260px;
-    background: #1e293b;
+    background: var(--color-sidebar-bg);
     color: #fff;
     padding: 1.5rem;
     display: flex;
@@ -93,13 +93,13 @@
     padding: 0.75rem 1rem;
     border-radius: 8px;
     text-decoration: none;
-    color: #94a3b8;
+    color: var(--color-sidebar-text);
     font-weight: 400;
 }
 
 .navLinkActive {
     color: #fff;
-    background: #334155;
+    background: var(--color-sidebar-hover);
     font-weight: 600;
 }
 
@@ -110,14 +110,14 @@
     padding: 0.75rem 1rem;
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: var(--color-sidebar-text);
     cursor: pointer;
     border-radius: 8px;
     font-size: 1rem;
 }
 
 .logoutBtn:hover {
-    background: #334155;
+    background: var(--color-sidebar-hover);
     color: #fff;
 }
 
@@ -166,29 +166,29 @@
 
 .btnOutline {
     composes: btn;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    color: #2563eb;
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-border-input);
+    color: var(--color-primary);
 }
 
 .btnOutline:disabled {
-    background: #f8fafc;
-    color: #94a3b8;
+    background: var(--color-table-header-bg);
+    color: var(--color-text-muted-lighter);
     cursor: not-allowed;
 }
 
 .btnLink {
-    color: #2563eb;
+    color: var(--color-primary);
     text-decoration: none;
     font-weight: 500;
 }
 
 /* == Form == */
 .formCard {
-    background: #fff;
+    background: var(--color-surface);
     padding: 2.5rem;
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
     width: 100%;
     max-width: 400px;
 }
@@ -211,9 +211,11 @@
 .formInput {
     width: 100%;
     padding: 0.625rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--color-border-input);
     border-radius: 6px;
     font-size: 1rem;
+    background: var(--color-input-bg);
+    color: var(--color-text-primary);
 }
 
 .formInput:focus {
@@ -223,7 +225,7 @@
 }
 
 .formError {
-    color: #dc2626;
+    color: var(--color-danger);
     margin-bottom: 1rem;
     font-size: 0.875rem;
 }
@@ -239,7 +241,7 @@
 }
 
 .tableHeader {
-    background: #f8fafc;
+    background: var(--color-table-header-bg);
     text-align: left;
 }
 
@@ -252,17 +254,19 @@
 }
 
 .tableRow {
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
 }
 
 /* == Search input == */
 .searchInput {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-border-input);
     border-radius: 8px;
     font-size: 1rem;
     margin-bottom: 1rem;
+    background: var(--color-input-bg);
+    color: var(--color-text-primary);
 }
 
 .searchInput:focus {
@@ -286,7 +290,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: #f1f5f9;
+    background: var(--color-bg);
 }
 
 .trackContainer {
@@ -304,7 +308,7 @@
 
 .trackSubtitle {
     text-align: center;
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
 }
 
@@ -315,9 +319,10 @@
 }
 
 .trackCard {
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 12px;
     padding: 1.5rem;
+    box-shadow: var(--shadow-md);
 }
 
 .trackCardHeader {
@@ -329,9 +334,10 @@
 
 /* == Detail page == */
 .detailSection {
-    background: #fff;
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 10px;
+    box-shadow: var(--shadow-sm);
 }
 
 .detailSectionTitle {
@@ -346,7 +352,7 @@
 
 .detailLabel {
     width: 140px;
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 0.875rem;
 }
 
@@ -362,7 +368,7 @@
 .timelineItem {
     position: relative;
     padding-bottom: 1.25rem;
-    border-left: 2px solid #e2e8f0;
+    border-left: 2px solid var(--color-border);
     padding-left: 1.5rem;
     margin-left: -1rem;
 }
@@ -374,17 +380,17 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--color-primary);
 }
 
 .timelineItemException {
     composes: timelineItem;
-    border-left-color: #fca5a5;
+    border-left-color: var(--badge-red-border);
 }
 
 .timelineDotException {
     composes: timelineDot;
-    background: #ef4444;
+    background: var(--badge-red-text);
 }
 
 .exceptionBadge {
@@ -397,7 +403,7 @@
 }
 
 .exceptionDetail {
-    color: #dc2626;
+    color: var(--badge-red-text);
     font-size: 0.875rem;
 }
 
@@ -407,23 +413,24 @@
 
 .timelineMeta {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .timelineRemark {
     font-size: 0.875rem;
-    color: #475569;
+    color: var(--color-text-secondary);
 }
 
 .timelineEmpty {
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 /* == Analytics page == */
 .statCard {
-    background: #fff;
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 10px;
+    box-shadow: var(--shadow-sm);
 }
 
 .statValue {
@@ -432,14 +439,15 @@
 }
 
 .statLabel {
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 0.875rem;
 }
 
 .chartContainer {
-    background: #fff;
+    background: var(--color-surface);
     padding: 1.5rem;
     border-radius: 10px;
+    box-shadow: var(--shadow-sm);
 }
 
 .chartTitle {
@@ -468,7 +476,7 @@
 }
 
 .errorMsg {
-    color: #64748b;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
 }
 
@@ -488,12 +496,12 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border-subtle);
     font-size: 0.875rem;
 }
 
 .paginationTotal {
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 .paginationBtns {
@@ -507,7 +515,7 @@
 
 .paginationPage {
     padding: 0.375rem 0;
-    color: #64748b;
+    color: var(--color-text-muted);
 }
 
 /* == Header action bar == */

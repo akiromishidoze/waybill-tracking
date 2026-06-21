@@ -578,3 +578,36 @@ export interface WhiteLabelPortalData {
     timestamp: string
   }[]
 }
+
+export interface IotSensorReading {
+  id: string
+  deviceId: string
+  type: string
+  trackingNumber: string
+  value: number
+  unit: string
+  thresholdMin: number
+  thresholdMax: number
+  status: string
+  recordedAt: string
+}
+
+export interface IotSensorDashboard {
+  summary: {
+    totalDevices: number
+    activeDevices: number
+    alertsToday: number
+    avgBatteryLevel: number
+    readingsToday: number
+  }
+  recentReadings: IotSensorReading[]
+  devices: {
+    id: string
+    deviceId: string
+    model: string
+    active: boolean
+    batteryLevel: number
+    assignedTracking: string | null
+    lastReading: string | null
+  }[]
+}

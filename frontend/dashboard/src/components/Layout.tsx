@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity,
 } from 'lucide-react'
 
 interface NavGroup {
@@ -58,6 +58,7 @@ const navGroups: NavGroup[] = [
       { to: '/integrations/erp', label: 'ERP Integrations', icon: Link2 },
       { to: '/integrations/ecommerce', label: 'E-Commerce', icon: ShoppingCart },
       { to: '/integrations/white-label', label: 'White-Label Portal', icon: Globe },
+      { to: '/integrations/iot-sensors', label: 'IoT Sensors', icon: Activity },
       { to: '/audit-logs', label: 'Audit Log', icon: ClipboardList },
       { to: '/roadmap/integrations', label: 'Roadmap', icon: Link2 },
     ],

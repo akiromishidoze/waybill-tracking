@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -446,6 +446,32 @@ const seedWhiteLabelPortal: WhiteLabelPortalData = {
   ],
 }
 
+const seedIotDashboard: IotSensorDashboard = {
+  summary: { totalDevices: 48, activeDevices: 42, alertsToday: 7, avgBatteryLevel: 78, readingsToday: 15200 },
+  devices: [
+    { id: 'iot-001', deviceId: 'SHT-2401-001', model: 'Sensirion SHT40', active: true, batteryLevel: 85, assignedTracking: 'LBC-2024-1001', lastReading: ago(0.5) },
+    { id: 'iot-002', deviceId: 'SHT-2401-002', model: 'Sensirion SHT40', active: true, batteryLevel: 72, assignedTracking: 'DHL-PH-99123', lastReading: ago(1) },
+    { id: 'iot-003', deviceId: 'SHK-2401-001', model: 'ShockWatch RFID', active: true, batteryLevel: 91, assignedTracking: '2GO-2024-6001', lastReading: ago(0.25) },
+    { id: 'iot-004', deviceId: 'SHT-2401-003', model: 'Sensirion SHT40', active: false, batteryLevel: 12, assignedTracking: null, lastReading: ago(360) },
+    { id: 'iot-005', deviceId: 'LGT-2401-001', model: 'LiteSense LUX', active: true, batteryLevel: 65, assignedTracking: 'FD-PH-78901', lastReading: ago(2) },
+    { id: 'iot-006', deviceId: 'SHT-2402-001', model: 'Sensirion SHT41', active: true, batteryLevel: 54, assignedTracking: 'LBC-2024-1008', lastReading: ago(0.75) },
+    { id: 'iot-007', deviceId: 'SHK-2401-002', model: 'ShockWatch RFID', active: true, batteryLevel: 88, assignedTracking: 'JT-2024-3002', lastReading: ago(1.5) },
+    { id: 'iot-008', deviceId: 'VIB-2401-001', model: 'VibraSense Pro', active: false, batteryLevel: 3, assignedTracking: null, lastReading: ago(720) },
+  ],
+  recentReadings: [
+    { id: 'rd-001', deviceId: 'SHT-2401-001', type: 'TEMPERATURE', trackingNumber: 'LBC-2024-1001', value: 24.5, unit: '°C', thresholdMin: 2, thresholdMax: 30, status: 'NORMAL', recordedAt: ago(0.5) },
+    { id: 'rd-002', deviceId: 'SHT-2401-002', type: 'TEMPERATURE', trackingNumber: 'DHL-PH-99123', value: 31.2, unit: '°C', thresholdMin: 2, thresholdMax: 30, status: 'WARNING', recordedAt: ago(1) },
+    { id: 'rd-003', deviceId: 'SHK-2401-001', type: 'SHOCK', trackingNumber: '2GO-2024-6001', value: 45, unit: 'G', thresholdMin: 0, thresholdMax: 50, status: 'NORMAL', recordedAt: ago(0.25) },
+    { id: 'rd-004', deviceId: 'SHT-2401-003', type: 'TEMPERATURE', trackingNumber: 'UNASSIGNED', value: 28.0, unit: '°C', thresholdMin: 2, thresholdMax: 30, status: 'NORMAL', recordedAt: ago(360) },
+    { id: 'rd-005', deviceId: 'LGT-2401-001', type: 'LIGHT', trackingNumber: 'FD-PH-78901', value: 850, unit: 'lux', thresholdMin: 0, thresholdMax: 100, status: 'ALERT', recordedAt: ago(2) },
+    { id: 'rd-006', deviceId: 'SHT-2402-001', type: 'HUMIDITY', trackingNumber: 'LBC-2024-1008', value: 68, unit: '%', thresholdMin: 20, thresholdMax: 80, status: 'NORMAL', recordedAt: ago(0.75) },
+    { id: 'rd-007', deviceId: 'SHK-2401-002', type: 'SHOCK', trackingNumber: 'JT-2024-3002', value: 72, unit: 'G', thresholdMin: 0, thresholdMax: 50, status: 'ALERT', recordedAt: ago(1.5) },
+    { id: 'rd-008', deviceId: 'VIB-2401-001', type: 'VIBRATION', trackingNumber: 'UNASSIGNED', value: 0.2, unit: 'mm/s', thresholdMin: 0, thresholdMax: 10, status: 'NORMAL', recordedAt: ago(720) },
+    { id: 'rd-009', deviceId: 'SHT-2401-001', type: 'HUMIDITY', trackingNumber: 'LBC-2024-1001', value: 52, unit: '%', thresholdMin: 20, thresholdMax: 80, status: 'NORMAL', recordedAt: ago(0.75) },
+    { id: 'rd-010', deviceId: 'LGT-2401-001', type: 'LIGHT', trackingNumber: 'FD-PH-78901', value: 120, unit: 'lux', thresholdMin: 0, thresholdMax: 100, status: 'ALERT', recordedAt: ago(3) },
+  ],
+}
+
 const seedCarbonFootprint: CarbonFootprint = {
   summary: { totalEmissions: 28450, avgPerShipment: 38.2, totalShipments: 745, offsetCredits: 5000, netEmissions: 23450, vsLastMonth: -5.2 },
   byCarrier: [
@@ -679,6 +705,10 @@ api.interceptors.request.use((config) => {
   }
   if (method === 'get' && key === 'integrations/white-label') {
     mock(seedWhiteLabelPortal)
+    return config
+  }
+  if (method === 'get' && key === 'integrations/iot-sensors') {
+    mock(seedIotDashboard)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -977,6 +1007,10 @@ export const eCommerceService = {
 
 export const whiteLabelService = {
   getPortal: () => api.get<WhiteLabelPortalData>('/integrations/white-label'),
+}
+
+export const iotSensorService = {
+  getDashboard: () => api.get<IotSensorDashboard>('/integrations/iot-sensors'),
 }
 
 export const codService = {

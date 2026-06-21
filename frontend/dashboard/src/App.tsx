@@ -36,6 +36,7 @@ import DemandForecastingPage from './pages/DemandForecastingPage'
 import CarbonFootprintPage from './pages/CarbonFootprintPage'
 import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
 import WhiteLabelPortalPage from './pages/WhiteLabelPortalPage'
+import IotSensorPage from './pages/IotSensorPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="/integrations/erp" element={<ErpIntegrationsPage />} />
           <Route path="/integrations/ecommerce" element={<ECommerceIntegrationsPage />} />
           <Route path="/integrations/white-label" element={<WhiteLabelPortalPage />} />
+          <Route path="/integrations/iot-sensors" element={<IotSensorPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

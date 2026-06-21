@@ -157,7 +157,7 @@ export default function WaybillDetailPage() {
   return (
     <div>
       {wb.slaBreached && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 8, marginBottom: '1rem', color: '#dc2626', fontSize: '0.875rem', fontWeight: 500 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 8, marginBottom: '1rem', color: 'var(--badge-red-text)', fontSize: '0.875rem', fontWeight: 500 }}>
           <AlertTriangle size={18} />
           SLA Breached — Estimated delivery was {new Date(wb.estimatedDelivery).toLocaleDateString()}
         </div>
@@ -218,7 +218,7 @@ export default function WaybillDetailPage() {
               {assignTeam.isPending && <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Saving...</span>}
             </div>
             {wb.teamName && (
-              <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: '#d97706' }}>
+              <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: 'var(--badge-amber-text)' }}>
                 <Shield size={12} />
                 Currently assigned to <strong>{wb.teamName}</strong>
               </div>
@@ -230,7 +230,7 @@ export default function WaybillDetailPage() {
       <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Paperclip size={18} color="#6b7280" />
+            <Paperclip size={18} color='var(--color-text-muted)' />
             <h3 style={{ fontWeight: 600 }}>Proof of Delivery Attachments</h3>
             <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted-lighter)' }}>({attachments?.length || 0})</span>
           </div>
@@ -239,7 +239,7 @@ export default function WaybillDetailPage() {
             <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer' }}>
               <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload File'}
             </button>
-            {uploadError && <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.375rem' }}>{uploadError}</p>}
+            {uploadError && <p style={{ fontSize: '0.75rem', color: 'var(--badge-red-text)', marginTop: '0.375rem' }}>{uploadError}</p>}
           </div>
         </div>
         {(!attachments || attachments.length === 0) ? (
@@ -249,7 +249,7 @@ export default function WaybillDetailPage() {
             {attachments.map((att: Attachment) => (
               <div key={att.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.75rem', background: 'var(--color-surface-hover)', borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
-                  <FileText size={16} color="#64748b" />
+                  <FileText size={16} color='var(--color-text-muted)' />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontWeight: 500, fontSize: '0.875rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.fileName}</p>
                     <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)', margin: 0 }}>{formatFileSize(att.fileSize)} · {new Date(att.uploadedAt).toLocaleDateString()}</p>
@@ -259,7 +259,7 @@ export default function WaybillDetailPage() {
                   <button onClick={() => { const a = document.createElement('a'); a.href = `data:${att.fileType};base64,${att.data}`; a.download = att.fileName; a.click() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
                     <Download size={12} /> Download
                   </button>
-                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: '#dc2626' }}>
+                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
                     <Trash2 size={12} /> Delete
                   </button>
                 </div>
@@ -375,7 +375,7 @@ export default function WaybillDetailPage() {
                           <User size={12} /> {evt.courierName}
                         </div>
                       )}
-                      {evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: '#dc2626', margin: '0.125rem 0 0 0' }}>{evt.exceptionDetail}</p>}
+                      {evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: 'var(--badge-red-text)', margin: '0.125rem 0 0 0' }}>{evt.exceptionDetail}</p>}
                       {evt.remark && !evt.exceptionDetail && <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', margin: '0.125rem 0 0 0', fontStyle: 'italic' }}>"{evt.remark}"</p>}
                     </div>
                   )
@@ -417,10 +417,10 @@ export default function WaybillDetailPage() {
       {dwellSegments && dwellSegments.length > 0 && (
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <Clock size={18} color={activeDwell ? '#dc2626' : '#6b7280'} />
+            <Clock size={18} color={activeDwell ? 'var(--badge-red-text)' : 'var(--color-text-muted)'} />
             <h3 style={{ fontWeight: 600 }}>Dwell Time at Facilities</h3>
             {activeDwell && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: 'var(--badge-red-bg)', color: '#dc2626', border: '1px solid var(--badge-red-border)' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: 'var(--badge-red-bg)', color: 'var(--badge-red-text)', border: '1px solid var(--badge-red-border)' }}>
                 <AlertTriangle size={10} /> Active Dwell
               </span>
             )}
@@ -431,8 +431,8 @@ export default function WaybillDetailPage() {
               const hours = duration / 60
               const isExcessive = seg.isActive && hours >= 24
               return (
-                <div key={seg.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', background: isExcessive ? '#fef2f2' : '#f8fafc', borderRadius: 8, border: isExcessive ? '1px solid #fecaca' : '1px solid #f1f5f9' }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: seg.isActive ? '#dc2626' : '#16a34a', flexShrink: 0 }} />
+                <div key={seg.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', background: isExcessive ? 'var(--badge-red-bg)' : 'var(--color-surface-hover)', borderRadius: 8, border: isExcessive ? '1px solid var(--badge-red-border)' : '1px solid var(--color-border-subtle)' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: seg.isActive ? 'var(--badge-red-text)' : 'var(--badge-green-text)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{seg.facility}</div>
                     <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -440,7 +440,7 @@ export default function WaybillDetailPage() {
                       {seg.departedAt ? (
                         <span>Departed: {new Date(seg.departedAt).toLocaleString()}</span>
                       ) : (
-                        <span style={{ color: '#dc2626', fontWeight: 500 }}>Still here</span>
+                        <span style={{ color: 'var(--badge-red-text)', fontWeight: 500 }}>Still here</span>
                       )}
                       <span>·</span>
                       <span>Duration: <strong>{hours >= 24 ? `${(hours / 24).toFixed(1)}d` : `${hours.toFixed(1)}h`}</strong></span>

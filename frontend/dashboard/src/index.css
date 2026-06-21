@@ -40,8 +40,25 @@
   --badge-orange-border: #fdba74;
   --badge-purple-bg: #7c3aed20;
   --badge-purple-text: #7c3aed;
+  --badge-cyan-bg: #cffafe;
+  --badge-cyan-text: #0e7490;
+  --badge-cyan-border: #a5f3fc;
   --badge-warm-bg: #fffbeb;
   --badge-warm-border: #fde68a;
+
+  --status-blue: #2563eb;
+  --status-amber: #d97706;
+  --status-purple: #7c3aed;
+  --status-cyan: #0891b2;
+  --status-green: #16a34a;
+  --status-red: #dc2626;
+  --status-gray: #6b7280;
+  --status-darkgray: #4b5563;
+  --status-orange: #f59e0b;
+  --status-violet: #8b5cf6;
+  --status-darkgreen: #059669;
+  --status-indigo: #6366f1;
+  --status-darkindigo: #4f46e5;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
   --shadow-md: 0 4px 24px rgba(0,0,0,0.15);
@@ -83,8 +100,25 @@
   --badge-orange-border: #7c2d12;
   --badge-purple-bg: #2e1065;
   --badge-purple-text: #c4b5fd;
+  --badge-cyan-bg: #083344;
+  --badge-cyan-text: #67e8f9;
+  --badge-cyan-border: #155e75;
   --badge-warm-bg: #451a03;
   --badge-warm-border: #78350f;
+
+  --status-blue: #3b82f6;
+  --status-amber: #f59e0b;
+  --status-purple: #8b5cf6;
+  --status-cyan: #06b6d4;
+  --status-green: #22c55e;
+  --status-red: #ef4444;
+  --status-gray: #94a3b8;
+  --status-darkgray: #64748b;
+  --status-orange: #f97316;
+  --status-violet: #a78bfa;
+  --status-darkgreen: #34d399;
+  --status-indigo: #818cf8;
+  --status-darkindigo: #818cf8;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 24px rgba(0,0,0,0.4);

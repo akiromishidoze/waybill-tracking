@@ -4,10 +4,10 @@ import { AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const statsCards = [
-  { label: 'Active Waybills', key: 'totalActive', color: '#2563eb' },
-  { label: 'Delivered Today', key: 'deliveredToday', color: '#16a34a' },
-  { label: 'In Transit', key: 'inTransit', color: '#d97706' },
-  { label: 'Pending Pickup', key: 'pendingPickup', color: '#dc2626' },
+  { label: 'Active Waybills', key: 'totalActive', color: 'var(--badge-blue-text)' },
+  { label: 'Delivered Today', key: 'deliveredToday', color: 'var(--badge-green-text)' },
+  { label: 'In Transit', key: 'inTransit', color: 'var(--badge-amber-text)' },
+  { label: 'Pending Pickup', key: 'pendingPickup', color: 'var(--badge-red-text)' },
 ]
 
 export default function DashboardPage() {
@@ -62,7 +62,7 @@ export default function DashboardPage() {
         <div onClick={() => navigate('/escalations')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem', padding: '1rem 1.25rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 10, cursor: 'pointer' }}>
           <AlertTriangle size={20} color="#dc2626" />
           <div>
-            <p style={{ fontWeight: 600, color: '#dc2626', fontSize: '0.9375rem' }}>{openEscalations} Open Escalation{openEscalations > 1 ? 's' : ''}</p>
+            <p style={{ fontWeight: 600, color: 'var(--badge-red-text)', fontSize: '0.9375rem' }}>{openEscalations} Open Escalation{openEscalations > 1 ? 's' : ''}</p>
             <p style={{ fontSize: '0.8125rem', color: 'var(--badge-red-text)' }}>Click to view and resolve.</p>
           </div>
         </div>

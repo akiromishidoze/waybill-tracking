@@ -47,7 +47,7 @@ export default function ScheduledReportsPage() {
               <button
                 onClick={() => deleteSchedule.mutate(s.id)}
                 disabled={deleteSchedule.isPending}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'var(--badge-red-bg)', color: '#dc2626', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'var(--badge-red-bg)', color: 'var(--badge-red-text)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer' }}
               >
                 <Trash2 size={12} /> Delete
               </button>

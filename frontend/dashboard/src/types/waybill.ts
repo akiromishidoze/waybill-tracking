@@ -422,3 +422,39 @@ export interface CodPayment {
   notes?: string
   carrierName: string
 }
+
+export interface CostAnalytics {
+  summary: {
+    totalCost: number
+    totalRevenue: number
+    totalShipments: number
+    avgCostPerShipment: number
+    avgRevenuePerShipment: number
+    profitMargin: number
+  }
+  byCarrier: {
+    carrierId: string
+    carrierName: string
+    totalCost: number
+    totalRevenue: number
+    shipmentCount: number
+    avgCost: number
+  }[]
+  byRegion: {
+    region: string
+    totalCost: number
+    totalRevenue: number
+    shipmentCount: number
+  }[]
+  byStatus: {
+    status: string
+    totalCost: number
+    shipmentCount: number
+  }[]
+  monthlyTrend: {
+    month: string
+    cost: number
+    revenue: number
+    count: number
+  }[]
+}

@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
           >
             Export Report
           </button>
-          {exportError && <span style={{ fontSize: '0.8125rem', color: '#dc2626' }}>{exportError}</span>}
+          {exportError && <span style={{ fontSize: '0.8125rem', color: 'var(--badge-red-text)' }}>{exportError}</span>}
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default function AnalyticsPage() {
           label="Exception Rate"
           value={stats ? `${stats.exceptionRate}%` : '—'}
           icon={AlertTriangle}
-          color={stats && stats.exceptionRate > 10 ? '#dc2626' : '#d97706'}
+          color={stats && stats.exceptionRate > 10 ? 'var(--badge-red-text)' : 'var(--badge-amber-text)'}
           sublabel="Of total shipments"
           progress={stats?.exceptionRate}
         />

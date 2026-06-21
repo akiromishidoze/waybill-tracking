@@ -70,7 +70,7 @@ export default function TrackingPage() {
 
         {isLoading && <div style={{ maxWidth: 400, margin: '1rem auto', display: 'grid', gap: '0.75rem' }}><SkeletonLine /><SkeletonLine width="80%" /><SkeletonLine width="60%" /></div>}
         {error && (
-          <p style={{ textAlign: 'center', color: '#dc2626' }}>
+          <p style={{ textAlign: 'center', color: 'var(--badge-red-text)' }}>
             Shipment not found. Please check your tracking number.
           </p>
         )}

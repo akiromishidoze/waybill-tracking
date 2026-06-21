@@ -6,11 +6,11 @@ import { DollarSign, CheckCircle, AlertTriangle, RotateCcw, Search, Wallet, Tren
 import { SkeletonBlock } from '@/components/Skeleton'
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; color: string }> = {
-  COLLECTED: { label: 'Collected', bg: '#dbeafe', color: 'var(--badge-blue-text)' },
-  PENDING_SETTLEMENT: { label: 'Pending Settlement', bg: '#fef3c7', color: 'var(--badge-amber-text)' },
-  SETTLED: { label: 'Settled', bg: '#dcfce7', color: 'var(--badge-green-text)' },
-  DISPUTED: { label: 'Disputed', bg: '#fecaca', color: 'var(--badge-red-text)' },
-  REFUNDED: { label: 'Refunded', bg: 'var(--color-bg)', color: '#64748b' },
+  COLLECTED: { label: 'Collected', bg: 'var(--badge-blue-bg)', color: 'var(--badge-blue-text)' },
+  PENDING_SETTLEMENT: { label: 'Pending Settlement', bg: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' },
+  SETTLED: { label: 'Settled', bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
+  DISPUTED: { label: 'Disputed', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
+  REFUNDED: { label: 'Refunded', bg: 'var(--color-bg)', color: 'var(--color-text-muted)' },
 }
 
 const fmt = (n: number) => '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2 })
@@ -59,10 +59,10 @@ export default function CODPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
-          { icon: DollarSign, label: 'Total Collected', value: fmt(totalCollected), bg: '#eff6ff', color: 'var(--color-primary)' },
-          { icon: Wallet, label: 'Pending Settlement', value: fmt(totalPending), bg: '#fef3c7', color: 'var(--badge-amber-text)' },
-          { icon: CheckCircle, label: 'Settled', value: fmt(totalSettled), bg: '#dcfce7', color: 'var(--badge-green-text)' },
-          { icon: AlertTriangle, label: 'Disputed', value: fmt(totalDisputed), bg: '#fecaca', color: 'var(--badge-red-text)' },
+          { icon: DollarSign, label: 'Total Collected', value: fmt(totalCollected), bg: 'var(--color-primary-soft)', color: 'var(--color-primary)' },
+          { icon: Wallet, label: 'Pending Settlement', value: fmt(totalPending), bg: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' },
+          { icon: CheckCircle, label: 'Settled', value: fmt(totalSettled), bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
+          { icon: AlertTriangle, label: 'Disputed', value: fmt(totalDisputed), bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
         ].map(card => (
           <div key={card.label} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>

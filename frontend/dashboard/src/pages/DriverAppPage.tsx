@@ -14,11 +14,11 @@ const STATUS_FLOW: Record<string, string[]> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  ASSIGNED: '#f59e0b',
-  PICKED_UP: '#2563eb',
-  IN_TRANSIT: '#8b5cf6',
-  DELIVERED: '#16a34a',
-  FAILED: '#dc2626',
+  ASSIGNED: 'var(--status-orange)',
+  PICKED_UP: 'var(--status-blue)',
+  IN_TRANSIT: 'var(--status-violet)',
+  DELIVERED: 'var(--status-green)',
+  FAILED: 'var(--status-red)',
 }
 
 const SCAN_LABELS: Record<string, string> = {
@@ -74,7 +74,7 @@ export default function DriverAppPage() {
   const activeAssignments = filteredAssignment?.filter(a => !['DELIVERED', 'FAILED'].includes(a.status)) || []
 
   const nextStatus = (current: string) => STATUS_FLOW[current]?.[0] || null
-  const statusColor = (s: string) => STATUS_COLORS[s] || '#64748b'
+  const statusColor = (s: string) => STATUS_COLORS[s] || 'var(--color-text-muted)'
 
   return (
     <div>
@@ -153,23 +153,23 @@ export default function DriverAppPage() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      <MapPin size={14} color="#94a3b8" /> {a.origin} &rarr; {a.destination}
+                      <MapPin size={14} color='var(--color-text-muted-lighter)' /> {a.origin} &rarr; {a.destination}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      <User size={14} color="#94a3b8" /> {a.recipientName}
+                      <User size={14} color='var(--color-text-muted-lighter)' /> {a.recipientName}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      <Phone size={14} color="#94a3b8" /> {a.recipientPhone}
+                      <Phone size={14} color='var(--color-text-muted-lighter)' /> {a.recipientPhone}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      <Clock size={14} color="#94a3b8" /> {a.pickedUpAt ? 'Picked up ' + new Date(a.pickedUpAt).toLocaleDateString() : 'Not picked up'}
+                      <Clock size={14} color='var(--color-text-muted-lighter)' /> {a.pickedUpAt ? 'Picked up ' + new Date(a.pickedUpAt).toLocaleDateString() : 'Not picked up'}
                     </div>
                   </div>
                   <div style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
                     {a.recipientAddress}
                   </div>
                   {a.notes && (
-                    <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'var(--badge-red-bg)', borderRadius: 6, fontSize: '0.8125rem', color: 'var(--badge-red-text)' }}>
+                    <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'var(--badge-red-bg)', borderRadius: 6, fontSize: '0.8125rem', color: 'var(--status-red)' }}>
                       Note: {a.notes}
                     </div>
                   )}
@@ -179,7 +179,7 @@ export default function DriverAppPage() {
           )}
 
           <h3 style={{ fontSize: '1.125rem', fontWeight: 600, margin: '1.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Package size={18} color="#64748b" /> Completed Deliveries
+            <Package size={18} color='var(--color-text-muted)' /> Completed Deliveries
           </h3>
           {loadingAssignments ? (
             <SkeletonBlock height={80} />
@@ -221,12 +221,12 @@ export default function DriverAppPage() {
                 <div key={s.id} style={{ background: 'var(--color-surface)', borderRadius: 8, padding: '0.75rem 1rem', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 8,
-                    background: s.scanType === 'DELIVERY' ? '#dcfce7' : s.scanType === 'ATTEMPT' ? '#fef2f2' : '#eff6ff',
+                    background: s.scanType === 'DELIVERY' ? 'var(--badge-green-bg)' : s.scanType === 'ATTEMPT' ? 'var(--badge-red-bg)' : 'var(--color-primary-soft)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {s.scanType === 'DELIVERY' ? <CheckCircle size={18} color="#16a34a" /> :
-                     s.scanType === 'ATTEMPT' ? <XCircle size={18} color="#dc2626" /> :
-                     <ScanLine size={18} color="#2563eb" />}
+                    {s.scanType === 'DELIVERY' ? <CheckCircle size={18} color="var(--badge-green-text)" /> :
+                     s.scanType === 'ATTEMPT' ? <XCircle size={18} color="var(--badge-red-text)" /> :
+                     <ScanLine size={18} color="var(--color-primary)" />}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -245,7 +245,7 @@ export default function DriverAppPage() {
                     )}
                   </div>
                   {s.signature && (
-                    <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--status-green)', display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
                       <PenLine size={12} /> Signed
                     </div>
                   )}

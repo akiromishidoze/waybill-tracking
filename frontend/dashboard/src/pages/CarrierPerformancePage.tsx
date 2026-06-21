@@ -23,13 +23,13 @@ export default function CarrierPerformancePage() {
           {carriers?.map((c: any) => (
             <div key={c.carrierId} style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
               <div style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: c.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Truck size={24} color={c.isActive ? '#16a34a' : '#94a3b8'} />
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: c.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Truck size={24} color={c.isActive ? 'var(--badge-green-text)' : 'var(--color-text-muted-lighter)'} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontWeight: 700, fontSize: '1.125rem' }}>{c.carrierName}</span>
-                    <span style={{ fontSize: '0.7rem', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600, background: c.isActive ? '#dcfce7' : '#f1f5f9', color: c.isActive ? '#16a34a' : '#94a3b8' }}>
+                    <span style={{ fontSize: '0.7rem', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600, background: c.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', color: c.isActive ? 'var(--badge-green-text)' : 'var(--color-text-muted-lighter)' }}>
                       {c.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
@@ -37,11 +37,11 @@ export default function CarrierPerformancePage() {
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', padding: '1.25rem' }}>
-                <MetricCard icon={Percent} label="On-Time Rate" value={`${c.onTimeRate}%`} color={c.onTimeRate >= 80 ? '#16a34a' : c.onTimeRate >= 50 ? '#d97706' : '#dc2626'} />
-                <MetricCard icon={AlertTriangle} label="Exception Rate" value={`${c.exceptionRate}%`} color={c.exceptionRate <= 10 ? '#16a34a' : c.exceptionRate <= 30 ? '#d97706' : '#dc2626'} />
+                <MetricCard icon={Percent} label="On-Time Rate" value={`${c.onTimeRate}%`} color={c.onTimeRate >= 80 ? 'var(--badge-green-text)' : c.onTimeRate >= 50 ? 'var(--badge-amber-text)' : 'var(--badge-red-text)'} />
+                <MetricCard icon={AlertTriangle} label="Exception Rate" value={`${c.exceptionRate}%`} color={c.exceptionRate <= 10 ? 'var(--badge-green-text)' : c.exceptionRate <= 30 ? 'var(--badge-amber-text)' : 'var(--badge-red-text)'} />
                 <MetricCard icon={BarChart3} label="Delivered" value={String(c.deliveredCount)} color="#2563eb" />
                 <MetricCard icon={CheckCircle} label="On Time" value={String(c.totalShipments - c.slaBreaches)} color="#16a34a" />
-                <MetricCard icon={XCircle} label="SLA Breaches" value={String(c.slaBreaches)} color={c.slaBreaches === 0 ? '#16a34a' : '#dc2626'} />
+                <MetricCard icon={XCircle} label="SLA Breaches" value={String(c.slaBreaches)} color={c.slaBreaches === 0 ? 'var(--badge-green-text)' : 'var(--badge-red-text)'} />
                 <MetricCard icon={Clock} label="Avg Transit" value={`${c.avgTransitHours}h`} color="#7c3aed" />
               </div>
             </div>
@@ -58,10 +58,10 @@ export default function CarrierPerformancePage() {
                   <div key={c.carrierId}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.8125rem' }}>
                       <span style={{ fontWeight: 500 }}>{c.carrierName}</span>
-                      <span style={{ fontWeight: 600, color: c.onTimeRate >= 80 ? '#16a34a' : c.onTimeRate >= 50 ? '#d97706' : '#dc2626' }}>{c.onTimeRate}% on-time</span>
+                      <span style={{ fontWeight: 600, color: c.onTimeRate >= 80 ? 'var(--badge-green-text)' : c.onTimeRate >= 50 ? 'var(--badge-amber-text)' : 'var(--badge-red-text)' }}>{c.onTimeRate}% on-time</span>
                     </div>
                     <div style={{ width: '100%', height: 10, background: 'var(--color-bg)', borderRadius: 5, overflow: 'hidden' }}>
-                      <div style={{ width: `${(c.onTimeRate / maxRate) * 100}%`, height: '100%', borderRadius: 5, background: c.onTimeRate >= 80 ? '#16a34a' : c.onTimeRate >= 50 ? '#d97706' : '#dc2626', transition: 'width 0.5s' }} />
+                      <div style={{ width: `${(c.onTimeRate / maxRate) * 100}%`, height: '100%', borderRadius: 5, background: c.onTimeRate >= 80 ? 'var(--badge-green-text)' : c.onTimeRate >= 50 ? 'var(--badge-amber-text)' : 'var(--badge-red-text)', transition: 'width 0.5s' }} />
                     </div>
                   </div>
                 )

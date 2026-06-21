@@ -6,15 +6,15 @@ import { Search, Clock } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
 
 const ACTION_COLORS: Record<string, string> = {
-  USER_LOGIN: '#2563eb',
-  USER_VIEW: '#6366f1',
-  ROLE_CHANGE: '#7c3aed',
-  WAYBILL_VIEW: '#0891b2',
-  WAYBILL_CREATE: '#059669',
-  STATUS_UPDATE: '#d97706',
-  EXCEPTION_CODE_VIEW: '#6b7280',
-  REPORT_EXPORT: '#16a34a',
-  DASHBOARD_VIEW: '#4f46e5',
+  USER_LOGIN: 'var(--status-blue)',
+  USER_VIEW: 'var(--status-indigo)',
+  ROLE_CHANGE: 'var(--status-purple)',
+  WAYBILL_VIEW: 'var(--status-cyan)',
+  WAYBILL_CREATE: 'var(--status-green)',
+  STATUS_UPDATE: 'var(--status-amber)',
+  EXCEPTION_CODE_VIEW: 'var(--status-gray)',
+  REPORT_EXPORT: 'var(--status-green)',
+  DASHBOARD_VIEW: 'var(--status-indigo)',
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -97,7 +97,7 @@ export default function AuditLogPage() {
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         color: '#fff',
-                        background: ACTION_COLORS[log.action] || '#6b7280',
+                        background: ACTION_COLORS[log.action] || 'var(--status-gray)',
                       }}
                     >
                       {ACTION_LABELS[log.action] || log.action}

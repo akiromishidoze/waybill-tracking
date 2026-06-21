@@ -73,14 +73,14 @@ export default function CarriersPage() {
         <div style={{ display: 'grid', gap: '1rem' }}>
           {carriers?.map((c) => (
             <div key={c.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: c.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Truck size={22} color={c.isActive ? '#16a34a' : '#94a3b8'} />
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: c.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Truck size={22} color={c.isActive ? 'var(--badge-green-text)' : 'var(--color-text-muted-lighter)'} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span style={{ fontWeight: 600, fontSize: '1rem' }}>{c.name}</span>
                   {c.isActive ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: '#16a34a', fontWeight: 500 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--badge-green-text)', fontWeight: 500 }}>
                       <CheckCircle size={12} /> Active
                     </span>
                   ) : (
@@ -101,7 +101,7 @@ export default function CarriersPage() {
                 <button onClick={() => openEdit(c)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <Pencil size={14} /> Edit
                 </button>
-                <button onClick={() => { if (confirm('Delete this carrier?')) deleteCarrier.mutate(c.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: '#dc2626', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
+                <button onClick={() => { if (confirm('Delete this carrier?')) deleteCarrier.mutate(c.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <Trash2 size={14} /> Delete
                 </button>
               </div>

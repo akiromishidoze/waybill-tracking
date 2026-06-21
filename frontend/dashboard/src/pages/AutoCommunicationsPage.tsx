@@ -78,8 +78,8 @@ export default function AutoCommunicationsPage() {
 
   const tabStyle = (tab: typeof activeTab) => ({
     padding: '0.625rem 1.25rem', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem',
-    borderRadius: 8, background: activeTab === tab ? '#2563eb' : '#f1f5f9',
-    color: activeTab === tab ? '#fff' : '#475569', transition: 'all 0.15s',
+    borderRadius: 8, background: activeTab === tab ? '#2563eb' : 'var(--color-bg)',
+    color: activeTab === tab ? '#fff' : 'var(--color-text-secondary)', transition: 'all 0.15s',
   })
 
   return (
@@ -164,8 +164,8 @@ export default function AutoCommunicationsPage() {
               <div key={rule.id} style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.25rem', border: '1px solid var(--color-border)', opacity: rule.isActive ? 1 : 0.5 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: '0.75rem', flex: 1 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: rule.isActive ? '#eff6ff' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <ChanIcon size={20} color={rule.isActive ? '#2563eb' : '#94a3b8'} />
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: rule.isActive ? 'var(--color-primary-soft)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ChanIcon size={20} color={rule.isActive ? 'var(--badge-blue-text)' : 'var(--color-text-muted-lighter)'} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -173,7 +173,7 @@ export default function AutoCommunicationsPage() {
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: 'var(--color-primary-soft)', color: 'var(--color-primary)' }}>
                           <TriggerIcon size={10} /> {TRIGGER_LABELS[rule.trigger] || rule.trigger}
                         </span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: rule.channel === 'EMAIL' ? '#f0fdf4' : '#fef2f2', color: rule.channel === 'EMAIL' ? '#16a34a' : '#dc2626' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: rule.channel === 'EMAIL' ? 'var(--badge-green-bg)' : 'var(--badge-red-bg)', color: rule.channel === 'EMAIL' ? 'var(--badge-green-text)' : 'var(--badge-red-text)' }}>
                           <ChanIcon size={10} /> {rule.channel}
                         </span>
                       </div>
@@ -218,7 +218,7 @@ export default function AutoCommunicationsPage() {
                 <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.875rem 1.25rem', fontWeight: 500, color: 'var(--color-primary)' }}>{log.trackingNumber}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, background: log.channel === 'EMAIL' ? '#f0fdf4' : '#fef2f2', color: log.channel === 'EMAIL' ? '#16a34a' : '#dc2626' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, background: log.channel === 'EMAIL' ? 'var(--badge-green-bg)' : 'var(--badge-red-bg)', color: log.channel === 'EMAIL' ? 'var(--badge-green-text)' : 'var(--badge-red-text)' }}>
                       {log.channel === 'EMAIL' ? <Mail size={12} /> : <MessageSquare size={12} />} {log.channel}
                     </span>
                   </td>
@@ -226,7 +226,7 @@ export default function AutoCommunicationsPage() {
                   <td style={{ padding: '0.875rem 1.25rem', color: 'var(--color-text-secondary)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.subject}</td>
                   <td style={{ padding: '0.875rem 1.25rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{new Date(log.sentAt).toLocaleString()}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: log.status === 'SENT' ? '#dcfce7' : '#fef2f2', color: log.status === 'SENT' ? '#16a34a' : '#dc2626' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, background: log.status === 'SENT' ? 'var(--badge-green-bg)' : 'var(--badge-red-bg)', color: log.status === 'SENT' ? 'var(--badge-green-text)' : 'var(--badge-red-text)' }}>
                       {log.status === 'SENT' ? <Check size={10} /> : <X size={10} />} {log.status}
                     </span>
                   </td>

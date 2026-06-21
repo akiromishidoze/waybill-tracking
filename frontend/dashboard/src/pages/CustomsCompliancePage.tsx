@@ -7,11 +7,11 @@ import { SkeletonBlock } from '@/components/Skeleton'
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   NOT_REQUIRED: { label: 'Not Required', bg: 'var(--color-bg)', color: 'var(--color-text-muted)' },
-  DOCUMENTS_PENDING: { label: 'Docs Pending', bg: '#fef3c7', color: 'var(--badge-amber-text)' },
-  DOCUMENTS_SUBMITTED: { label: 'Docs Submitted', bg: '#dbeafe', color: 'var(--badge-blue-text)' },
-  CLEARANCE_IN_PROGRESS: { label: 'Clearance In Progress', bg: '#e0e7ff', color: 'var(--badge-indigo-text)' },
-  CLEARED: { label: 'Cleared', bg: '#dcfce7', color: 'var(--badge-green-text)' },
-  HELD: { label: 'Held', bg: '#fecaca', color: 'var(--badge-red-text)' },
+  DOCUMENTS_PENDING: { label: 'Docs Pending', bg: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' },
+  DOCUMENTS_SUBMITTED: { label: 'Docs Submitted', bg: 'var(--badge-blue-bg)', color: 'var(--badge-blue-text)' },
+  CLEARANCE_IN_PROGRESS: { label: 'Clearance In Progress', bg: 'var(--badge-indigo-bg)', color: 'var(--badge-indigo-text)' },
+  CLEARED: { label: 'Cleared', bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
+  HELD: { label: 'Held', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
 }
 
 const DOC_LABELS: Record<string, string> = {
@@ -25,10 +25,10 @@ const DOC_LABELS: Record<string, string> = {
 }
 
 const DOC_STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  PENDING: { label: 'Pending', bg: '#fef3c7', color: 'var(--badge-amber-text)' },
-  SUBMITTED: { label: 'Submitted', bg: '#dbeafe', color: 'var(--badge-blue-text)' },
-  APPROVED: { label: 'Approved', bg: '#dcfce7', color: 'var(--badge-green-text)' },
-  REJECTED: { label: 'Rejected', bg: '#fecaca', color: 'var(--badge-red-text)' },
+  PENDING: { label: 'Pending', bg: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' },
+  SUBMITTED: { label: 'Submitted', bg: 'var(--badge-blue-bg)', color: 'var(--badge-blue-text)' },
+  APPROVED: { label: 'Approved', bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
+  REJECTED: { label: 'Rejected', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
 }
 
 const formatSize = (bytes: number) => {
@@ -89,7 +89,7 @@ export default function CustomsCompliancePage() {
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={120} /><SkeletonBlock height={120} /></div>
       ) : !filtered.length ? (
         <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '2rem', textAlign: 'center', border: '1px solid var(--color-border)' }}>
-          <Globe size={40} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
+          <Globe size={40} color='var(--color-text-muted-lighter)' style={{ marginBottom: '0.75rem' }} />
           <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>No customs shipments found.</p>
         </div>
       ) : (
@@ -103,8 +103,8 @@ export default function CustomsCompliancePage() {
                 <div style={{ padding: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', flex: 1 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 10, background: isIntl ? '#eff6ff' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Globe size={20} color={isIntl ? '#2563eb' : '#94a3b8'} />
+                      <div style={{ width: 44, height: 44, borderRadius: 10, background: isIntl ? 'var(--color-primary-soft)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Globe size={20} color={isIntl ? 'var(--color-primary)' : 'var(--color-text-muted-lighter)'} />
                       </div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -147,7 +147,7 @@ export default function CustomsCompliancePage() {
                           return (
                             <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: 'var(--color-surface)', borderRadius: 8, border: '1px solid var(--color-border)' }}>
                               <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FileText size={18} color="#64748b" />
+                                <FileText size={18} color='var(--color-text-muted)' />
                               </div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{doc.title}</div>

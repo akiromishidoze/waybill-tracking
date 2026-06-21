@@ -6,15 +6,15 @@ import { CheckSquare, Clock, Truck, Shield, RotateCcw } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
 
 const statusColors: Record<string, string> = {
-  CREATED: '#6b7280',
-  PICKED_UP: '#2563eb',
-  IN_TRANSIT: '#d97706',
-  AT_SORTING_CENTER: '#7c3aed',
-  OUT_FOR_DELIVERY: '#0891b2',
-  DELIVERED: '#16a34a',
-  FAILED_DELIVERY: '#dc2626',
-  RETURNED: '#9333ea',
-  CANCELLED: '#4b5563',
+  CREATED: 'var(--status-gray)',
+  PICKED_UP: 'var(--status-blue)',
+  IN_TRANSIT: 'var(--status-amber)',
+  AT_SORTING_CENTER: 'var(--status-purple)',
+  OUT_FOR_DELIVERY: 'var(--status-cyan)',
+  DELIVERED: 'var(--status-green)',
+  FAILED_DELIVERY: 'var(--status-red)',
+  RETURNED: 'var(--status-purple)',
+  CANCELLED: 'var(--status-gray)',
 }
 
 const STATUS_OPTIONS = ['CREATED', 'PICKED_UP', 'IN_TRANSIT', 'AT_SORTING_CENTER', 'OUT_FOR_DELIVERY', 'DELIVERED', 'FAILED_DELIVERY', 'CANCELLED']
@@ -110,7 +110,7 @@ export default function BatchStatusPage() {
               <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No waybills found.</td></tr>
             ) : (
               filtered?.map((wb: Waybill) => (
-                <tr key={wb.id} style={{ borderTop: '1px solid var(--color-border-subtle)', background: selected.has(wb.id) ? '#eff6ff' : undefined }}>
+                <tr key={wb.id} style={{ borderTop: '1px solid var(--color-border-subtle)', background: selected.has(wb.id) ? 'var(--color-primary-soft)' : undefined }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <input type="checkbox" checked={selected.has(wb.id)} onChange={() => toggleOne(wb.id)} style={{ cursor: 'pointer' }} />
                   </td>
@@ -125,7 +125,7 @@ export default function BatchStatusPage() {
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     {wb.teamName ? (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 500, background: 'var(--badge-warm-bg)', color: '#d97706' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 500, background: 'var(--badge-warm-bg)', color: 'var(--status-amber)' }}>
                         <Shield size={10} /> {wb.teamName}
                       </span>
                     ) : <span style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.8125rem' }}>—</span>}

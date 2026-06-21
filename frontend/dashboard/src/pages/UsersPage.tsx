@@ -7,7 +7,7 @@ import { SkeletonTableRow } from '@/components/Skeleton'
 
 const ROLE_OPTIONS = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
 const ROLE_COLORS: Record<string, string> = {
-  ADMIN: '#7c3aed', OPS: '#2563eb', SHIPPER: '#059669', COURIER: '#d97706',
+  ADMIN: 'var(--status-purple)', OPS: 'var(--status-blue)', SHIPPER: 'var(--status-green)', COURIER: 'var(--status-amber)',
 }
 
 export default function UsersPage() {
@@ -94,14 +94,14 @@ export default function UsersPage() {
                   <td style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)' }}>{u.email}</td>
                   <td style={{ padding: '0.75rem 1rem', color: 'var(--color-text-muted)' }}>{u.company || '—'}</td>
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 600, color: '#fff', background: ROLE_COLORS[u.role] || '#6b7280' }}>{u.role}</span>
+                    <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 600, color: '#fff', background: ROLE_COLORS[u.role] || 'var(--color-text-muted)' }}>{u.role}</span>
                   </td>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button onClick={() => openEdit(u)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                         <Pencil size={12} /> Edit
                       </button>
-                      <button onClick={() => { if (confirm('Delete this user?')) deleteUser.mutate(u.id) }} disabled={deleteUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: '#dc2626', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
+                      <button onClick={() => { if (confirm('Delete this user?')) deleteUser.mutate(u.id) }} disabled={deleteUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                         <Trash2 size={12} /> Delete
                       </button>
                     </div>

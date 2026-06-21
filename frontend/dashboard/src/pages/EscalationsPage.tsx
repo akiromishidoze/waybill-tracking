@@ -6,9 +6,9 @@ import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
 
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: '#dc2626',
-  ACKNOWLEDGED: '#d97706',
-  RESOLVED: '#16a34a',
+  OPEN: 'var(--status-red)',
+  ACKNOWLEDGED: 'var(--status-amber)',
+  RESOLVED: 'var(--status-green)',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -44,8 +44,8 @@ export default function EscalationsPage() {
       title="Escalations"
       actions={
         <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem' }}>
-          <span style={{ color: '#dc2626' }}>Open: <strong>{openCount}</strong></span>
-          <span style={{ color: '#d97706' }}>Acknowledged: <strong>{ackCount}</strong></span>
+          <span style={{ color: 'var(--status-red)' }}>Open: <strong>{openCount}</strong></span>
+          <span style={{ color: 'var(--status-amber)' }}>Acknowledged: <strong>{ackCount}</strong></span>
         </div>
       }
     >
@@ -69,7 +69,7 @@ export default function EscalationsPage() {
               <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No escalations.</td></tr>
             ) : (
               escalations.map((esc: any) => (
-                <tr key={esc.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: esc.status === 'OPEN' ? '#fef2f2' : undefined }}>
+                <tr key={esc.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: esc.status === 'OPEN' ? 'var(--badge-red-bg)' : undefined }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <Link to={`/waybills/${esc.waybillId}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>
                       {esc.trackingNumber}

@@ -33,8 +33,8 @@ export default function RegionPerformancePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.875rem' }}>
                 <div style={{ color: 'var(--color-text-muted)' }}>Total Shipments</div><div style={{ fontWeight: 500, textAlign: 'right' }}>{r.totalShipments}</div>
                 <div style={{ color: 'var(--color-text-muted)' }}>Delivered</div><div style={{ fontWeight: 500, textAlign: 'right' }}>{r.deliveredCount}</div>
-                <div style={{ color: 'var(--color-text-muted)' }}>On-Time</div><div style={{ fontWeight: 500, textAlign: 'right', color: '#16a34a' }}>{r.onTimeCount}</div>
-                <div style={{ color: 'var(--color-text-muted)' }}>Exceptions</div><div style={{ fontWeight: 500, textAlign: 'right', color: '#dc2626' }}>{r.exceptionCount}</div>
+                <div style={{ color: 'var(--color-text-muted)' }}>On-Time</div><div style={{ fontWeight: 500, textAlign: 'right', color: 'var(--badge-green-text)' }}>{r.onTimeCount}</div>
+                <div style={{ color: 'var(--color-text-muted)' }}>Exceptions</div><div style={{ fontWeight: 500, textAlign: 'right', color: 'var(--badge-red-text)' }}>{r.exceptionCount}</div>
                 <div style={{ color: 'var(--color-text-muted)' }}>Avg Transit</div><div style={{ fontWeight: 500, textAlign: 'right' }}>{r.avgTransitHours.toFixed(1)}h</div>
                 <div style={{ color: 'var(--color-text-muted)' }}>SLA Compliance</div><div style={{ fontWeight: 500, textAlign: 'right', color: 'var(--color-primary)' }}>{(r.slaCompliance * 100).toFixed(1)}%</div>
               </div>

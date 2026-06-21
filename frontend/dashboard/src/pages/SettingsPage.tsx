@@ -105,7 +105,7 @@ export default function SettingsPage() {
               <UserPlus size={14} /> Create User
             </button>
           </div>
-          {createUserMsg && <p style={{ fontSize: '0.8125rem', color: createUserMsg.includes('successfully') ? '#16a34a' : '#dc2626', marginTop: '0.5rem' }}>{createUserMsg}</p>}
+          {createUserMsg && <p style={{ fontSize: '0.8125rem', color: createUserMsg.includes('successfully') ? 'var(--badge-green-text)' : 'var(--badge-red-text)', marginTop: '0.5rem' }}>{createUserMsg}</p>}
         </section>
 
         {/* General Settings */}
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                   Cancel
                 </button>
               </div>
-              {savedMsg && <p style={{ fontSize: '0.8125rem', color: '#16a34a' }}>{savedMsg}</p>}
+              {savedMsg && <p style={{ fontSize: '0.8125rem', color: 'var(--badge-green-text)' }}>{savedMsg}</p>}
             </div>
           )}
         </section>
@@ -267,7 +267,7 @@ export default function SettingsPage() {
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {(rules || []).map((r: any) => (
                 <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
-                  <AlertTriangle size={14} color={r.isActive ? '#dc2626' : '#94a3b8'} />
+                  <AlertTriangle size={14} color={r.isActive ? 'var(--badge-red-text)' : 'var(--color-text-muted-lighter)'} />
                   <div style={{ flex: 1 }}>
                     <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{r.name}</span>
                     <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginLeft: '0.5rem' }}>— {CONDITION_LABELS[r.condition] || r.condition} ({r.threshold}) → {r.targetRole}</span>

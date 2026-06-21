@@ -18,17 +18,17 @@ const icon = L.icon({
 
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    CREATED: '#6b7280',
-    PICKED_UP: '#2563eb',
-    IN_TRANSIT: '#d97706',
-    AT_SORTING_CENTER: '#7c3aed',
-    OUT_FOR_DELIVERY: '#0891b2',
-    DELIVERED: '#16a34a',
-    FAILED_DELIVERY: '#dc2626',
-    RETURNED: '#9333ea',
-    CANCELLED: '#4b5563',
+    CREATED: 'var(--color-text-muted)',
+    PICKED_UP: 'var(--badge-blue-text)',
+    IN_TRANSIT: 'var(--badge-amber-text)',
+    AT_SORTING_CENTER: 'var(--badge-purple-text)',
+    OUT_FOR_DELIVERY: 'var(--badge-cyan-text)',
+    DELIVERED: 'var(--badge-green-text)',
+    FAILED_DELIVERY: 'var(--badge-red-text)',
+    RETURNED: 'var(--badge-purple-text)',
+    CANCELLED: 'var(--color-text-muted)',
   }
-  return colors[status] || '#6b7280'
+  return colors[status] || 'var(--color-text-muted)'
 }
 
 export default function MapViewPage() {

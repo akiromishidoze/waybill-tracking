@@ -5,7 +5,7 @@ import { Database, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonBlock } from '@/components/Skeleton'
 
-const SYSTEM_COLORS: Record<string, string> = { SAP: '#1a73e8', ORACLE: '#f80000', NETSUITE: '#1a8cff', OTHER: '#64748b' }
+const SYSTEM_COLORS: Record<string, string> = { SAP: 'var(--status-blue)', ORACLE: 'var(--status-red)', NETSUITE: 'var(--status-blue)', OTHER: 'var(--status-gray)' }
 
 export default function ErpIntegrationsPage() {
   const { data: integrations, isLoading } = useQuery({
@@ -26,15 +26,15 @@ export default function ErpIntegrationsPage() {
         <div style={{ display: 'grid', gap: '0.75rem' }}>
           {integrations.map((i: ErpIntegration) => (
             <div key={i.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--color-surface)', borderRadius: 10, border: '1px solid var(--color-border)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: (SYSTEM_COLORS[i.system] || '#64748b') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Database size={20} color={SYSTEM_COLORS[i.system] || '#64748b'} />
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: (SYSTEM_COLORS[i.system] || 'var(--status-gray)') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Database size={20} color={SYSTEM_COLORS[i.system] || 'var(--status-gray)'} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   {i.name}
                   {i.lastSyncStatus === 'SUCCESS' ? <CheckCircle size={14} color="#16a34a" /> : i.lastSyncStatus === 'FAILED' ? <XCircle size={14} color="#dc2626" /> : null}
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--status-gray)', marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <span>{i.system}</span>
                   <span>{i.authType}</span>
                   <span>{i.syncDirection}</span>
@@ -42,8 +42,8 @@ export default function ErpIntegrationsPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.875rem' }}>
-                <RefreshCw size={14} color={i.isActive ? '#16a34a' : '#94a3b8'} />
-                <span style={{ color: i.isActive ? '#16a34a' : '#94a3b8', fontWeight: 500 }}>{i.isActive ? 'Active' : 'Inactive'}</span>
+                <RefreshCw size={14} color={i.isActive ? 'var(--badge-green-text)' : 'var(--color-text-muted-lighter)'} />
+                <span style={{ color: i.isActive ? 'var(--badge-green-text)' : 'var(--color-text-muted-lighter)', fontWeight: 500 }}>{i.isActive ? 'Active' : 'Inactive'}</span>
               </div>
             </div>
           ))}

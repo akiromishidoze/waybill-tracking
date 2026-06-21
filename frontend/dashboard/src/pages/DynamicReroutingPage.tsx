@@ -55,7 +55,7 @@ export default function DynamicReroutingPage() {
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={100} /><SkeletonBlock height={100} /><SkeletonBlock height={100} /></div>
       ) : !rerouteCandidates.length ? (
         <div style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '2rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
-          <Navigation size={40} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
+          <Navigation size={40} color='var(--color-text-muted-lighter)' style={{ marginBottom: '0.75rem' }} />
           <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>No shipments currently in transit. Re-routing is only available for active shipments.</p>
         </div>
       ) : (
@@ -66,7 +66,7 @@ export default function DynamicReroutingPage() {
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {wb.trackingNumber}
-                    <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: '#d9770620', color: '#d97706' }}>
+                    <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' }}>
                       {wb.status.replace(/_/g, ' ')}
                     </span>
                   </div>
@@ -91,16 +91,16 @@ export default function DynamicReroutingPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <MapPin size={14} color="#94a3b8" /> Destination: <strong>{wb.destination}</strong>
+                  <MapPin size={14} color='var(--color-text-muted-lighter)' /> Destination: <strong>{wb.destination}</strong>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <Truck size={14} color="#94a3b8" /> Carrier: <strong>{wb.carrierName || '—'}</strong>
+                  <Truck size={14} color='var(--color-text-muted-lighter)' /> Carrier: <strong>{wb.carrierName || '—'}</strong>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <Clock size={14} color="#94a3b8" /> ETA: <strong>{wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'}</strong>
+                  <Clock size={14} color='var(--color-text-muted-lighter)' /> ETA: <strong>{wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'}</strong>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                  <AlertTriangle size={14} color="#94a3b8" /> SLA: {wb.slaBreached ? <span style={{ color: '#dc2626', fontWeight: 600 }}>Breached</span> : <span style={{ color: '#16a34a' }}>On Time</span>}
+                  <AlertTriangle size={14} color='var(--color-text-muted-lighter)' /> SLA: {wb.slaBreached ? <span style={{ color: 'var(--badge-red-text)', fontWeight: 600 }}>Breached</span> : <span style={{ color: 'var(--badge-green-text)' }}>On Time</span>}
                 </div>
               </div>
 

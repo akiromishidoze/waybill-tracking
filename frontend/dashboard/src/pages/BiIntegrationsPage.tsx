@@ -9,11 +9,11 @@ const PLATFORM_NAMES: Record<string, string> = {
   POWER_BI: 'Power BI', LOOKER: 'Looker', TABLEAU: 'Tableau', SUPERSET: 'Apache Superset', GRAFANA: 'Grafana', OTHER: 'Other',
 }
 const PLATFORM_COLORS: Record<string, string> = {
-  POWER_BI: '#f2c811', LOOKER: '#4285f4', TABLEAU: '#e97627', SUPERSET: '#1fa7ba', GRAFANA: '#f46800', OTHER: '#64748b',
+  POWER_BI: 'var(--status-orange)', LOOKER: 'var(--status-blue)', TABLEAU: 'var(--status-orange)', SUPERSET: 'var(--status-cyan)', GRAFANA: 'var(--status-orange)', OTHER: 'var(--status-gray)',
 }
 const STATUS_STYLE: Record<string, { label: string; bg: string; color: string }> = {
   CONNECTED: { label: 'Connected', bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
-  DISCONNECTED: { label: 'Disconnected', bg: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' },
+  DISCONNECTED: { label: 'Disconnected', bg: 'var(--badge-amber-bg)', color: 'var(--status-orange)' },
   ERROR: { label: 'Error', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
 }
 
@@ -76,8 +76,8 @@ export default function BiIntegrationsPage() {
                 <div style={{ padding: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: '0.75rem', flex: 1 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 10, background: (PLATFORM_COLORS[bi.platform] || '#64748b') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Database size={20} color={PLATFORM_COLORS[bi.platform] || '#64748b'} />
+                      <div style={{ width: 44, height: 44, borderRadius: 10, background: (PLATFORM_COLORS[bi.platform] || 'var(--status-gray)') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Database size={20} color={PLATFORM_COLORS[bi.platform] || 'var(--status-gray)'} />
                       </div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

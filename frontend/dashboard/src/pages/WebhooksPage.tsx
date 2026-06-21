@@ -4,10 +4,10 @@ import { webhookService } from '@/services/api'
 import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
 
 const EVENT_COLORS: Record<string, string> = {
-  'status.updated': '#2563eb',
-  'waybill.created': '#16a34a',
-  'waybill.delivered': '#0891b2',
-  'exception.raised': '#dc2626',
+  'status.updated': 'var(--status-blue)',
+  'waybill.created': 'var(--status-green)',
+  'waybill.delivered': 'var(--status-cyan)',
+  'exception.raised': 'var(--status-red)',
   'test.ping': '#6b7280',
 }
 
@@ -83,7 +83,7 @@ export default function WebhooksPage() {
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Subscribe to Events</label>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {(events || WEBHOOK_EVENTS).map((evt: string) => (
-                <label key={evt} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', borderRadius: 6, border: `1px solid ${form.events.includes(evt) ? EVENT_COLORS[evt] || '#2563eb' : '#e2e8f0'}`, background: form.events.includes(evt) ? (EVENT_COLORS[evt] || '#2563eb') + '10' : '#fff', cursor: 'pointer', fontSize: '0.8125rem' }}>
+                <label key={evt} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', borderRadius: 6, border: `1px solid ${form.events.includes(evt) ? EVENT_COLORS[evt] || 'var(--status-blue)' : 'var(--color-border-input)'}`, background: form.events.includes(evt) ? 'var(--color-primary-soft)' : 'var(--color-input-bg)', cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <input type="checkbox" checked={form.events.includes(evt)} onChange={() => toggleEvent(evt)} style={{ cursor: 'pointer' }} />
                   {evt}
                 </label>
@@ -102,7 +102,7 @@ export default function WebhooksPage() {
       )}
 
       {testMsg && (
-        <div style={{ padding: '0.75rem 1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: '1rem', fontSize: '0.8125rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ padding: '0.75rem 1rem', background: 'var(--badge-green-bg)', border: '1px solid #bbf7d0', borderRadius: 8, marginBottom: '1rem', fontSize: '0.8125rem', color: 'var(--status-green)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Send size={14} /> {testMsg}
         </div>
       )}
@@ -114,13 +114,13 @@ export default function WebhooksPage() {
           {webhooks?.map((w: any) => (
             <div key={w.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: w.isActive ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Webhook size={20} color={w.isActive ? '#16a34a' : '#94a3b8'} />
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: w.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Webhook size={20} color={w.isActive ? 'var(--status-green)' : 'var(--color-text-muted-lighter)'} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontWeight: 600 }}>{w.name}</span>
-                    <span style={{ fontSize: '0.7rem', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600, background: w.isActive ? '#dcfce7' : '#f1f5f9', color: w.isActive ? '#16a34a' : '#94a3b8' }}>
+                    <span style={{ fontSize: '0.7rem', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600, background: w.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', color: w.isActive ? 'var(--status-green)' : 'var(--color-text-muted)' }}>
                       {w.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
@@ -133,14 +133,14 @@ export default function WebhooksPage() {
                   <button onClick={() => openEdit(w)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer' }}>
                     <Pencil size={14} />
                   </button>
-                  <button onClick={() => { if (confirm('Delete this webhook?')) deleteWebhook.mutate(w.id) }} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: '#dc2626' }}>
+                  <button onClick={() => { if (confirm('Delete this webhook?')) deleteWebhook.mutate(w.id) }} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: 'var(--status-red)' }}>
                     <Trash2 size={14} />
                   </button>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
                 {w.events.map((evt: string) => (
-                  <span key={evt} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600, background: (EVENT_COLORS[evt] || '#6b7280') + '15', color: EVENT_COLORS[evt] || '#6b7280' }}>
+                  <span key={evt} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 600, background: (EVENT_COLORS[evt] || 'var(--color-text-muted)') + '15', color: EVENT_COLORS[evt] || 'var(--color-text-muted)' }}>
                     <Activity size={10} /> {evt}
                   </span>
                 ))}

@@ -99,8 +99,8 @@ export default function AggregatedTrackingPage() {
       ) : (
         Object.entries(grouped).map(([carrierId, group]: [string, any]) => (
           <div key={carrierId} style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', marginBottom: '1.5rem', overflow: 'hidden' }}>
-            <div style={{ padding: '0.75rem 1rem', background: (CARRIER_COLORS[carrierId] || '#6b7280') + '10', borderBottom: `2px solid ${CARRIER_COLORS[carrierId] || '#6b7280'}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Truck size={18} color={CARRIER_COLORS[carrierId] || '#6b7280'} />
+            <div style={{ padding: '0.75rem 1rem', background: (CARRIER_COLORS[carrierId] || 'var(--color-text-muted)') + '10', borderBottom: `2px solid ${CARRIER_COLORS[carrierId] || 'var(--color-text-muted)'}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Truck size={18} color={CARRIER_COLORS[carrierId] || 'var(--color-text-muted)'} />
               <span style={{ fontWeight: 600 }}>{group.name}</span>
               <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>({group.items.length} shipments)</span>
             </div>
@@ -134,7 +134,7 @@ export default function AggregatedTrackingPage() {
                     <td style={{ padding: '0.625rem 1rem' }}>
                       <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
                         <Link to={`/waybills/${item.waybillId}`} style={{ display: 'flex', color: 'var(--color-primary)' }}><ChevronRight size={16} /></Link>
-                        <button onClick={() => { if (confirm('Remove carrier from this waybill?')) removeCarrier.mutate(item.waybillId) }} style={{ display: 'flex', padding: '0.25rem', background: 'transparent', color: '#dc2626', border: 'none', borderRadius: 4, cursor: 'pointer' }} title="Remove carrier">
+                        <button onClick={() => { if (confirm('Remove carrier from this waybill?')) removeCarrier.mutate(item.waybillId) }} style={{ display: 'flex', padding: '0.25rem', background: 'transparent', color: 'var(--badge-red-text)', border: 'none', borderRadius: 4, cursor: 'pointer' }} title="Remove carrier">
                           <Trash2 size={14} />
                         </button>
                       </div>

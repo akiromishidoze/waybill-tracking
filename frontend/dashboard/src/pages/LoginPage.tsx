@@ -45,7 +45,7 @@ export default function LoginPage() {
           Email: <strong>Admin</strong> / Password: <strong>admin</strong>
         </p>
         {error && (
-          <p style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          <p style={{ color: 'var(--badge-red-text)', marginBottom: '1rem', fontSize: '0.875rem' }}>
             {error}
           </p>
         )}

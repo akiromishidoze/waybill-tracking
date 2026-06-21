@@ -57,6 +57,7 @@ const navGroups: NavGroup[] = [
       { to: '/webhooks', label: 'Webhooks', icon: Webhook },
       { to: '/integrations/erp', label: 'ERP Integrations', icon: Link2 },
       { to: '/integrations/ecommerce', label: 'E-Commerce', icon: ShoppingCart },
+      { to: '/integrations/white-label', label: 'White-Label Portal', icon: Globe },
       { to: '/audit-logs', label: 'Audit Log', icon: ClipboardList },
       { to: '/roadmap/integrations', label: 'Roadmap', icon: Link2 },
     ],

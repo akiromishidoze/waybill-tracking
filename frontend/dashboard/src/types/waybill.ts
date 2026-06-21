@@ -551,3 +551,30 @@ export interface ECommerceDashboard {
     lastSyncAt: string | null
   }
 }
+
+export interface WhiteLabelPortalData {
+  config: {
+    brandName: string
+    logoUrl: string | null
+    customDomain: string | null
+    primaryColor: string
+    supportEmail: string
+    supportPhone: string
+    enabled: boolean
+    portalUrl: string
+  }
+  stats: {
+    activeSessions: number
+    trackingQueriesToday: number
+    totalRegisteredCustomers: number
+    averageSatisfaction: number
+  }
+  recentTracking: {
+    id: string
+    trackingNumber: string
+    customerName: string
+    status: string
+    carrier: string
+    timestamp: string
+  }[]
+}

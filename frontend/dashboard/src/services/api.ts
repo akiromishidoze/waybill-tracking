@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -425,6 +425,27 @@ const seedECommerceDashboard: ECommerceDashboard = {
   summary: { totalConnected: 4, totalDisconnected: 2, totalOrdersSynced: 36850, lastSyncAt: ago(1) },
 }
 
+const seedWhiteLabelPortal: WhiteLabelPortalData = {
+  config: {
+    brandName: 'TrackExpress',
+    logoUrl: null,
+    customDomain: 'track.yourcompany.com',
+    primaryColor: '#2563eb',
+    supportEmail: 'support@traackexpress.com',
+    supportPhone: '+63 2 8888 7777',
+    enabled: true,
+    portalUrl: 'https://track.yourcompany.com',
+  },
+  stats: { activeSessions: 142, trackingQueriesToday: 3850, totalRegisteredCustomers: 12800, averageSatisfaction: 4.6 },
+  recentTracking: [
+    { id: 'wl-001', trackingNumber: 'LBC-2024-1001', customerName: 'Ricardo Dimagiba', status: 'IN_TRANSIT', carrier: 'LBC Express', timestamp: ago(1) },
+    { id: 'wl-002', trackingNumber: 'DHL-PH-99123', customerName: 'ABC Trading Co.', status: 'DELIVERED', carrier: 'DHL Express', timestamp: ago(3) },
+    { id: 'wl-003', trackingNumber: '2GO-2024-6001', customerName: 'Carmen Villanueva', status: 'OUT_FOR_DELIVERY', carrier: '2Go Logistics', timestamp: ago(5) },
+    { id: 'wl-004', trackingNumber: 'FD-PH-78901', customerName: 'Fernando Reyes', status: 'PICKED_UP', carrier: 'Flash Delivery', timestamp: ago(8) },
+    { id: 'wl-005', trackingNumber: 'LBC-2024-1008', customerName: 'Elena Martinez', status: 'IN_TRANSIT', carrier: 'LBC Express', timestamp: ago(12) },
+  ],
+}
+
 const seedCarbonFootprint: CarbonFootprint = {
   summary: { totalEmissions: 28450, avgPerShipment: 38.2, totalShipments: 745, offsetCredits: 5000, netEmissions: 23450, vsLastMonth: -5.2 },
   byCarrier: [
@@ -654,6 +675,10 @@ api.interceptors.request.use((config) => {
   }
   if (method === 'get' && key === 'integrations/ecommerce') {
     mock(seedECommerceDashboard)
+    return config
+  }
+  if (method === 'get' && key === 'integrations/white-label') {
+    mock(seedWhiteLabelPortal)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -948,6 +973,10 @@ export const carbonFootprintService = {
 
 export const eCommerceService = {
   getDashboard: () => api.get<ECommerceDashboard>('/integrations/ecommerce'),
+}
+
+export const whiteLabelService = {
+  getPortal: () => api.get<WhiteLabelPortalData>('/integrations/white-label'),
 }
 
 export const codService = {

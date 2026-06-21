@@ -458,3 +458,32 @@ export interface CostAnalytics {
     count: number
   }[]
 }
+
+export interface DemandForecast {
+  summary: {
+    totalForecast: number
+    totalCapacity: number
+    utilizationRate: number
+    nextMonthGrowth: number
+  }
+  byLane: {
+    lane: string
+    origin: string
+    destination: string
+    currentVolume: number
+    forecastedVolume: number
+    growth: number
+    confidence: number
+  }[]
+  byRegion: {
+    region: string
+    currentVolume: number
+    forecastedVolume: number
+    growth: number
+  }[]
+  monthlyForecast: {
+    month: string
+    volume: number
+    capacity: number
+  }[]
+}

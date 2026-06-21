@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -404,6 +404,36 @@ const seedCodPayments: CodPayment[] = [
   { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
 ]
 
+const seedDemandForecast: DemandForecast = {
+  summary: { totalForecast: 84500, totalCapacity: 102000, utilizationRate: 82.8, nextMonthGrowth: 12.5 },
+  byLane: [
+    { lane: 'NCR-Luzon', origin: 'Manila', destination: 'Northern Luzon', currentVolume: 12000, forecastedVolume: 13800, growth: 15.0, confidence: 88 },
+    { lane: 'NCR-Visayas', origin: 'Manila', destination: 'Cebu', currentVolume: 8500, forecastedVolume: 9600, growth: 12.9, confidence: 82 },
+    { lane: 'NCR-Mindanao', origin: 'Manila', destination: 'Davao', currentVolume: 6200, forecastedVolume: 7100, growth: 14.5, confidence: 75 },
+    { lane: 'Luzon-NCR', origin: 'Clark', destination: 'Manila', currentVolume: 9800, forecastedVolume: 10500, growth: 7.1, confidence: 90 },
+    { lane: 'Visayas-NCR', origin: 'Cebu', destination: 'Manila', currentVolume: 5400, forecastedVolume: 5900, growth: 9.3, confidence: 78 },
+    { lane: 'Mindanao-Luzon', origin: 'Davao', destination: 'Manila', currentVolume: 3200, forecastedVolume: 3800, growth: 18.8, confidence: 65 },
+    { lane: 'NCR-Remote', origin: 'Manila', destination: 'Palawan', currentVolume: 2800, forecastedVolume: 3100, growth: 10.7, confidence: 70 },
+    { lane: 'Luzon-Visayas', origin: 'Clark', destination: 'Cebu', currentVolume: 4100, forecastedVolume: 4700, growth: 14.6, confidence: 72 },
+  ],
+  byRegion: [
+    { region: 'NCR', currentVolume: 29500, forecastedVolume: 33400, growth: 13.2 },
+    { region: 'Luzon', currentVolume: 13900, forecastedVolume: 15200, growth: 9.4 },
+    { region: 'Visayas', currentVolume: 12600, forecastedVolume: 14300, growth: 13.5 },
+    { region: 'Mindanao', currentVolume: 9400, forecastedVolume: 10900, growth: 16.0 },
+    { region: 'Remote', currentVolume: 3800, forecastedVolume: 4200, growth: 10.5 },
+  ],
+  monthlyForecast: [
+    { month: 'Aug', volume: 68500, capacity: 82000 },
+    { month: 'Sep', volume: 71200, capacity: 84000 },
+    { month: 'Oct', volume: 73800, capacity: 86000 },
+    { month: 'Nov', volume: 78200, capacity: 90000 },
+    { month: 'Dec', volume: 84500, capacity: 102000 },
+    { month: 'Jan', volume: 81000, capacity: 95000 },
+    { month: 'Feb', volume: 76500, capacity: 88000 },
+  ],
+}
+
 const seedCostAnalytics: CostAnalytics = {
   summary: { totalCost: 284750.50, totalRevenue: 421500.00, totalShipments: 71, avgCostPerShipment: 4010.57, avgRevenuePerShipment: 5936.62, profitMargin: 32.45 },
   byCarrier: [
@@ -562,6 +592,10 @@ api.interceptors.request.use((config) => {
   }
   if (method === 'get' && key === 'analytics/cost-per-shipment') {
     mock(seedCostAnalytics)
+    return config
+  }
+  if (method === 'get' && key === 'analytics/demand-forecast') {
+    mock(seedDemandForecast)
     return config
   }
   if (method === 'get' && key === 'analytics/sla') {
@@ -844,6 +878,10 @@ export const regionService = { performance: () => api.get<RegionPerformance[]>('
 
 export const costAnalyticsService = {
   get: () => api.get<CostAnalytics>('/analytics/cost-per-shipment'),
+}
+
+export const demandForecastService = {
+  get: () => api.get<DemandForecast>('/analytics/demand-forecast'),
 }
 
 export const codService = {

@@ -46,6 +46,7 @@ const navGroups: NavGroup[] = [
       { to: '/analytics/regions', label: 'Region Performance', icon: BarChart3 },
       { to: '/analytics/bi-tools', label: 'BI Integrations', icon: BarChart3 },
       { to: '/analytics/cost-per-shipment', label: 'Cost Analytics', icon: Calculator },
+      { to: '/analytics/demand-forecast', label: 'Demand Forecast', icon: BarChart3 },
       { to: '/roadmap/analytics', label: 'Roadmap', icon: PieChart },
     ],
   },

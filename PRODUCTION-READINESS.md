@@ -86,7 +86,7 @@
 
 31. ~~**Empty `src/utils/` directory** — `formatDateGroup`, `formatFileSize` duplicated inline across pages. Extract into shared utilities.~~ ✅ Done — Created `src/utils/format.ts` with `formatDateGroup` and `formatFileSize`, and replaced inline implementations in `WaybillDetailPage.tsx` and `CustomsCompliancePage.tsx`.
 
-32. **Mock credentials in UI** — `LoginPage.tsx` shows "Email: Admin / Password: admin" hint. Should be stripped or behind a dev flag.
+32. ~~**Mock credentials in UI** — `LoginPage.tsx` shows "Email: Admin / Password: admin" hint. Should be stripped or behind a dev flag.~~ ✅ Done — Gated the dev credentials hint behind `import.meta.env.DEV` in `LoginPage.tsx`; production builds show a generic sign-in message instead.
 
 ---
 

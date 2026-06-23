@@ -48,9 +48,15 @@ export default function LoginPage() {
         }}
       >
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-          Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>admin</strong>
-        </p>
+        {import.meta.env.DEV ? (
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
+            Dev hint: Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>admin</strong>
+          </p>
+        ) : (
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
+            Enter your credentials to access the dashboard.
+          </p>
+        )}
         {serverError && (
           <p style={{ color: 'var(--badge-red-text)', marginBottom: '1rem', fontSize: '0.875rem' }}>
             {serverError}

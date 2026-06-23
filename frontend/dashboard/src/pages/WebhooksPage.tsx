@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { webhookService } from '@/services/api'
-import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
+import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity, Inbox } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import BackButton from '@/components/BackButton'
 import ConfirmModal from '@/components/ConfirmModal'
 
@@ -115,7 +116,7 @@ export default function WebhooksPage() {
       {webhooksLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={100} /><SkeletonBlock height={100} /><SkeletonBlock height={100} /></div>
       ) : !webhooks?.length ? (
-        <p style={{ color: 'var(--color-text-muted)' }}>No webhooks configured yet.</p>
+        <EmptyState icon={Inbox} title="No webhooks configured" message="Add a webhook to receive real-time shipment event notifications." />
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {webhooks?.map((w: any) => (

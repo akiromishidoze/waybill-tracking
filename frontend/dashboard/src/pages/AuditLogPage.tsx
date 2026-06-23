@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { auditLogService } from '@/services/api'
 
-import { Search, Clock } from 'lucide-react'
+import { Search, Clock, ClipboardList } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import BackButton from '@/components/BackButton'
 
 const ACTION_COLORS: Record<string, string> = {
@@ -73,7 +74,7 @@ export default function AuditLogPage() {
         {isLoading ? (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}><tbody>{Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={4} />)}</tbody></table>
         ) : filtered.length === 0 ? (
-          <p style={{ padding: '2rem', color: 'var(--color-text-muted)' }}>No matching audit logs found.</p>
+          <EmptyState icon={ClipboardList} title="No audit logs" message={search ? 'No logs match your search.' : 'Audit log entries will appear once users perform actions.'} />
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>

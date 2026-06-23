@@ -82,7 +82,7 @@
 
 29. ~~**Loading skeletons missing** — Many list pages have no skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`). `DashboardPage.tsx` shows `—` placeholders instead of skeleton/spinner.~~ ✅ Done — Added `SkeletonBlock` loaders to `WebhooksPage` and `DashboardPage` stats cards. `CarriersPage` and `BatchStatusPage` already used `SkeletonBlock`/`SkeletonTableRow`.
 
-30. **Standardized empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text. Some have no empty state at all (`AuditLogPage`, `CarriersPage`).
+30. ~~**Standardized empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text. Some have no empty state at all (`AuditLogPage`, `CarriersPage`).~~ ✅ Done — Created `src/components/EmptyState.tsx` and replaced raw empty text with it across `CarriersPage`, `WebhooksPage`, `AuditLogPage`, `WaybillListPage`, `EscalationsPage`, `UsersPage`, and `BatchStatusPage`.
 
 31. **Empty `src/utils/` directory** — `formatDateGroup`, `formatFileSize` duplicated inline across pages. Extract into shared utilities.
 

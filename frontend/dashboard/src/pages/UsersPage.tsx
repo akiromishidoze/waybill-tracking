@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/api'
 import type { User } from '@/types/waybill'
-import { Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Check, Users as UsersIcon } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import ConfirmModal from '@/components/ConfirmModal'
 
 const ROLE_OPTIONS = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
@@ -88,7 +89,7 @@ export default function UsersPage() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={5} />)
             ) : users?.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No users yet.</td></tr>
+              <tr><td colSpan={5}><EmptyState icon={UsersIcon} title="No users yet" message="Add users to give them access to the dashboard." /></td></tr>
             ) : (
               users?.map((u) => (
                 <tr key={u.id} style={{ borderTop: '1px solid var(--color-border-subtle)' }}>

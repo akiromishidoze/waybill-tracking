@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { escalationService } from '@/services/api'
-import { CheckCircle, Eye } from 'lucide-react'
+import { CheckCircle, Eye, AlertTriangle } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import BackButton from '@/components/BackButton'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -68,7 +69,7 @@ export default function EscalationsPage() {
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <SkeletonTableRow key={i} cols={7} />)
             ) : !escalations?.length ? (
-              <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No escalations.</td></tr>
+              <tr><td colSpan={7}><EmptyState icon={AlertTriangle} title="No escalations" message="No shipment issues have been escalated yet." /></td></tr>
             ) : (
               escalations.map((esc: any) => (
                 <tr key={esc.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: esc.status === 'OPEN' ? 'var(--badge-red-bg)' : undefined }}>

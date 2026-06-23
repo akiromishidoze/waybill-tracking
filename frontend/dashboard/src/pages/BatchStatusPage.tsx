@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
-import { CheckSquare, Clock, Truck, Shield, RotateCcw } from 'lucide-react'
+import { CheckSquare, Clock, Truck, Shield, RotateCcw, PackageOpen } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import BackButton from '@/components/BackButton'
 
 const statusColors: Record<string, string> = {
@@ -109,7 +110,7 @@ export default function BatchStatusPage() {
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={9} />)
             ) : !filtered?.length ? (
-              <tr><td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No waybills found.</td></tr>
+              <tr><td colSpan={9}><EmptyState icon={PackageOpen} title="No waybills found" message={search ? 'No waybills match your search.' : 'Create shipments to update their status in bulk.'} /></td></tr>
             ) : (
               filtered?.map((wb: Waybill) => (
                 <tr key={wb.id} style={{ borderTop: '1px solid var(--color-border-subtle)', background: selected.has(wb.id) ? 'var(--color-primary-soft)' : undefined }}>

@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService, dwellTimeService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
-import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight } from 'lucide-react'
+import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight, PackageOpen } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import Pagination from '@/components/Pagination'
 
 const statusColors: Record<string, string> = {
@@ -143,7 +144,7 @@ export default function WaybillListPage() {
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} cols={10} />)
             ) : !displayed.length ? (
-              <tr><td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)', fontSize: '0.9375rem' }}>No waybills found.</td></tr>
+              <tr><td colSpan={10}><EmptyState icon={PackageOpen} title="No waybills found" message={search ? 'No waybills match your search.' : 'Create a shipment to see it here.'} /></td></tr>
             ) : (
               displayed.map((wb: Waybill) => (
                 <tr key={wb.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: wb.slaBreached ? 'var(--badge-red-bg)' : undefined, transition: 'background 0.15s' }}

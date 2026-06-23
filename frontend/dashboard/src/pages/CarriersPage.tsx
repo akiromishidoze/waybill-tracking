@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { carrierService } from '@/services/api'
 import type { Carrier } from '@/types/waybill'
-import { Truck, ExternalLink, CheckCircle, XCircle, Plus, Pencil, Trash2, X, Check } from 'lucide-react'
+import { Truck, ExternalLink, CheckCircle, XCircle, Plus, Pencil, Trash2, X, Check, Inbox } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 import ConfirmModal from '@/components/ConfirmModal'
 
 export default function CarriersPage() {
@@ -70,7 +71,7 @@ export default function CarriersPage() {
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !carriers?.length ? (
-        <p style={{ color: 'var(--color-text-muted)' }}>No carriers configured yet.</p>
+        <EmptyState icon={Inbox} title="No carriers configured" message="Add a carrier integration to start tracking shipments." />
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
           {carriers?.map((c) => (

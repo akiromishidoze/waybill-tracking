@@ -1,23 +1,45 @@
 import axios from 'axios'
 import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard, ChatbotDashboard } from '@/types/waybill'
+import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
-api.interceptors.request.use((config) => {
+let isRefreshing = false
+let pendingRequests: Array<(token: string) => void> = []
+
+api.interceptors.request.use(async (config) => {
   const token = localStorage.getItem('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  if (!token) return config
+
+  if (isTokenExpired(token)) {
+    const newToken = await attemptRefresh()
+    if (newToken) {
+      config.headers.Authorization = `Bearer ${newToken}`
+      return config
+    }
+    localStorage.removeItem('access_token')
+    window.location.href = '/login'
+    return Promise.reject(new Error('token expired'))
   }
+
+  config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
+  async (err) => {
+    const originalRequest = err.config
+    if (err.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+      const newToken = await attemptRefresh()
+      if (newToken) {
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return api(originalRequest)
+      }
       localStorage.removeItem('access_token')
       window.location.href = '/login'
     }
@@ -25,10 +47,42 @@ api.interceptors.response.use(
   },
 )
 
+async function attemptRefresh(): Promise<string | null> {
+  const token = localStorage.getItem('access_token')
+  if (!token) return null
+
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      pendingRequests.push((t: string) => resolve(t))
+    })
+  }
+
+  isRefreshing = true
+  try {
+    const res = await axios.post<{ accessToken: string; user: User }>(
+      `${api.defaults.baseURL}/auth/refresh`,
+      { accessToken: token },
+    )
+    const newToken = res.data.accessToken
+    localStorage.setItem('access_token', newToken)
+    pendingRequests.forEach((cb) => cb(newToken))
+    pendingRequests = []
+    return newToken
+  } catch {
+    pendingRequests.forEach((cb) => cb(''))
+    pendingRequests = []
+    return null
+  } finally {
+    isRefreshing = false
+  }
+}
+
 export const authService = {
   login: (email: string, password: string) =>
     api.post<{ accessToken: string; user: User }>('/auth/login', { email, password }),
   me: () => api.get<User>('/auth/me'),
+  refresh: (accessToken: string) =>
+    api.post<{ accessToken: string; user: User }>('/auth/refresh', { accessToken }),
 }
 
 export const waybillService = {

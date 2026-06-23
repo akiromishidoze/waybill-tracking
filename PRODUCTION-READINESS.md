@@ -45,7 +45,7 @@
 
 14. ~~**CORS `*` everywhere** — Both core-api (`main.go`) and analytics-api (`main.py`) allow all origins. `config.go` has `AllowedOrigins` field but it's unused. No preflight (`OPTIONS`) handling in core-api.~~ ✅ Done — Core API: Created `internal/middleware/cors.go` with `CORSMiddleware` that reads `cfg.AllowedOrigins` (env `ALLOWED_ORIGINS`, default `http://localhost:3010`), handles OPTIONS preflight (204 No Content), sets `Vary: Origin`, `Access-Control-Max-Age: 86400`. Analytics API: `main.py` now reads `settings.ALLOWED_ORIGINS` instead of hard-coded `["*"]`.
 
-15. **JWT in localStorage** — Token stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.
+15. ~~**JWT in localStorage** — Token stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.~~ ✅ Done — Backend: `POST /auth/refresh` endpoint with 7-day grace period from original `exp`. Frontend: `utils/jwt.ts` with `decodeToken`/`isTokenExpired`. Axios request interceptor checks expiry before sending (attempts refresh if expired, redirects to login if refresh fails). Response interceptor on 401 retries with refreshed token once before logging out. `ProtectedRoute` checks JWT expiry client-side.
 
 16. **Empty catch blocks** — Several places silently swallow errors:
     - `WaybillDetailPage.tsx` (file upload)

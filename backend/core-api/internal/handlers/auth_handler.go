@@ -252,6 +252,61 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
+func RefreshTokenHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			AccessToken string `json:"accessToken" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "missing accessToken"})
+			return
+		}
+
+		parser := jwt.NewParser(jwt.WithValidMethods([]string{"HS256"}))
+		token, err := parser.Parse(req.AccessToken, func(t *jwt.Token) (interface{}, error) {
+			return []byte(jwtSecret), nil
+		})
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			return
+		}
+
+		if exp, ok := claims["exp"].(float64); ok {
+			if time.Now().Unix() > int64(exp)+7*24*3600 {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired beyond grace period"})
+				return
+			}
+		}
+
+		userID, _ := claims["sub"].(string)
+		email, _ := claims["email"].(string)
+		role, _ := claims["role"].(string)
+
+		var user struct {
+			Name    string
+			Company sql.NullString
+		}
+		err = db.QueryRow(c, `SELECT name, company FROM users WHERE id=$1`, userID).Scan(&user.Name, &user.Company)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+
+		company := ""
+		if user.Company.Valid {
+			company = user.Company.String
+		}
+
+		respondWithToken(c, jwtSecret, userID, email, user.Name, role, company)
+	}
+}
+
 func UpdateUserRoleHandler(db *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")

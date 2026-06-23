@@ -64,6 +64,7 @@ func main() {
 	{
 		api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db))
 		api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
+		api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
 		api.GET("/features", feature.Handler())
 
 		public := api.Group("")

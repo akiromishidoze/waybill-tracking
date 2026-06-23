@@ -41,10 +41,12 @@ import ChatbotPage from './pages/ChatbotPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ToastProvider } from './contexts/ToastContext'
 
 export default function App() {
   return (
     <ThemeProvider>
+    <ToastProvider>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/track/:trackingNumber" element={<TrackingPage />} />
@@ -91,6 +93,7 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </ToastProvider>
     </ThemeProvider>
   )
 }

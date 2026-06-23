@@ -69,6 +69,7 @@ func main() {
 			{
 				admin.GET("/users", handlers.ListUsersHandler(db))
 				admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
+				admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
 			}
 		}
 	}

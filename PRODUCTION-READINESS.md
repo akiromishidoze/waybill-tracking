@@ -9,7 +9,7 @@
 
 1. ~~**User Registration endpoint** — `POST /auth/register` handler is referenced in tests but never implemented. No self-signup flow exists. Users can only be created manually by an admin.~~ ✅ Done — `RegisterHandler` + `respondWithToken` added to `auth_handler.go`, wired in `main.go`
 
-2. **Password reset endpoint** — Frontend `settingsService.resetPassword()` calls `POST /auth/reset-password` but no backend route exists. No "forgot password" flow, no email-based reset token, no password strength validation.
+2. ~~**Password reset endpoint** — Frontend `settingsService.resetPassword()` calls `POST /auth/reset-password` but no backend route exists. No "forgot password" flow, no email-based reset token, no password strength validation.~~ ✅ Done — `ResetPasswordHandler` added to `auth_handler.go`, wired as admin-only route in `main.go`. Includes password length validation.
 
 3. **File upload endpoint** — Frontend `attachmentService.upload()` exists and `WaybillDetailPage.tsx` has an "Add Attachment" button. No backend file upload route exists — will fail in production.
 

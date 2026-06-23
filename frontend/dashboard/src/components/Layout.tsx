@@ -103,11 +103,24 @@ function NavGroupSection({ group }: { group: NavGroup }) {
   const location = useLocation()
   const isActiveGroup = group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
   const [open, setOpen] = useState(isActiveGroup)
+  const groupId = `nav-group-${group.label.toLowerCase().replace(/\s+/g, '-')}`
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setOpen(!open)
+    }
+  }
 
   return (
-    <div>
+    <div role="group" aria-label={group.label}>
       <button
+        type="button"
         onClick={() => setOpen(!open)}
+        onKeyDown={handleKeyDown}
+        aria-expanded={open}
+        aria-controls={groupId}
+        aria-label={`${group.label} navigation group`}
         style={{
           display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
           borderRadius: 8, border: 'none', background: 'transparent', color: isActiveGroup ? '#fff' : '#94a3b8',
@@ -115,16 +128,20 @@ function NavGroupSection({ group }: { group: NavGroup }) {
         }}
         className="nav-link"
       >
-        <group.icon size={20} />
+        <group.icon size={20} aria-hidden="true" />
         {group.label}
-        <span style={{ marginLeft: 'auto' }}>{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
+        <span style={{ marginLeft: 'auto' }} aria-hidden="true">{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
       </button>
-      {open && group.items.map(item => (
-        <NavLink key={item.to} to={item.to} style={({ isActive }) => subLinkStyle(isActive)} className="nav-link" end>
-          <item.icon size={16} />
-          {item.label}
-        </NavLink>
-      ))}
+      {open && (
+        <div id={groupId} role="region" aria-label={`${group.label} links`}>
+          {group.items.map(item => (
+            <NavLink key={item.to} to={item.to} style={({ isActive }) => subLinkStyle(isActive)} className="nav-link" end aria-label={item.label}>
+              <item.icon size={16} aria-hidden="true" />
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -141,14 +158,15 @@ export default function Layout() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <aside style={{ width: 260, background: '#1e293b', color: '#fff', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <aside role="complementary" aria-label="Sidebar navigation" style={{ width: 260, background: '#1e293b', color: '#fff', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: '1.5rem' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>WaybillTrack</h1>
           {!loading && user && (
-            <div style={{ padding: '0.625rem 0.75rem', background: '#334155', borderRadius: 8, fontSize: '0.8125rem' }}>
+            <div style={{ padding: '0.625rem 0.75rem', background: '#334155', borderRadius: 8, fontSize: '0.8125rem' }} aria-label="User profile">
               <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{user.name}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: 2 }}>
-                <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 600, color: '#fff', background: ROLE_COLORS[user.role] || '#6b7280' }}>
+                <span style={{ display: 'inline-block', padding: '0.125rem 0.5rem', borderRadius: 4, fontSize: '0.6875rem', fontWeight: 600, color: '#fff', background: ROLE_COLORS[user.role] || '#6b7280' }} aria-label={`Role: ${user.role}`}>
                   {user.role}
                 </span>
                 {user.company && <span style={{ color: '#94a3b8' }}>{user.company}</span>}
@@ -157,40 +175,40 @@ export default function Layout() {
           )}
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
-          <NavLink to="/dashboard" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-            <LayoutDashboard size={20} /> Dashboard
+        <nav role="navigation" aria-label="Primary navigation" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
+          <NavLink to="/dashboard" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Dashboard">
+            <LayoutDashboard size={20} aria-hidden="true" /> Dashboard
           </NavLink>
-          <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-            <Package size={20} /> Waybills
+          <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Waybills">
+            <Package size={20} aria-hidden="true" /> Waybills
           </NavLink>
-          <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-            <BarChart3 size={20} /> Analytics
+          <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Analytics">
+            <BarChart3 size={20} aria-hidden="true" /> Analytics
           </NavLink>
-          <div style={{ borderTop: '1px solid #334155', margin: '0.25rem 0' }} />
+          <div style={{ borderTop: '1px solid #334155', margin: '0.25rem 0' }} aria-hidden="true" />
           {navGroups.map(group => (
             <NavGroupSection key={group.label} group={group} />
           ))}
           {user?.role === 'ADMIN' && (
             <>
-              <div style={{ borderTop: '1px solid #334155', marginTop: '0.25rem', paddingTop: '0.25rem' }} />
-              <NavLink to="/users" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-                <Shield size={20} /> Users
+              <div style={{ borderTop: '1px solid #334155', marginTop: '0.25rem', paddingTop: '0.25rem' }} aria-hidden="true" />
+              <NavLink to="/users" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Users">
+                <Shield size={20} aria-hidden="true" /> Users
               </NavLink>
-              <NavLink to="/carriers" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-                <Truck size={20} /> Carriers
+              <NavLink to="/carriers" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Carriers">
+                <Truck size={20} aria-hidden="true" /> Carriers
               </NavLink>
-              <NavLink to="/settings" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link">
-                <Settings size={20} /> Settings
+              <NavLink to="/settings" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Settings">
+                <Settings size={20} aria-hidden="true" /> Settings
               </NavLink>
             </>
           )}
         </nav>
-        <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
-          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />} {theme === 'dark' ? 'Light' : 'Dark'} Mode
+        <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          {theme === 'dark' ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />} {theme === 'dark' ? 'Light' : 'Dark'} Mode
         </button>
-        <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
-          <LogOut size={20} /> Logout
+        <button type="button" onClick={handleLogout} aria-label="Logout" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          <LogOut size={20} aria-hidden="true" /> Logout
         </button>
       </aside>
       <style>{`
@@ -200,8 +218,13 @@ export default function Layout() {
         .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: #2563eb; color: #fff; padding: 8px 16px; z-index: 100; text-decoration: none; border-radius: 0 0 8px 0; font-weight: 600; transition: top 0.2s; }
+        .skip-link:focus { top: 0; }
       `}</style>
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+      <main id="main-content" role="main" aria-label="Main content" style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+        <div aria-live="polite" aria-atomic="true" className="sr-only" style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+          {/* Screen reader announcements can be injected here */}
+        </div>
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>

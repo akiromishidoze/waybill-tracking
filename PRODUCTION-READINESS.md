@@ -68,9 +68,9 @@
 
 22. ~~**Role-based route protection** — `ProtectedRoute.tsx` only checks token existence. Any authenticated user can access admin pages. No 403 page or unauthorized state.~~ ✅ Done — Updated `ProtectedRoute` to take `allowedRoles` prop and check JWT claims. Added `UnauthorizedPage.tsx` (403). Wrapped `users`, `audit-logs`, `carriers`, `settings`, and `webhooks` routes in `App.tsx` with `<ProtectedRoute allowedRoles={['ADMIN']} />`.
 
-23. **Mobile/responsive layout** — Fixed 260px sidebar, no `useMediaQuery`, no breakpoints, no hamburger menu. Desktop-only.
+23. ~~**Mobile/responsive layout** — Fixed 260px sidebar, no `useMediaQuery`, no breakpoints, no hamburger menu. Desktop-only.~~ ✅ Removed — Responsive/mobile code intentionally rolled back; app remains desktop-only.
 
-24. **Accessibility** — No `aria-label`, `aria-describedby`, or `role` attributes. No keyboard navigation for sidebar groups. No skip-to-content links. No screen-reader-friendly announcements.
+24. ~~**Accessibility** — No `aria-label`, `aria-describedby`, or `role` attributes. No keyboard navigation for sidebar groups. No skip-to-content links. No screen-reader-friendly announcements.~~ ✅ Done — Added `aria-label`/`role` to sidebar, nav groups, and controls; added `aria-expanded`/`aria-controls` keyboard support for collapsible groups; added skip-to-content link and ARIA live region for screen-reader announcements.
 
 25. **Two duplicate Layout.tsx files** — Root `/Layout.tsx` (older, flat structure) and `src/components/Layout.tsx` (newer, collapsible groups). One should be removed.
 

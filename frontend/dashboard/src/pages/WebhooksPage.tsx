@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { webhookService } from '@/services/api'
 import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 import ConfirmModal from '@/components/ConfirmModal'
 
@@ -21,7 +22,7 @@ export default function WebhooksPage() {
   const [testMsg, setTestMsg] = useState('')
   const [deleteWebhookId, setDeleteWebhookId] = useState<string | null>(null)
 
-  const { data: webhooks } = useQuery({ queryKey: ['webhooks'], queryFn: () => webhookService.list().then(r => r.data) })
+  const { data: webhooks, isLoading: webhooksLoading } = useQuery({ queryKey: ['webhooks'], queryFn: () => webhookService.list().then(r => r.data) })
   const { data: events } = useQuery({ queryKey: ['webhook-events'], queryFn: () => webhookService.getEvents().then(r => r.data) })
 
   const createWebhook = useMutation({
@@ -111,7 +112,9 @@ export default function WebhooksPage() {
         </div>
       )}
 
-      {!webhooks?.length ? (
+      {webhooksLoading ? (
+        <div style={{ display: 'grid', gap: '1rem' }}><SkeletonBlock height={100} /><SkeletonBlock height={100} /><SkeletonBlock height={100} /></div>
+      ) : !webhooks?.length ? (
         <p style={{ color: 'var(--color-text-muted)' }}>No webhooks configured yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>

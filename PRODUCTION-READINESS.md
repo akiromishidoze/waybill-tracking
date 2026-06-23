@@ -80,7 +80,7 @@
 
 28. ~~**`RegisterHandler` + `respondWithToken` missing** — Test file references these functions. Code doesn't compile.~~ ✅ Done — `RegisterHandler` and `respondWithToken` are implemented in `backend/core-api/internal/handlers/auth_handler.go` and wired to `POST /api/auth/register` in `cmd/server/main.go`. Tests reference the existing functions.
 
-29. **Loading skeletons missing** — Many list pages have no skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`). `DashboardPage.tsx` shows `—` placeholders instead of skeleton/spinner.
+29. ~~**Loading skeletons missing** — Many list pages have no skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`). `DashboardPage.tsx` shows `—` placeholders instead of skeleton/spinner.~~ ✅ Done — Added `SkeletonBlock` loaders to `WebhooksPage` and `DashboardPage` stats cards. `CarriersPage` and `BatchStatusPage` already used `SkeletonBlock`/`SkeletonTableRow`.
 
 30. **Standardized empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text. Some have no empty state at all (`AuditLogPage`, `CarriersPage`).
 

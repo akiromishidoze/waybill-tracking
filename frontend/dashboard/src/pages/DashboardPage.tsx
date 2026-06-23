@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { analyticsService, escalationService } from '@/services/api'
 import { AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { SkeletonBlock } from '@/components/Skeleton'
 
 const statsCards = [
   { label: 'Active Waybills', key: 'totalActive', color: 'var(--badge-blue-text)' },
@@ -12,7 +13,7 @@ const statsCards = [
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => analyticsService.stats().then((r) => r.data),
     refetchInterval: 30000,
@@ -51,9 +52,13 @@ export default function DashboardPage() {
             }}
           >
             <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{card.label}</p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 700 }}>
-              {stats?.[card.key as keyof typeof stats] ?? '—'}
-            </p>
+            {statsLoading ? (
+              <SkeletonBlock width={80} height={32} style={{ marginTop: 4 }} />
+            ) : (
+              <p style={{ fontSize: '1.75rem', fontWeight: 700 }}>
+                {stats?.[card.key as keyof typeof stats] ?? '—'}
+              </p>
+            )}
           </div>
         ))}
       </div>

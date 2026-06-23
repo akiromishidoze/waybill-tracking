@@ -7,6 +7,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [serverError, setServerError] = useState('')
+  const login = useAuthStore((s) => s.login)
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,8 +21,7 @@ export default function LoginPage() {
     if (errs.email || errs.password) return
 
     try {
-      const res = await authService.login(trimmed, password)
-      localStorage.setItem('access_token', res.data.accessToken)
+      await login(trimmed, password)
       navigate('/dashboard')
     } catch {
       setServerError('Invalid email or password')

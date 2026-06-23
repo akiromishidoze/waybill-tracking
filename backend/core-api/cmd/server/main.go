@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
+	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
@@ -46,6 +47,8 @@ func main() {
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 
+	feature.RegisterAll(feature.DefaultFlags)
+
 	r := gin.Default()
 
 	r.Use(func(c *gin.Context) {
@@ -58,6 +61,7 @@ func main() {
 	{
 		api.POST("/auth/login", handlers.LoginHandler(cfg.JWTSecret, db))
 		api.POST("/auth/register", handlers.RegisterHandler(cfg.JWTSecret, db))
+		api.GET("/features", feature.Handler())
 
 		public := api.Group("")
 		public.GET("/track/:trackingNumber", waybillHandler.Track)

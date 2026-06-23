@@ -13,7 +13,7 @@
 
 3. ~~**File upload endpoint** — Frontend `attachmentService.upload()` exists and `WaybillDetailPage.tsx` has an "Add Attachment" button. No backend file upload route exists — will fail in production.~~ ✅ Done — `attachment_handler.go` created with List/Upload/Get/Delete handlers. `004_attachments.sql` migration added. Routes wired in `main.go`. Migrator auto-run on startup.
 
-4. **Feature flags endpoint** — `useFeatures.tsx` calls `GET /features` but no backend route is registered. Feature flags handler exists at `internal/feature/handler.go` but never wired in `main.go`.
+4. ~~**Feature flags endpoint** — `useFeatures.tsx` calls `GET /features` but no backend route is registered. Feature flags handler exists at `internal/feature/handler.go` but never wired in `main.go`.~~ ✅ Done — `feature.RegisterAll(feature.DefaultFlags)` added in `main.go`, `GET /api/features` wired as public route.
 
 5. **Nginx `try_files` fallback** — Dashboard Dockerfile copies `dist/` to nginx but has no `try_files $uri /index.html` — page refresh on non-root routes returns 404.
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,6 +13,7 @@ import (
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
+	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
@@ -25,6 +27,11 @@ func main() {
 	}
 	defer db.Close()
 
+	migrationsDir := filepath.Join("migrations")
+	if err := migrator.New(db, migrationsDir).Run(context.Background()); err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
 	rdb := redis.NewClient(&redis.Options{
 		Addr: cfg.RedisURL,
 	})
@@ -37,6 +44,7 @@ func main() {
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
+	attachmentHandler := handlers.NewAttachmentHandler(db)
 
 	r := gin.Default()
 
@@ -63,6 +71,10 @@ func main() {
 			protected.GET("/waybills/:id", waybillHandler.Get)
 			protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
 			protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+			protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
+			protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
+			protected.GET("/attachments/:attachmentId", attachmentHandler.Get)
+			protected.DELETE("/attachments/:attachmentId", attachmentHandler.Delete)
 
 			admin := protected.Group("")
 			admin.Use(middleware.RoleMiddleware("ADMIN"))

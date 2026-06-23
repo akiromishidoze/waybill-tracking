@@ -11,7 +11,7 @@
 
 2. ~~**Password reset endpoint** — Frontend `settingsService.resetPassword()` calls `POST /auth/reset-password` but no backend route exists. No "forgot password" flow, no email-based reset token, no password strength validation.~~ ✅ Done — `ResetPasswordHandler` added to `auth_handler.go`, wired as admin-only route in `main.go`. Includes password length validation.
 
-3. **File upload endpoint** — Frontend `attachmentService.upload()` exists and `WaybillDetailPage.tsx` has an "Add Attachment" button. No backend file upload route exists — will fail in production.
+3. ~~**File upload endpoint** — Frontend `attachmentService.upload()` exists and `WaybillDetailPage.tsx` has an "Add Attachment" button. No backend file upload route exists — will fail in production.~~ ✅ Done — `attachment_handler.go` created with List/Upload/Get/Delete handlers. `004_attachments.sql` migration added. Routes wired in `main.go`. Migrator auto-run on startup.
 
 4. **Feature flags endpoint** — `useFeatures.tsx` calls `GET /features` but no backend route is registered. Feature flags handler exists at `internal/feature/handler.go` but never wired in `main.go`.
 

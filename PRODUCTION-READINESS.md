@@ -84,7 +84,7 @@
 
 30. ~~**Standardized empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text. Some have no empty state at all (`AuditLogPage`, `CarriersPage`).~~ ✅ Done — Created `src/components/EmptyState.tsx` and replaced raw empty text with it across `CarriersPage`, `WebhooksPage`, `AuditLogPage`, `WaybillListPage`, `EscalationsPage`, `UsersPage`, and `BatchStatusPage`.
 
-31. **Empty `src/utils/` directory** — `formatDateGroup`, `formatFileSize` duplicated inline across pages. Extract into shared utilities.
+31. ~~**Empty `src/utils/` directory** — `formatDateGroup`, `formatFileSize` duplicated inline across pages. Extract into shared utilities.~~ ✅ Done — Created `src/utils/format.ts` with `formatDateGroup` and `formatFileSize`, and replaced inline implementations in `WaybillDetailPage.tsx` and `CustomsCompliancePage.tsx`.
 
 32. **Mock credentials in UI** — `LoginPage.tsx` shows "Email: Admin / Password: admin" hint. Should be stripped or behind a dev flag.
 

@@ -5,6 +5,7 @@ import type { CustomsShipment, CustomsDocument } from '@/types/waybill'
 import { FileText, Globe, CheckCircle, XCircle, Clock, Upload, Download, Search } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
+import { formatFileSize } from '@/utils/format'
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   NOT_REQUIRED: { label: 'Not Required', bg: 'var(--color-bg)', color: 'var(--color-text-muted)' },
@@ -30,12 +31,6 @@ const DOC_STATUS_CONFIG: Record<string, { label: string; bg: string; color: stri
   SUBMITTED: { label: 'Submitted', bg: 'var(--badge-blue-bg)', color: 'var(--badge-blue-text)' },
   APPROVED: { label: 'Approved', bg: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' },
   REJECTED: { label: 'Rejected', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
-}
-
-const formatSize = (bytes: number) => {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / 1048576).toFixed(1) + ' MB'
 }
 
 export default function CustomsCompliancePage() {
@@ -155,7 +150,7 @@ export default function CustomsCompliancePage() {
                                 <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{doc.title}</div>
                                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.125rem', fontSize: '0.75rem', color: 'var(--color-text-muted-lighter)' }}>
                                   <span>{DOC_LABELS[doc.docType] || doc.docType}</span>
-                                  <span>{formatSize(doc.fileSize)}</span>
+                                  <span>{formatFileSize(doc.fileSize)}</span>
                                   {doc.submittedAt && <span>Submitted: {new Date(doc.submittedAt).toLocaleDateString()}</span>}
                                 </div>
                               </div>

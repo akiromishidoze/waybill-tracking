@@ -8,6 +8,7 @@ import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus,
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
+import { formatDateGroup, formatFileSize } from '@/utils/format'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
   CREATED: Package,
@@ -26,16 +27,6 @@ const EVENT_ICONS: Record<EventType, typeof ScanLine> = {
   SCAN: ScanLine,
   EXCEPTION: AlertTriangle,
   NOTE: FileText,
-}
-
-function formatDateGroup(dateStr: string): string {
-  const d = new Date(dateStr)
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-  if (d.toDateString() === today.toDateString()) return 'Today'
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default function WaybillDetailPage() {
@@ -140,12 +131,6 @@ export default function WaybillDetailPage() {
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
     reader.readAsDataURL(file)
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
   const groupedEvents = useMemo(() => {

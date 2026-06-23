@@ -58,11 +58,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
-		c.Next()
-	})
+	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 
 	api := r.Group("/api")
 	{

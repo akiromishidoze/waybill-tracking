@@ -43,7 +43,7 @@
 
 13. ~~**Rate limiting on auth endpoints** — `RateLimitMiddleware` exists at `internal/middleware/ratelimit.go` (Redis-based) but is never applied to any route. Login endpoint is unprotected from brute-force attacks. No CAPTCHA.~~ ✅ Done — Login: 10 req/min/IP. Register: 5 req/min/IP. Applied inline via `middleware.RateLimitMiddleware(rdb, n, 1*time.Minute)`. Sets `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers. On Redis failure, silently allows request through.
 
-14. **CORS `*` everywhere** — Both core-api (`main.go`) and analytics-api (`main.py`) allow all origins. `config.go` has `AllowedOrigins` field but it's unused. No preflight (`OPTIONS`) handling in core-api.
+14. ~~**CORS `*` everywhere** — Both core-api (`main.go`) and analytics-api (`main.py`) allow all origins. `config.go` has `AllowedOrigins` field but it's unused. No preflight (`OPTIONS`) handling in core-api.~~ ✅ Done — Core API: Created `internal/middleware/cors.go` with `CORSMiddleware` that reads `cfg.AllowedOrigins` (env `ALLOWED_ORIGINS`, default `http://localhost:3010`), handles OPTIONS preflight (204 No Content), sets `Vary: Origin`, `Access-Control-Max-Age: 86400`. Analytics API: `main.py` now reads `settings.ALLOWED_ORIGINS` instead of hard-coded `["*"]`.
 
 15. **JWT in localStorage** — Token stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.
 

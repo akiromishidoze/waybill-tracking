@@ -17,7 +17,8 @@ export function decodeToken(token: string): JwtClaims | null {
 export function isTokenExpired(token: string | null, graceSeconds = 0): boolean {
   if (!token) return true
   const claims = decodeToken(token)
-  if (!claims?.exp) return true
+  if (!claims) return false
+  if (!claims.exp) return true
   return Date.now() >= (claims.exp + graceSeconds) * 1000
 }
 

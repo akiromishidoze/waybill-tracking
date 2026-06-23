@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/auth'
+import { authService } from '@/services/api'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [serverError, setServerError] = useState('')
-  const login = useAuthStore((s) => s.login)
-  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,8 +18,9 @@ export default function LoginPage() {
     if (errs.email || errs.password) return
 
     try {
-      await login(trimmed, password)
-      navigate('/dashboard')
+      const res = await authService.login(trimmed, password)
+      localStorage.setItem('access_token', res.data.accessToken)
+      window.location.href = '/dashboard'
     } catch {
       setServerError('Invalid email or password')
     }

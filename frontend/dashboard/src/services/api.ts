@@ -34,6 +34,9 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config
     if (err.response?.status === 401 && !originalRequest._retry) {
+      if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/register') {
+        return Promise.reject(err)
+      }
       originalRequest._retry = true
       const newToken = await attemptRefresh()
       if (newToken) {

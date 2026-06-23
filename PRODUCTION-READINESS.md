@@ -17,7 +17,7 @@
 
 5. ~~**Nginx `try_files` fallback** — Dashboard Dockerfile copies `dist/` to nginx but has no `try_files $uri /index.html` — page refresh on non-root routes returns 404.~~ ✅ Done — `nginx.conf` created with SPA fallback + static asset caching, copied into Dockerfile.
 
-6. **CI pipeline location** — `ci/github-actions.yml` is in the wrong directory. GitHub Actions requires workflows in `.github/workflows/`. Pipeline will never run.
+6. ~~**CI pipeline location** — `ci/github-actions.yml` is in the wrong directory. GitHub Actions requires workflows in `.github/workflows/`. Pipeline will never run.~~ ✅ Done — moved `ci/github-actions.yml` to `.github/workflows/ci.yml`, removed stale copy.
 
 7. **`NewWaybillHandler` receives wrong args** — `main.go` creates `handlers.NewWaybillHandler(waybillRepo)` but the constructor expects `kafkaProducer`, `wsHub`, `esClient`, and `webhookRepo` — none are passed. Kafka/WebSocket/Elasticsearch/webhook dispatch will silently no-op.
 

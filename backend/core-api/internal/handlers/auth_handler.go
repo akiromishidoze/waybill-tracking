@@ -11,6 +11,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type registerRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Role     string `json:"role" binding:"required"`
+	Company  string `json:"company"`
+}
+
 type loginRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -25,6 +33,71 @@ var validRoles = map[string]bool{
 	"COURIER": true,
 	"OPS":     true,
 	"ADMIN":   true,
+}
+
+func respondWithToken(c *gin.Context, jwtSecret, userID, email, name, role, company string) {
+	claims := jwt.MapClaims{
+		"sub":   userID,
+		"email": email,
+		"role":  role,
+		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, _ := token.SignedString([]byte(jwtSecret))
+
+	c.JSON(http.StatusOK, gin.H{
+		"accessToken": tokenStr,
+		"user": gin.H{
+			"id":      userID,
+			"email":   email,
+			"name":    name,
+			"role":    role,
+			"company": company,
+		},
+	})
+}
+
+func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req registerRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if len(req.Password) < 8 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
+			return
+		}
+
+		if !validRoles[req.Role] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid role"})
+			return
+		}
+
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			return
+		}
+
+		if db == nil {
+			respondWithToken(c, jwtSecret, "new-user-id", req.Email, req.Name, req.Role, req.Company)
+			return
+		}
+
+		var userID string
+		err = db.QueryRow(c,
+			`INSERT INTO users (email, name, password, role, company) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+			req.Email, req.Name, string(hashed), req.Role, req.Company,
+		).Scan(&userID)
+		if err != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+			return
+		}
+
+		respondWithToken(c, jwtSecret, userID, req.Email, req.Name, req.Role, req.Company)
+	}
 }
 
 func LoginHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {

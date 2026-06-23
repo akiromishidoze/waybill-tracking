@@ -7,7 +7,7 @@
 
 ## 🚨 Critical (App won't function without these)
 
-1. **User Registration endpoint** — `POST /auth/register` handler is referenced in tests but never implemented. No self-signup flow exists. Users can only be created manually by an admin.
+1. ~~**User Registration endpoint** — `POST /auth/register` handler is referenced in tests but never implemented. No self-signup flow exists. Users can only be created manually by an admin.~~ ✅ Done — `RegisterHandler` + `respondWithToken` added to `auth_handler.go`, wired in `main.go`
 
 2. **Password reset endpoint** — Frontend `settingsService.resetPassword()` calls `POST /auth/reset-password` but no backend route exists. No "forgot password" flow, no email-based reset token, no password strength validation.
 

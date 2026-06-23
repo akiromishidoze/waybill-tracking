@@ -49,6 +49,7 @@ func main() {
 	api := r.Group("/api")
 	{
 		api.POST("/auth/login", handlers.LoginHandler(cfg.JWTSecret, db))
+		api.POST("/auth/register", handlers.RegisterHandler(cfg.JWTSecret, db))
 
 		public := api.Group("")
 		public.GET("/track/:trackingNumber", waybillHandler.Track)

@@ -72,7 +72,7 @@
 
 24. ~~**Accessibility** — No `aria-label`, `aria-describedby`, or `role` attributes. No keyboard navigation for sidebar groups. No skip-to-content links. No screen-reader-friendly announcements.~~ ✅ Done — Added `aria-label`/`role` to sidebar, nav groups, and controls; added `aria-expanded`/`aria-controls` keyboard support for collapsible groups; added skip-to-content link and ARIA live region for screen-reader announcements.
 
-25. **Two duplicate Layout.tsx files** — Root `/Layout.tsx` (older, flat structure) and `src/components/Layout.tsx` (newer, collapsible groups). One should be removed.
+25. ~~**Two duplicate Layout.tsx files** — Root `/Layout.tsx` (older, flat structure) and `src/components/Layout.tsx` (newer, collapsible groups). One should be removed.~~ ✅ Done — Removed the duplicate root `Layout.tsx`; `src/components/Layout.tsx` is the canonical layout used by `App.tsx`.
 
 26. **ML model directory empty** — `models_data/` exists but is empty. Analytics ML models will crash on first load.
 

@@ -78,7 +78,7 @@
 
 27. ~~**No `.dockerignore`** — No `.dockerignore` in any service. `node_modules` and build artifacts are sent in Docker build context.~~ ✅ Done — Added `.dockerignore` to `backend/core-api`, `backend/analytics-api`, and `frontend/dashboard` excluding `node_modules`, `dist`, `build`, `.git`, `.env`, logs, IDE files, and generated artifacts.
 
-28. **`RegisterHandler` + `respondWithToken` missing** — Test file references these functions. Code doesn't compile.
+28. ~~**`RegisterHandler` + `respondWithToken` missing** — Test file references these functions. Code doesn't compile.~~ ✅ Done — `RegisterHandler` and `respondWithToken` are implemented in `backend/core-api/internal/handlers/auth_handler.go` and wired to `POST /api/auth/register` in `cmd/server/main.go`. Tests reference the existing functions.
 
 29. **Loading skeletons missing** — Many list pages have no skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`). `DashboardPage.tsx` shows `—` placeholders instead of skeleton/spinner.
 

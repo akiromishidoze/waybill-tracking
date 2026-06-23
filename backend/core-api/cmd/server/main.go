@@ -10,12 +10,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
+	"github.com/waybill-tracking/core-api/internal/elastic"
 	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
 	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	"github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
@@ -41,9 +43,12 @@ func main() {
 	defer kafkaProducer.Close()
 
 	wsHub := ws.NewHub()
+	esClient := elastic.NewClient(cfg.ElasticsearchURL)
+	webhookRepo := repository.NewWebhookRepository(db)
+	webhookDispatcher := webhook.NewDispatcher(webhookRepo)
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	waybillHandler := handlers.NewWaybillHandler(waybillRepo)
+	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 

@@ -19,7 +19,7 @@
 
 6. ~~**CI pipeline location** — `ci/github-actions.yml` is in the wrong directory. GitHub Actions requires workflows in `.github/workflows/`. Pipeline will never run.~~ ✅ Done — moved `ci/github-actions.yml` to `.github/workflows/ci.yml`, removed stale copy.
 
-7. **`NewWaybillHandler` receives wrong args** — `main.go` creates `handlers.NewWaybillHandler(waybillRepo)` but the constructor expects `kafkaProducer`, `wsHub`, `esClient`, and `webhookRepo` — none are passed. Kafka/WebSocket/Elasticsearch/webhook dispatch will silently no-op.
+7. ~~**`NewWaybillHandler` receives wrong args** — `main.go` creates `handlers.NewWaybillHandler(waybillRepo)` but the constructor expects `kafkaProducer`, `wsHub`, `esClient`, and `webhookRepo` — none are passed. Kafka/WebSocket/Elasticsearch/webhook dispatch will silently no-op.~~ ✅ Done — All 5 dependencies wired: `esClient`, `webhookRepo`, `webhookDispatcher`, `kafkaProducer`, `wsHub` created and passed to `NewWaybillHandler`.
 
 8. **HealthHandler not registered** — `health.go` has a multi-dependency health check handler but it's never wired in `main.go`. Current `GET /health` returns a static `{"status":"ok"}` without checking any dependency.
 

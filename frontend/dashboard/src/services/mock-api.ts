@@ -610,7 +610,8 @@ export function installMockInterceptor(api: AxiosInstance) {
 
     if (url === '/auth/login' && method === 'post') {
       const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
-      if (String(body?.email).toLowerCase() === 'admin' && body?.password === 'admin') {
+      const email = String(body?.email).toLowerCase()
+      if ((email === 'admin' || email === 'admin@waybilltrack.com') && body?.password === 'admin') {
         mock({ accessToken: MOCK_TOKEN, user: MOCK_USER })
       } else {
         mock({ error: 'Invalid credentials' }, 401)

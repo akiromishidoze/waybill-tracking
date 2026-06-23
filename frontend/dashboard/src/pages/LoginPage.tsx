@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authService } from '@/services/api'
-import { loginSchema, validateField, emailSchema, passwordSchema } from '@/utils/validation'
+import { useAuthStore } from '@/store/auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,15 +12,15 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError('')
-    const fieldErrors = {
-      email: validateField(emailSchema, email),
-      password: validateField(passwordSchema, password),
-    }
-    setErrors({ email: fieldErrors.email, password: fieldErrors.password })
-    if (fieldErrors.email || fieldErrors.password) return
+    const trimmed = email.trim()
+    const errs: { email?: string; password?: string } = {}
+    if (!trimmed) errs.email = 'Email is required'
+    if (!password) errs.password = 'Password is required'
+    setErrors(errs)
+    if (errs.email || errs.password) return
 
     try {
-      const res = await authService.login(email, password)
+      const res = await authService.login(trimmed, password)
       localStorage.setItem('access_token', res.data.accessToken)
       navigate('/dashboard')
     } catch {
@@ -52,7 +51,7 @@ export default function LoginPage() {
       >
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-          Email: <strong>Admin</strong> / Password: <strong>admin</strong>
+          Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>admin</strong>
         </p>
         {serverError && (
           <p style={{ color: 'var(--badge-red-text)', marginBottom: '1rem', fontSize: '0.875rem' }}>

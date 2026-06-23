@@ -22,3 +22,6 @@ crash.log
 infrastructure/docker/nginx/certs/*.crt
 infrastructure/docker/nginx/certs/*.key
 infrastructure/docker/nginx/certs/*.pem
+
+# Production readiness checklist — local working notes
+PRODUCTION-READINESS.md

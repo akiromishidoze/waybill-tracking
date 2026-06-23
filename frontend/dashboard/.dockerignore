@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+.env.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Documentation
+PRODUCTION-READINESS.md
+README.md
+*.md
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+coverage/
+*.test.ts
+*.test.tsx

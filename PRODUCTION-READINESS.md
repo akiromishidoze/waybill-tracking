@@ -76,7 +76,7 @@
 
 26. ~~**ML model directory empty** — `models_data/` exists but is empty. Analytics ML models will crash on first load.~~ ✅ Done — Added `backend/analytics-api/models_data/.gitkeep` and `README.md` so the directory is tracked. Made `MLService` lazy-loaded: models are loaded only when predictions are requested, and the model directory is created on demand. Missing models fall back to SQL-based historical averages and stuck-shipment rules.
 
-27. **No `.dockerignore`** — No `.dockerignore` in any service. `node_modules` and build artifacts are sent in Docker build context.
+27. ~~**No `.dockerignore`** — No `.dockerignore` in any service. `node_modules` and build artifacts are sent in Docker build context.~~ ✅ Done — Added `.dockerignore` to `backend/core-api`, `backend/analytics-api`, and `frontend/dashboard` excluding `node_modules`, `dist`, `build`, `.git`, `.env`, logs, IDE files, and generated artifacts.
 
 28. **`RegisterHandler` + `respondWithToken` missing** — Test file references these functions. Code doesn't compile.
 

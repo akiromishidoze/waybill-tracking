@@ -40,6 +40,7 @@ import IotSensorPage from './pages/IotSensorPage'
 import ChatbotPage from './pages/ChatbotPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import UnauthorizedPage from './pages/UnauthorizedPage'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 
@@ -54,17 +55,21 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/waybills" element={<WaybillListPage />} />
           <Route path="/waybills/:id" element={<WaybillDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/audit-logs" element={<AuditLogPage />} />
-          <Route path="/carriers" element={<CarriersPage />} />
           <Route path="/tracking/aggregated" element={<AggregatedTrackingPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/batch-status" element={<BatchStatusPage />} />
-          <Route path="/webhooks" element={<WebhooksPage />} />
           <Route path="/carrier-performance" element={<CarrierPerformancePage />} />
+          
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/audit-logs" element={<AuditLogPage />} />
+            <Route path="/carriers" element={<CarriersPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/webhooks" element={<WebhooksPage />} />
+          </Route>
           <Route path="/map" element={<MapViewPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/escalations" element={<EscalationsPage />} />

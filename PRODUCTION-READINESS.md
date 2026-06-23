@@ -66,7 +66,7 @@
 
 21. ~~**`audit_logs` database table** — No migration creates this table. `AuditLogPage.tsx` uses mock data. Audit logging is non-functional in production.~~ ✅ Done — `006_audit_logs.sql` migration, `models/audit_log.go`, `repository/audit_log_repo.go`, `repository/audit_logger.go` utility, `handlers/audit_log_handler.go`, wired `GET /audit-logs` (admin-only). Audit logging added to login, waybill create, status update, and delete handlers.
 
-22. **Role-based route protection** — `ProtectedRoute.tsx` only checks token existence. Any authenticated user can access admin pages. No 403 page or unauthorized state.
+22. ~~**Role-based route protection** — `ProtectedRoute.tsx` only checks token existence. Any authenticated user can access admin pages. No 403 page or unauthorized state.~~ ✅ Done — Updated `ProtectedRoute` to take `allowedRoles` prop and check JWT claims. Added `UnauthorizedPage.tsx` (403). Wrapped `users`, `audit-logs`, `carriers`, `settings`, and `webhooks` routes in `App.tsx` with `<ProtectedRoute allowedRoles={['ADMIN']} />`.
 
 23. **Mobile/responsive layout** — Fixed 260px sidebar, no `useMediaQuery`, no breakpoints, no hamburger menu. Desktop-only.
 

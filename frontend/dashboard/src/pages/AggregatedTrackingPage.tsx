@@ -5,6 +5,7 @@ import { aggregatedTrackingService, carrierService, waybillService } from '@/ser
 import { Truck, ChevronRight, Plus, X, Trash2, Check } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const CARRIER_COLORS: Record<string, string> = {
   c1: '#2563eb', c2: '#7c3aed', c3: '#d97706',
@@ -14,6 +15,7 @@ export default function AggregatedTrackingPage() {
   const queryClient = useQueryClient()
   const [showAssign, setShowAssign] = useState(false)
   const [assignForm, setAssignForm] = useState({ waybillId: '', carrierId: '', carrierTrackingNumber: '' })
+  const [removeCarrierId, setRemoveCarrierId] = useState<string | null>(null)
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['aggregated-tracking'],
@@ -136,7 +138,7 @@ export default function AggregatedTrackingPage() {
                     <td style={{ padding: '0.625rem 1rem' }}>
                       <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
                         <Link to={`/waybills/${item.waybillId}`} style={{ display: 'flex', color: 'var(--color-primary)' }}><ChevronRight size={16} /></Link>
-                        <button onClick={() => { if (confirm('Remove carrier from this waybill?')) removeCarrier.mutate(item.waybillId) }} style={{ display: 'flex', padding: '0.25rem', background: 'transparent', color: 'var(--badge-red-text)', border: 'none', borderRadius: 4, cursor: 'pointer' }} title="Remove carrier">
+                        <button onClick={() => setRemoveCarrierId(item.waybillId)} style={{ display: 'flex', padding: '0.25rem', background: 'transparent', color: 'var(--badge-red-text)', border: 'none', borderRadius: 4, cursor: 'pointer' }} title="Remove carrier">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -148,6 +150,14 @@ export default function AggregatedTrackingPage() {
           </div>
         ))
       )}
+      <ConfirmModal
+        open={removeCarrierId !== null}
+        title="Remove Carrier"
+        message="Are you sure you want to remove this carrier from the waybill?"
+        confirmLabel="Remove"
+        onConfirm={() => { if (removeCarrierId) removeCarrier.mutate(removeCarrierId); setRemoveCarrierId(null) }}
+        onCancel={() => setRemoveCarrierId(null)}
+      />
     </div>
   )
 }

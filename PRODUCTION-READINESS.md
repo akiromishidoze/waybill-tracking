@@ -31,13 +31,13 @@
 
 10. ~~**Form validation** — `react-hook-form` (v7.52.0) and `zod` (v3.23.8) installed but never imported. All forms use bare HTML5 `required` with no field-level error messages, no schema validation, no debounced async validation.~~ ✅ Done — `src/utils/validation.ts` created with zod schemas for login, waybill, user, carrier forms + `validate()`/`validateField()` helpers. `FormField` component with error display. `LoginPage` and `WaybillNewPage` updated with field-level validation and red error borders.
 
-11. **Confirmation modals** — 7 locations use native browser `confirm()` for destructive actions:
+11. ~~**Confirmation modals** — 7 locations use native browser `confirm()` for destructive actions:
     - `WaybillDetailPage.tsx` — Delete attachment
     - `UsersPage.tsx` — Delete user
     - `SettingsPage.tsx` — Delete team, Delete escalation rule
     - `CarriersPage.tsx` — Delete carrier
     - `WebhooksPage.tsx` — Delete webhook
-    - `AggregatedTrackingPage.tsx` — Remove carrier from waybill
+    - `AggregatedTrackingPage.tsx` — Remove carrier from waybill~~ ✅ Done — `ConfirmModal` component created with Escape key support, backdrop click dismiss, focus management. All 7 locations updated.
 
 12. **Pagination in UI** — All list pages fetch unlimited data. `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. No page selector, no "Load More", no infinite scroll. Frontend will degrade with >500 records.
 

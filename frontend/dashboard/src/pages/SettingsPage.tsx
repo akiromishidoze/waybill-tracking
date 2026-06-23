@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { settingsService, userService, teamService, escalationRuleService } from '@/services/api'
 import { UserPlus, Save, Plus, Trash2, Check, X, Shield, AlertTriangle } from 'lucide-react'
+import ConfirmModal from '@/components/ConfirmModal'
 
 export default function SettingsPage() {
   const queryClient = useQueryClient()
@@ -22,6 +23,8 @@ export default function SettingsPage() {
   const [ruleForm, setRuleForm] = useState({ name: '', condition: 'SLA_BREACHED', threshold: 0, targetRole: 'OPS', isActive: true })
   const [showRuleForm, setShowRuleForm] = useState(false)
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null)
+  const [deleteTeamTarget, setDeleteTeamTarget] = useState<{ id: string; name: string } | null>(null)
+  const [deleteRuleTarget, setDeleteRuleTarget] = useState<{ id: string; name: string } | null>(null)
 
   const createUser = useMutation({
     mutationFn: () => userService.create(createUserForm as any),
@@ -208,7 +211,7 @@ export default function SettingsPage() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem' }}>
                     <button onClick={() => { setEditingTeamId(t.id); setTeamForm({ name: t.name, description: t.description, color: t.color }); setShowTeamForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
-                    <button onClick={() => { if (confirm('Delete team "' + t.name + '"?')) deleteTeam.mutate(t.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
+                    <button onClick={() => setDeleteTeamTarget({ id: t.id, name: t.name })} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -275,7 +278,7 @@ export default function SettingsPage() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem' }}>
                     <button onClick={() => { setEditingRuleId(r.id); setRuleForm({ name: r.name, condition: r.condition, threshold: r.threshold, targetRole: r.targetRole, isActive: r.isActive }); setShowRuleForm(true) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>Edit</button>
-                    <button onClick={() => { if (confirm('Delete rule "' + r.name + '"?')) deleteRule.mutate(r.id) }} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
+                    <button onClick={() => setDeleteRuleTarget({ id: r.id, name: r.name })} style={{ padding: '0.25rem 0.5rem', background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem' }}>
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -285,6 +288,20 @@ export default function SettingsPage() {
           )}
         </section>
       </div>
+      <ConfirmModal
+        open={deleteTeamTarget !== null}
+        title="Delete Team"
+        message={`Are you sure you want to delete team "${deleteTeamTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => { if (deleteTeamTarget) deleteTeam.mutate(deleteTeamTarget.id); setDeleteTeamTarget(null) }}
+        onCancel={() => setDeleteTeamTarget(null)}
+      />
+      <ConfirmModal
+        open={deleteRuleTarget !== null}
+        title="Delete Rule"
+        message={`Are you sure you want to delete rule "${deleteRuleTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => { if (deleteRuleTarget) deleteRule.mutate(deleteRuleTarget.id); setDeleteRuleTarget(null) }}
+        onCancel={() => setDeleteRuleTarget(null)}
+      />
     </div>
   )
 }

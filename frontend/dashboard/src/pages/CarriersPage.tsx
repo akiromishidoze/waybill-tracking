@@ -4,11 +4,13 @@ import { carrierService } from '@/services/api'
 import type { Carrier } from '@/types/waybill'
 import { Truck, ExternalLink, CheckCircle, XCircle, Plus, Pencil, Trash2, X, Check } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import ConfirmModal from '@/components/ConfirmModal'
 
 export default function CarriersPage() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deleteCarrierId, setDeleteCarrierId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', apiEndpoint: '', apiKey: '', isActive: true, trackingUrlTemplate: '' })
 
   const { data: carriers, isLoading } = useQuery({
@@ -101,7 +103,7 @@ export default function CarriersPage() {
                 <button onClick={() => openEdit(c)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <Pencil size={14} /> Edit
                 </button>
-                <button onClick={() => { if (confirm('Delete this carrier?')) deleteCarrier.mutate(c.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
+                <button onClick={() => setDeleteCarrierId(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                   <Trash2 size={14} /> Delete
                 </button>
               </div>
@@ -109,6 +111,13 @@ export default function CarriersPage() {
           ))}
         </div>
       )}
+      <ConfirmModal
+        open={deleteCarrierId !== null}
+        title="Delete Carrier"
+        message="Are you sure you want to delete this carrier? This action cannot be undone."
+        onConfirm={() => { if (deleteCarrierId) deleteCarrier.mutate(deleteCarrierId); setDeleteCarrierId(null) }}
+        onCancel={() => setDeleteCarrierId(null)}
+      />
     </div>
   )
 }

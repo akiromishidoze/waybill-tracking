@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
 import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
+import ConfirmModal from '@/components/ConfirmModal'
 import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
@@ -85,6 +86,7 @@ export default function WaybillDetailPage() {
 
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [deleteAttachId, setDeleteAttachId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data: dwellSegments } = useQuery({
@@ -261,7 +263,7 @@ export default function WaybillDetailPage() {
                   <button onClick={() => { const a = document.createElement('a'); a.href = `data:${att.fileType};base64,${att.data}`; a.download = att.fileName; a.click() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
                     <Download size={12} /> Download
                   </button>
-                  <button onClick={() => { if (confirm('Delete this attachment?')) deleteAttachment.mutate(att.id) }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
+                  <button onClick={() => setDeleteAttachId(att.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'var(--color-surface)', border: '1px solid var(--badge-red-border)', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
                     <Trash2 size={12} /> Delete
                   </button>
                 </div>
@@ -270,6 +272,13 @@ export default function WaybillDetailPage() {
           </div>
         )}
       </div>
+      <ConfirmModal
+        open={deleteAttachId !== null}
+        title="Delete Attachment"
+        message="Are you sure you want to delete this attachment? This action cannot be undone."
+        onConfirm={() => { if (deleteAttachId) deleteAttachment.mutate(deleteAttachId); setDeleteAttachId(null) }}
+        onCancel={() => setDeleteAttachId(null)}
+      />
 
       {wb.returnInfo ? (
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>

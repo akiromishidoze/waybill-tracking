@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { webhookService } from '@/services/api'
 import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
 import BackButton from '@/components/BackButton'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const EVENT_COLORS: Record<string, string> = {
   'status.updated': 'var(--status-blue)',
@@ -18,6 +19,7 @@ export default function WebhooksPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', url: '', events: [] as string[], isActive: true })
   const [testMsg, setTestMsg] = useState('')
+  const [deleteWebhookId, setDeleteWebhookId] = useState<string | null>(null)
 
   const { data: webhooks } = useQuery({ queryKey: ['webhooks'], queryFn: () => webhookService.list().then(r => r.data) })
   const { data: events } = useQuery({ queryKey: ['webhook-events'], queryFn: () => webhookService.getEvents().then(r => r.data) })
@@ -135,7 +137,7 @@ export default function WebhooksPage() {
                   <button onClick={() => openEdit(w)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer' }}>
                     <Pencil size={14} />
                   </button>
-                  <button onClick={() => { if (confirm('Delete this webhook?')) deleteWebhook.mutate(w.id) }} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: 'var(--status-red)' }}>
+                  <button onClick={() => setDeleteWebhookId(w.id)} style={{ display: 'flex', padding: '0.5rem', background: 'transparent', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', color: 'var(--status-red)' }}>
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -151,6 +153,13 @@ export default function WebhooksPage() {
           ))}
         </div>
       )}
+      <ConfirmModal
+        open={deleteWebhookId !== null}
+        title="Delete Webhook"
+        message="Are you sure you want to delete this webhook? This action cannot be undone."
+        onConfirm={() => { if (deleteWebhookId) deleteWebhook.mutate(deleteWebhookId); setDeleteWebhookId(null) }}
+        onCancel={() => setDeleteWebhookId(null)}
+      />
     </div>
   )
 }

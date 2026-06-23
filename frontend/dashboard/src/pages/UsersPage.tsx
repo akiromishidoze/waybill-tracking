@@ -4,6 +4,7 @@ import { userService } from '@/services/api'
 import type { User } from '@/types/waybill'
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const ROLE_OPTIONS = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
 const ROLE_COLORS: Record<string, string> = {
@@ -14,6 +15,7 @@ export default function UsersPage() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null)
   const [form, setForm] = useState({ email: '', name: '', role: 'SHIPPER', company: '' })
 
   const { data: users, isLoading } = useQuery({
@@ -101,7 +103,7 @@ export default function UsersPage() {
                       <button onClick={() => openEdit(u)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                         <Pencil size={12} /> Edit
                       </button>
-                      <button onClick={() => { if (confirm('Delete this user?')) deleteUser.mutate(u.id) }} disabled={deleteUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
+                      <button onClick={() => setDeleteUserId(u.id)} disabled={deleteUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', color: 'var(--badge-red-text)', border: '1px solid #dc2626', borderRadius: 6, cursor: 'pointer', fontSize: '0.8125rem' }}>
                         <Trash2 size={12} /> Delete
                       </button>
                     </div>
@@ -112,6 +114,13 @@ export default function UsersPage() {
           </tbody>
         </table>
       </div>
+      <ConfirmModal
+        open={deleteUserId !== null}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        onConfirm={() => { if (deleteUserId) deleteUser.mutate(deleteUserId); setDeleteUserId(null) }}
+        onCancel={() => setDeleteUserId(null)}
+      />
     </div>
   )
 }

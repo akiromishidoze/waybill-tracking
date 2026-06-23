@@ -39,7 +39,7 @@
     - `WebhooksPage.tsx` — Delete webhook
     - `AggregatedTrackingPage.tsx` — Remove carrier from waybill~~ ✅ Done — `ConfirmModal` component created with Escape key support, backdrop click dismiss, focus management. All 7 locations updated.
 
-12. **Pagination in UI** — All list pages fetch unlimited data. `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. No page selector, no "Load More", no infinite scroll. Frontend will degrade with >500 records.
+12. ~~**Pagination in UI** — All list pages fetch unlimited data. `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. No page selector, no "Load More", no infinite scroll. Frontend will degrade with >500 records.~~ ✅ Done — `Pagination` component (prev/next, page buttons, ellipsis, total count). `WaybillListPage.tsx` updated with page state, `page`/`limit` params passed to API, handles both mock (array) and real backend (`{data, meta}`) response formats. Filters reset to page 1.
 
 13. **Rate limiting on auth endpoints** — `RateLimitMiddleware` exists at `internal/middleware/ratelimit.go` (Redis-based) but is never applied to any route. Login endpoint is unprotected from brute-force attacks. No CAPTCHA.
 

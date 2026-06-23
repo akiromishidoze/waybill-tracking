@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService, dwellTimeService } from '@/services/api'
@@ -6,6 +6,7 @@ import type { Waybill } from '@/types/waybill'
 import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import Pagination from '@/components/Pagination'
 
 const statusColors: Record<string, string> = {
   CREATED: 'var(--status-gray)',
@@ -19,21 +20,36 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'var(--status-gray)',
 }
 
+const PAGE_SIZE = 25
+
 export default function WaybillListPage() {
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
   const [carrierFilter, setCarrierFilter] = useState('')
   const [breachFilter, setBreachFilter] = useState<'all' | 'breached' | 'ontime'>('all')
   const [returnFilter, setReturnFilter] = useState<'all' | 'hasReturn' | 'noReturn'>('all')
   const [teamFilter, setTeamFilter] = useState('')
-  const { data: waybills, isLoading } = useQuery({
-    queryKey: ['waybills', search],
-    queryFn: () => waybillService.list({ search }).then((r) => r.data),
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ['waybills', search, page],
+    queryFn: () => waybillService.list({ search, page, limit: PAGE_SIZE }).then((r) => r.data),
   })
 
   const { data: dwellAlerts } = useQuery({
     queryKey: ['dwell-alerts'],
     queryFn: () => dwellTimeService.listAlerts().then(r => r.data),
   })
+
+  const waybills = useMemo(() => {
+    if (!rawData) return undefined
+    const list: Waybill[] = Array.isArray(rawData) ? rawData as Waybill[] : (rawData as any).data as Waybill[] ?? []
+    return list
+  }, [rawData])
+
+  const total = useMemo(() => {
+    if (!rawData) return 0
+    if (Array.isArray(rawData)) return rawData.length
+    return (rawData as any).meta?.total ?? (rawData as any).data?.length ?? 0
+  }, [rawData])
 
   const carriers = waybills
     ? [...new Set(waybills.filter((w) => w.carrierName).map((w) => w.carrierName!))]
@@ -52,9 +68,20 @@ export default function WaybillListPage() {
     return true
   })
 
+  const totalPages = Math.max(1, Math.ceil((filtered?.length ?? total) / PAGE_SIZE))
+  const displayed = filtered?.slice(0, PAGE_SIZE) ?? []
+
+  function resetPage() { setPage(1) }
+
   const dweltWaybills = new Set(
     (dwellAlerts || []).filter(a => !a.acknowledged).map(a => a.waybillId)
   )
+
+  function handleSearch(v: string) { setSearch(v); resetPage() }
+  function handleCarrier(v: string) { setCarrierFilter(v); resetPage() }
+  function handleBreach(v: string) { setBreachFilter(v as any); resetPage() }
+  function handleReturn(v: string) { setReturnFilter(v as any); resetPage() }
+  function handleTeam(v: string) { setTeamFilter(v); resetPage() }
 
   return (
     <PageContainer
@@ -66,29 +93,29 @@ export default function WaybillListPage() {
       }
     >
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <input type="text" placeholder="Search tracking number..." value={search} onChange={(e) => setSearch(e.target.value)}
+        <input type="text" placeholder="Search tracking number..." value={search} onChange={(e) => handleSearch(e.target.value)}
           style={{ flex: 1, minWidth: 220, padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem' }} />
         {carriers.length > 0 && (
-          <select value={carrierFilter} onChange={(e) => setCarrierFilter(e.target.value)}
+          <select value={carrierFilter} onChange={(e) => handleCarrier(e.target.value)}
             style={{ padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', minWidth: 170 }}>
             <option value="">All Carriers</option>
             {carriers.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
         )}
-        <select value={breachFilter} onChange={(e) => setBreachFilter(e.target.value as any)}
+        <select value={breachFilter} onChange={(e) => handleBreach(e.target.value)}
           style={{ padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', minWidth: 140 }}>
           <option value="all">All SLA</option>
           <option value="breached">SLA Breached</option>
           <option value="ontime">On Time</option>
         </select>
-        <select value={returnFilter} onChange={(e) => setReturnFilter(e.target.value as any)}
+        <select value={returnFilter} onChange={(e) => handleReturn(e.target.value)}
           style={{ padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', minWidth: 140 }}>
           <option value="all">All Returns</option>
           <option value="hasReturn">With Return</option>
           <option value="noReturn">Without Return</option>
         </select>
         {teams.length > 0 && (
-          <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
+          <select value={teamFilter} onChange={(e) => handleTeam(e.target.value)}
             style={{ padding: '0.625rem 1rem', border: '1px solid var(--color-border-input)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', minWidth: 170 }}>
             <option value="">All Teams</option>
             {teams.map((t) => (<option key={t} value={t}>{t}</option>))}
@@ -115,10 +142,10 @@ export default function WaybillListPage() {
           <tbody>
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} cols={10} />)
-            ) : !filtered?.length ? (
+            ) : !displayed.length ? (
               <tr><td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)', fontSize: '0.9375rem' }}>No waybills found.</td></tr>
             ) : (
-              filtered?.map((wb: Waybill) => (
+              displayed.map((wb: Waybill) => (
                 <tr key={wb.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: wb.slaBreached ? 'var(--badge-red-bg)' : undefined, transition: 'background 0.15s' }}
                     onMouseEnter={e => !wb.slaBreached && (e.currentTarget.style.background = 'var(--color-surface-hover)')}
                     onMouseLeave={e => !wb.slaBreached && (e.currentTarget.style.background = '')}>
@@ -193,6 +220,7 @@ export default function WaybillListPage() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} totalPages={totalPages} total={filtered?.length ?? total} pageSize={PAGE_SIZE} onPageChange={setPage} />
     </PageContainer>
   )
 }

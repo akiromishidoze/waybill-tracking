@@ -74,7 +74,7 @@
 
 25. ~~**Two duplicate Layout.tsx files** — Root `/Layout.tsx` (older, flat structure) and `src/components/Layout.tsx` (newer, collapsible groups). One should be removed.~~ ✅ Done — Removed the duplicate root `Layout.tsx`; `src/components/Layout.tsx` is the canonical layout used by `App.tsx`.
 
-26. **ML model directory empty** — `models_data/` exists but is empty. Analytics ML models will crash on first load.
+26. ~~**ML model directory empty** — `models_data/` exists but is empty. Analytics ML models will crash on first load.~~ ✅ Done — Added `backend/analytics-api/models_data/.gitkeep` and `README.md` so the directory is tracked. Made `MLService` lazy-loaded: models are loaded only when predictions are requested, and the model directory is created on demand. Missing models fall back to SQL-based historical averages and stuck-shipment rules.
 
 27. **No `.dockerignore`** — No `.dockerignore` in any service. `node_modules` and build artifacts are sent in Docker build context.
 

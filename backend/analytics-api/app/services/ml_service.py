@@ -25,8 +25,10 @@ class MLService:
         self.anomaly_model: IsolationForest | None = None
         self.label_encoders: dict[str, LabelEncoder] = {}
         self._trained = False
+        self._loaded = False
+
+    def _ensure_model_dir(self):
         os.makedirs(MODEL_DIR, exist_ok=True)
-        self._load()
 
     def _load(self):
         try:
@@ -46,6 +48,7 @@ class MLService:
 
     def _save(self):
         try:
+            self._ensure_model_dir()
             with open(ETA_MODEL_PATH, "wb") as f:
                 pickle.dump(self.eta_model, f)
             with open(ANOMALY_MODEL_PATH, "wb") as f:
@@ -55,6 +58,12 @@ class MLService:
             self._trained = True
         except Exception as e:
             logger.error("Failed to save ML models: %s", e)
+
+    def _load_if_needed(self):
+        if self._loaded:
+            return
+        self._loaded = True
+        self._load()
 
     def _encode(self, df: pd.DataFrame, columns: list[str], fit: bool = False) -> pd.DataFrame:
         df = df.copy()
@@ -117,7 +126,9 @@ class MLService:
         )
         self.anomaly_model.fit(X_anomaly)
 
+        self._ensure_model_dir()
         self._save()
+        self._trained = True
 
         return {
             "status": "trained",
@@ -136,6 +147,7 @@ class MLService:
         if not row:
             return None
 
+        self._load_if_needed()
         if self.eta_model is not None and self._trained:
             df = pd.DataFrame([dict(row)])
             df = self._encode(df, ["origin", "destination", "service_type"])
@@ -183,6 +195,7 @@ class MLService:
         df = pd.DataFrame([dict(r) for r in rows])
         df["stuck_days"] = (datetime.utcnow() - pd.to_datetime(df["updated_at"])).dt.total_seconds() / 86400
 
+        self._load_if_needed()
         ml_anomalies: list[dict[str, Any]] = []
         if self.anomaly_model is not None and self._trained:
             try:
@@ -228,4 +241,11 @@ class MLService:
         return self._trained
 
 
-ml_service = MLService()
+_ml_service_instance: MLService | None = None
+
+
+def get_ml_service() -> MLService:
+    global _ml_service_instance
+    if _ml_service_instance is None:
+        _ml_service_instance = MLService()
+    return _ml_service_instance

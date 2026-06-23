@@ -36,7 +36,7 @@ export default function Pagination({ page, totalPages, total, pageSize, onPageCh
               key={p}
               onClick={() => onPageChange(p)}
               style={{
-                padding: '0.375rem 0.75rem', borderRadius: 6, border: 'none',
+                padding: '0.375rem 0.75rem', borderRadius: 6,
                 background: p === page ? 'var(--color-primary)' : 'var(--color-surface)',
                 color: p === page ? '#fff' : 'var(--color-text-primary)',
                 cursor: 'pointer', fontWeight: p === page ? 600 : 400, minWidth: 32,

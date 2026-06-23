@@ -4,6 +4,7 @@ import { waybillService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
 import { CheckSquare, Clock, Truck, Shield, RotateCcw } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const statusColors: Record<string, string> = {
   CREATED: 'var(--status-gray)',
@@ -56,6 +57,7 @@ export default function BatchStatusPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Batch Shipment Status</h2>
         <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>

@@ -4,6 +4,7 @@ import { driverService } from '@/services/api'
 
 import { Package, ScanLine, CheckCircle, XCircle, Truck, Clock, MapPin, User, Phone, Navigation, Camera, PenLine } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const STATUS_FLOW: Record<string, string[]> = {
   ASSIGNED: ['PICKED_UP'],
@@ -78,6 +79,7 @@ export default function DriverAppPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Driver App Integration</h2>

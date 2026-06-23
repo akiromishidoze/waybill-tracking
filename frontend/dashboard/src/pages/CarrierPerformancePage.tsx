@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/api'
 import { Truck, CheckCircle, XCircle, Clock, AlertTriangle, TrendingUp, BarChart3, Percent } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 export default function CarrierPerformancePage() {
   const { data: carriers, isLoading } = useQuery({
@@ -12,6 +13,7 @@ export default function CarrierPerformancePage() {
 
   return (
     <div>
+      <BackButton fallback="/analytics" />
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Carrier Performance Scoreboard</h2>
 
       {isLoading ? (

@@ -4,6 +4,7 @@ import {
   Globe, Users, Eye, Star, ShoppingBag, ExternalLink, Mail, Phone,
   CheckCircle, XCircle, Palette,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function ago(iso: string | null) {
   if (!iso) return '—'
@@ -46,6 +47,7 @@ export default function WhiteLabelPortalPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/dashboard" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Customer-Facing White-Label Portal</h1>
 
       {/* Stats Cards */}

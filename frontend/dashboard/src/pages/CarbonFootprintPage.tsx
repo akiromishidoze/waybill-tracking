@@ -3,6 +3,7 @@ import { carbonFootprintService } from '@/services/api'
 import {
   Leaf, TrendingDown, TrendingUp, Truck, MapPin, BarChart3, ShieldCheck,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function fmt(n: number) { return n.toLocaleString(undefined, { maximumFractionDigits: 1 }) }
 function pct(n: number) { return (n >= 0 ? '+' : '') + n.toFixed(1) + '%' }
@@ -36,6 +37,7 @@ export default function CarbonFootprintPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/analytics" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Carbon Footprint Tracking</h1>
 
       {/* Summary Cards */}

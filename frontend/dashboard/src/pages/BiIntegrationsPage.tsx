@@ -4,6 +4,7 @@ import api from '@/services/api'
 import type { BiIntegration } from '@/types/waybill'
 import { BarChart3, Database, RefreshCw, Unlink, ExternalLink, WifiOff, AlertTriangle, Search } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const PLATFORM_NAMES: Record<string, string> = {
   POWER_BI: 'Power BI', LOOKER: 'Looker', TABLEAU: 'Tableau', SUPERSET: 'Apache Superset', GRAFANA: 'Grafana', OTHER: 'Other',
@@ -40,6 +41,7 @@ export default function BiIntegrationsPage() {
 
   return (
     <div>
+      <BackButton fallback="/analytics" />
       <div style={{ marginBottom: '1rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>BI Tool Integration</h2>
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>

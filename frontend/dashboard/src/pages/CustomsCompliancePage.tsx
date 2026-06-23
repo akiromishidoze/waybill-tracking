@@ -4,6 +4,7 @@ import api from '@/services/api'
 import type { CustomsShipment, CustomsDocument } from '@/types/waybill'
 import { FileText, Globe, CheckCircle, XCircle, Clock, Upload, Download, Search } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   NOT_REQUIRED: { label: 'Not Required', bg: 'var(--color-bg)', color: 'var(--color-text-muted)' },
@@ -63,6 +64,7 @@ export default function CustomsCompliancePage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Customs & Compliance</h2>

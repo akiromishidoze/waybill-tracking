@@ -4,6 +4,7 @@ import type { ErpIntegration } from '@/types/waybill'
 import { Database, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const SYSTEM_COLORS: Record<string, string> = { SAP: 'var(--status-blue)', ORACLE: 'var(--status-red)', NETSUITE: 'var(--status-blue)', OTHER: 'var(--status-gray)' }
 
@@ -15,6 +16,7 @@ export default function ErpIntegrationsPage() {
 
   return (
     <PageContainer title="ERP Integrations">
+      <BackButton fallback="/dashboard" />
       {isLoading ? (
         <div style={{ display: 'grid', gap: '0.75rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !integrations?.length ? (

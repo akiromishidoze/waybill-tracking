@@ -7,6 +7,7 @@ import L from 'leaflet'
 import PageContainer from '@/components/PageContainer'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import 'leaflet/dist/leaflet.css'
+import BackButton from '@/components/BackButton'
 
 // Fix leaflet icon issue
 const icon = L.icon({
@@ -52,6 +53,7 @@ export default function MapViewPage() {
       title="Real-Time GPS Tracking"
       actions={<span className="text-sm text-slate-500">{waybills?.length || 0} active shipments</span>}
     >
+      <BackButton fallback="/dashboard" />
       <div style={{ position: 'relative', height: '100%', width: '100%' }}>
         <ErrorBoundary>
           <MapContainer

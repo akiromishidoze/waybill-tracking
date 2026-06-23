@@ -3,6 +3,7 @@ import { demandForecastService } from '@/services/api'
 import {
   TrendingUp, TrendingDown, BarChart3, MapPin, ArrowLeftRight, Package,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function pct(n: number) { return n + '%' }
 function fmt(n: number) { return n.toLocaleString() }
@@ -36,6 +37,7 @@ export default function DemandForecastingPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/analytics" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Demand Forecasting</h1>
 
       {/* Summary Cards */}

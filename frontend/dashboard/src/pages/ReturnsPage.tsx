@@ -7,6 +7,7 @@ import { RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { RefreshCw, MapPin } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const NEXT_STATUS: Record<string, string> = {
   RETURN_REQUESTED: 'RETURN_IN_TRANSIT',
@@ -46,6 +47,7 @@ export default function ReturnsPage() {
 
   return (
     <PageContainer title="Returns & Reverse Logistics">
+      <BackButton fallback="/dashboard" />
       {initiatingId && (
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem', border: '1px solid var(--color-border)' }}>
           <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>Initiate Return for {initiatingId}</h4>

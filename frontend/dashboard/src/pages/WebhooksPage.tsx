@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { webhookService } from '@/services/api'
 import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 const EVENT_COLORS: Record<string, string> = {
   'status.updated': 'var(--status-blue)',
@@ -49,6 +50,7 @@ export default function WebhooksPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Webhook Event Publishing</h2>
         <button onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: 'pointer' }}>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Bell, Mail, MessageSquare, Plus, Check, X, Clock, Truck, AlertTriangle, Package } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 interface CommsRule {
   id: string
@@ -84,6 +85,7 @@ export default function AutoCommunicationsPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Automated Customer Communications</h2>

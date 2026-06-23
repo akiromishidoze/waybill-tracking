@@ -4,6 +4,7 @@ import { waybillService } from '@/services/api'
 import { Navigation, MapPin, Truck, Clock, AlertTriangle, Check, X, RefreshCw } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import type { Waybill } from '@/types/waybill'
+import BackButton from '@/components/BackButton'
 
 const ROUTE_STATUSES = ['PICKED_UP', 'IN_TRANSIT', 'AT_SORTING_CENTER', 'OUT_FOR_DELIVERY']
 
@@ -42,6 +43,7 @@ export default function DynamicReroutingPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Dynamic Re-routing</h2>

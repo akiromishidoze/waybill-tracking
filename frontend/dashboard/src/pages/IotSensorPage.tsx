@@ -4,6 +4,7 @@ import {
   Activity, Thermometer, Droplets, Zap, Sun, AlertTriangle,
   Battery, Radio, Wifi,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function ago(iso: string | null) {
   if (!iso) return '—'
@@ -55,6 +56,7 @@ export default function IotSensorPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/dashboard" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>IoT Sensor Data Ingestion</h1>
 
       {/* Summary */}

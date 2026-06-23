@@ -4,6 +4,7 @@ import type { RegionPerformance } from '@/types/waybill'
 import { Globe, TrendingUp } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 export default function RegionPerformancePage() {
   const { data: regions, isLoading } = useQuery({
@@ -12,7 +13,7 @@ export default function RegionPerformancePage() {
   })
 
   return (
-    <PageContainer title="Region Performance">
+    <><BackButton fallback="/analytics" /><PageContainer title="Region Performance">
       {isLoading ? (
         <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
           <SkeletonBlock height={180} /><SkeletonBlock height={180} /><SkeletonBlock height={180} />
@@ -42,6 +43,6 @@ export default function RegionPerformancePage() {
           ))}
         </div>
       )}
-    </PageContainer>
+    </PageContainer></>
   )
 }

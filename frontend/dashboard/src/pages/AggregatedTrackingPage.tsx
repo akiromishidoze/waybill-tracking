@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { aggregatedTrackingService, carrierService, waybillService } from '@/services/api'
 import { Truck, ChevronRight, Plus, X, Trash2, Check } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const CARRIER_COLORS: Record<string, string> = {
   c1: '#2563eb', c2: '#7c3aed', c3: '#d97706',
@@ -50,6 +51,7 @@ export default function AggregatedTrackingPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Multi-Carrier Aggregated Tracking</h2>
         <button onClick={() => setShowAssign(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: 'pointer' }}>

@@ -5,6 +5,7 @@ import { dwellTimeService } from '@/services/api'
 import type { DwellAlert } from '@/types/waybill'
 import { Clock, CheckCircle, Eye, AlertTriangle } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
+import BackButton from '@/components/BackButton'
 
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60)
@@ -68,6 +69,7 @@ export default function DwellAlertsPage() {
         </div>
       }
     >
+      <BackButton fallback="/dashboard" />
       {isLoading ? (
         <p>Loading...</p>
       ) : alerts && alerts.length === 0 ? (

@@ -6,6 +6,7 @@ import { waybillService, teamService, attachmentService, analyticsService, retur
 import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const STATUS_ICONS: Record<WaybillStatus, typeof Package> = {
   CREATED: Package,
@@ -162,6 +163,7 @@ export default function WaybillDetailPage() {
           SLA Breached — Estimated delivery was {new Date(wb.estimatedDelivery).toLocaleDateString()}
         </div>
       )}
+      <BackButton fallback="/waybills" />
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
         Waybill #{wb.trackingNumber}
       </h2>

@@ -5,6 +5,7 @@ import {
   MessageSquare, Bot, Send, ThumbsUp, Clock, CheckCircle, Users,
   XCircle, Zap,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function ago(iso: string | null) {
   if (!iso) return '—'
@@ -63,6 +64,7 @@ export default function ChatbotPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/dashboard" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>AI Chatbot for Shipment Inquiries</h1>
 
       {/* Stats */}

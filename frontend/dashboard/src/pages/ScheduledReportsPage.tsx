@@ -4,6 +4,7 @@ import type { ReportSchedule } from '@/types/waybill'
 import { Calendar, FileText, Trash2 } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const FREQ_LABELS: Record<string, string> = { DAILY: 'Daily', WEEKLY: 'Weekly', MONTHLY: 'Monthly' }
 const FORMAT_LABELS: Record<string, string> = { PDF: 'PDF', CSV: 'CSV', EXCEL: 'Excel' }
@@ -21,7 +22,7 @@ export default function ScheduledReportsPage() {
   })
 
   return (
-    <PageContainer title="Scheduled Reports">
+    <><BackButton fallback="/analytics" /><PageContainer title="Scheduled Reports">
       {isLoading ? (
         <div style={{ display: 'grid', gap: '0.75rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !schedules?.length ? (
@@ -55,6 +56,6 @@ export default function ScheduledReportsPage() {
           ))}
         </div>
       )}
-    </PageContainer>
+    </PageContainer></>
   )
 }

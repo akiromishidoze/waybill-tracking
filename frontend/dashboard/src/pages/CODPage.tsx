@@ -4,6 +4,7 @@ import { codService } from '@/services/api'
 import type { CodPayment } from '@/types/waybill'
 import { DollarSign, CheckCircle, AlertTriangle, RotateCcw, Search, Wallet, TrendingUp } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; color: string }> = {
   COLLECTED: { label: 'Collected', bg: 'var(--badge-blue-bg)', color: 'var(--badge-blue-text)' },
@@ -53,6 +54,7 @@ export default function CODPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ marginBottom: '1rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>COD Reconciliation</h2>
       </div>

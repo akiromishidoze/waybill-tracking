@@ -4,6 +4,7 @@ import { escalationService } from '@/services/api'
 import { CheckCircle, Eye } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: 'var(--status-red)',
@@ -49,6 +50,7 @@ export default function EscalationsPage() {
         </div>
       }
     >
+      <BackButton fallback="/dashboard" />
       <div style={{ background: 'var(--color-surface)', borderRadius: 10, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left' }}>
           <thead style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }}>

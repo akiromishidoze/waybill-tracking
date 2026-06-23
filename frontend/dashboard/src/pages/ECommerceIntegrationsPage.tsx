@@ -4,6 +4,7 @@ import {
   ShoppingCart, RefreshCw, CheckCircle, XCircle, Link2,
   Globe, Package, AlertTriangle,
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 const PLATFORM_COLORS: Record<string, string> = {
   Shopify: 'var(--status-green)',
@@ -47,6 +48,7 @@ export default function ECommerceIntegrationsPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/dashboard" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>E-Commerce Platform Connectors</h1>
 
       {/* Summary Cards */}

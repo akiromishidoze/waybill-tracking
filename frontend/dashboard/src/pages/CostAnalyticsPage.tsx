@@ -3,6 +3,7 @@ import { costAnalyticsService } from '@/services/api'
 import {
   DollarSign, TrendingUp, TrendingDown, PieChart, Truck, MapPin, Package, BarChart3
 } from 'lucide-react'
+import BackButton from '@/components/BackButton'
 
 function fmt(n: number) { return '₱' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 
@@ -36,6 +37,7 @@ export default function CostAnalyticsPage() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
+      <BackButton fallback="/analytics" />
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Cost-per-Shipment Analytics</h1>
 
       {/* Summary Cards */}

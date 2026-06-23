@@ -4,6 +4,7 @@ import { auditLogService } from '@/services/api'
 
 import { Search, Clock } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 const ACTION_COLORS: Record<string, string> = {
   USER_LOGIN: 'var(--status-blue)',
@@ -47,6 +48,7 @@ export default function AuditLogPage() {
 
   return (
     <div>
+      <BackButton fallback="/dashboard" />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Audit Log</h2>
         <div style={{ position: 'relative' }}>

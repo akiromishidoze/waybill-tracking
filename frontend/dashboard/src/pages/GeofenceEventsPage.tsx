@@ -5,6 +5,7 @@ import type { GeofenceEvent } from '@/types/waybill'
 import { MapPin, LogIn, LogOut } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonBlock } from '@/components/Skeleton'
+import BackButton from '@/components/BackButton'
 
 export default function GeofenceEventsPage() {
   const [zoneFilter, setZoneFilter] = useState('')
@@ -36,6 +37,7 @@ export default function GeofenceEventsPage() {
         </div>
       }
     >
+      <BackButton fallback="/dashboard" />
       {isLoading ? (
         <div style={{ display: 'grid', gap: '0.5rem' }}><SkeletonBlock height={80} /><SkeletonBlock height={80} /><SkeletonBlock height={80} /></div>
       ) : !filtered?.length ? (

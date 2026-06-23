@@ -21,7 +21,7 @@
 
 7. ~~**`NewWaybillHandler` receives wrong args** — `main.go` creates `handlers.NewWaybillHandler(waybillRepo)` but the constructor expects `kafkaProducer`, `wsHub`, `esClient`, and `webhookRepo` — none are passed. Kafka/WebSocket/Elasticsearch/webhook dispatch will silently no-op.~~ ✅ Done — All 5 dependencies wired: `esClient`, `webhookRepo`, `webhookDispatcher`, `kafkaProducer`, `wsHub` created and passed to `NewWaybillHandler`.
 
-8. **HealthHandler not registered** — `health.go` has a multi-dependency health check handler but it's never wired in `main.go`. Current `GET /health` returns a static `{"status":"ok"}` without checking any dependency.
+8. ~~**HealthHandler not registered** — `health.go` has a multi-dependency health check handler but it's never wired in `main.go`. Current `GET /health` returns a static `{"status":"ok"}` without checking any dependency.~~ ✅ Done — `HealthHandler` created with db/redis/kafka/es, wired to `GET /health`. Returns per-component status + overall healthy/degraded.
 
 ---
 

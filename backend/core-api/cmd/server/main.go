@@ -51,6 +51,7 @@ func main() {
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
+	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	feature.RegisterAll(feature.DefaultFlags)
 
@@ -99,9 +100,7 @@ func main() {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)
 	})
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	r.GET("/health", healthHandler.Check)
 
 	log.Printf("Core API starting on :%s", cfg.Port)
 	r.Run(":" + cfg.Port)

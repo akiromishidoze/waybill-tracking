@@ -15,7 +15,7 @@
 
 4. ~~**Feature flags endpoint** — `useFeatures.tsx` calls `GET /features` but no backend route is registered. Feature flags handler exists at `internal/feature/handler.go` but never wired in `main.go`.~~ ✅ Done — `feature.RegisterAll(feature.DefaultFlags)` added in `main.go`, `GET /api/features` wired as public route.
 
-5. **Nginx `try_files` fallback** — Dashboard Dockerfile copies `dist/` to nginx but has no `try_files $uri /index.html` — page refresh on non-root routes returns 404.
+5. ~~**Nginx `try_files` fallback** — Dashboard Dockerfile copies `dist/` to nginx but has no `try_files $uri /index.html` — page refresh on non-root routes returns 404.~~ ✅ Done — `nginx.conf` created with SPA fallback + static asset caching, copied into Dockerfile.
 
 6. **CI pipeline location** — `ci/github-actions.yml` is in the wrong directory. GitHub Actions requires workflows in `.github/workflows/`. Pipeline will never run.
 

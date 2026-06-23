@@ -41,7 +41,7 @@
 
 12. ~~**Pagination in UI** — All list pages fetch unlimited data. `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. No page selector, no "Load More", no infinite scroll. Frontend will degrade with >500 records.~~ ✅ Done — `Pagination` component (prev/next, page buttons, ellipsis, total count). `WaybillListPage.tsx` updated with page state, `page`/`limit` params passed to API, handles both mock (array) and real backend (`{data, meta}`) response formats. Filters reset to page 1.
 
-13. **Rate limiting on auth endpoints** — `RateLimitMiddleware` exists at `internal/middleware/ratelimit.go` (Redis-based) but is never applied to any route. Login endpoint is unprotected from brute-force attacks. No CAPTCHA.
+13. ~~**Rate limiting on auth endpoints** — `RateLimitMiddleware` exists at `internal/middleware/ratelimit.go` (Redis-based) but is never applied to any route. Login endpoint is unprotected from brute-force attacks. No CAPTCHA.~~ ✅ Done — Login: 10 req/min/IP. Register: 5 req/min/IP. Applied inline via `middleware.RateLimitMiddleware(rdb, n, 1*time.Minute)`. Sets `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers. On Redis failure, silently allows request through.
 
 14. **CORS `*` everywhere** — Both core-api (`main.go`) and analytics-api (`main.py`) allow all origins. `config.go` has `AllowedOrigins` field but it's unused. No preflight (`OPTIONS`) handling in core-api.
 

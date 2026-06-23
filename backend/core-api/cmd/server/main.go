@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -65,8 +66,8 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.POST("/auth/login", handlers.LoginHandler(cfg.JWTSecret, db))
-		api.POST("/auth/register", handlers.RegisterHandler(cfg.JWTSecret, db))
+		api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db))
+		api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 		api.GET("/features", feature.Handler())
 
 		public := api.Group("")

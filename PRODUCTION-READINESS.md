@@ -29,7 +29,7 @@
 
 9. ~~**Toast/notification system** — No toast library installed. Users get zero success/error feedback after any mutation (creating waybills, deleting records, etc.). Actions silently succeed or fail.~~ ✅ Done — `ToastContext` created with `success`/`error`/`info` methods, auto-dismiss after 3.5s, slideIn animation. Wrapped in `App.tsx`. Usage: `const toast = useToast(); toast.success('Done!')`
 
-10. **Form validation** — `react-hook-form` (v7.52.0) and `zod` (v3.23.8) installed but never imported. All forms use bare HTML5 `required` with no field-level error messages, no schema validation, no debounced async validation.
+10. ~~**Form validation** — `react-hook-form` (v7.52.0) and `zod` (v3.23.8) installed but never imported. All forms use bare HTML5 `required` with no field-level error messages, no schema validation, no debounced async validation.~~ ✅ Done — `src/utils/validation.ts` created with zod schemas for login, waybill, user, carrier forms + `validate()`/`validateField()` helpers. `FormField` component with error display. `LoginPage` and `WaybillNewPage` updated with field-level validation and red error borders.
 
 11. **Confirmation modals** — 7 locations use native browser `confirm()` for destructive actions:
     - `WaybillDetailPage.tsx` — Delete attachment

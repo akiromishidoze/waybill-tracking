@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { waybillService } from '@/services/api'
+import { waybillSchema, validate, type FieldErrors } from '@/utils/validation'
+import FormField from '@/components/FormField'
 import s from '@/styles/components.module.css'
 
 interface FormData {
@@ -27,15 +29,21 @@ const initial: FormData = {
 
 export default function WaybillNewPage() {
   const [form, setForm] = useState<FormData>(initial)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<FieldErrors>({})
+  const [serverError, setServerError] = useState('')
   const navigate = useNavigate()
 
-  const set = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const set = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
+    setErrors(p => ({ ...p, [field]: undefined }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    setServerError('')
+    const { errors: fieldErrors } = validate(waybillSchema, form)
+    setErrors(fieldErrors)
+    if (Object.keys(fieldErrors).length > 0) return
 
     try {
       await waybillService.create({
@@ -50,7 +58,7 @@ export default function WaybillNewPage() {
       })
       navigate('/waybills')
     } catch {
-      setError('Failed to create waybill. Please try again.')
+      setServerError('Failed to create waybill. Please try again.')
     }
   }
 
@@ -60,57 +68,49 @@ export default function WaybillNewPage() {
 
       <div style={{ maxWidth: 640 }}>
         <form onSubmit={handleSubmit} className={s.cardPadded}>
-          {error && <p className={s.formError}>{error}</p>}
+          {serverError && <p className={s.formError}>{serverError}</p>}
 
           <div className={s.grid2} style={{ marginBottom: '1.5rem' }}>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Recipient Name</label>
-              <input className={s.formInput} value={form.recipientName} onChange={set('recipientName')} required />
-            </div>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Recipient Phone</label>
-              <input className={s.formInput} value={form.recipientPhone} onChange={set('recipientPhone')} required />
-            </div>
+            <FormField label="Recipient Name" error={errors.recipientName} required>
+              <input className={s.formInput} value={form.recipientName} onChange={set('recipientName')} />
+            </FormField>
+            <FormField label="Recipient Phone" error={errors.recipientPhone} required>
+              <input className={s.formInput} value={form.recipientPhone} onChange={set('recipientPhone')} />
+            </FormField>
           </div>
 
-          <div className={s.formGroup}>
-            <label className={s.formLabel}>Recipient Address</label>
-            <input className={s.formInput} value={form.recipientAddress} onChange={set('recipientAddress')} required />
-          </div>
+          <FormField label="Recipient Address" error={errors.recipientAddress} required>
+            <input className={s.formInput} value={form.recipientAddress} onChange={set('recipientAddress')} />
+          </FormField>
 
           <div className={s.grid2} style={{ marginBottom: '1.5rem' }}>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Origin</label>
-              <input className={s.formInput} value={form.origin} onChange={set('origin')} required />
-            </div>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Destination</label>
-              <input className={s.formInput} value={form.destination} onChange={set('destination')} required />
-            </div>
+            <FormField label="Origin" error={errors.origin} required>
+              <input className={s.formInput} value={form.origin} onChange={set('origin')} />
+            </FormField>
+            <FormField label="Destination" error={errors.destination} required>
+              <input className={s.formInput} value={form.destination} onChange={set('destination')} />
+            </FormField>
           </div>
 
           <div className={s.grid2} style={{ marginBottom: '1.5rem' }}>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Weight (kg)</label>
-              <input className={s.formInput} type="number" step="0.01" min="0" value={form.weight} onChange={set('weight')} required />
-            </div>
-            <div className={s.formGroup}>
-              <label className={s.formLabel}>Dimensions</label>
+            <FormField label="Weight (kg)" error={errors.weight} required>
+              <input className={s.formInput} type="number" step="0.01" value={form.weight} onChange={set('weight')} />
+            </FormField>
+            <FormField label="Dimensions">
               <input className={s.formInput} placeholder="e.g. 30x20x15 cm" value={form.dimensions} onChange={set('dimensions')} />
-            </div>
+            </FormField>
           </div>
 
-          <div className={s.formGroup} style={{ marginBottom: '1.5rem' }}>
-            <label className={s.formLabel}>Service Type</label>
+          <FormField label="Service Type">
             <select className={s.formInput} value={form.serviceType} onChange={set('serviceType')}>
               <option value="STANDARD">Standard</option>
               <option value="EXPRESS">Express</option>
               <option value="OVERNIGHT">Overnight</option>
               <option value="FREIGHT">Freight</option>
             </select>
-          </div>
+          </FormField>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
             <button type="submit" className={s.btnPrimary} style={{ padding: '0.625rem 1.5rem' }}>
               Create Waybill
             </button>

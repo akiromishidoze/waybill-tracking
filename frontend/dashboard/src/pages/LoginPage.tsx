@@ -1,21 +1,31 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '@/services/api'
+import { loginSchema, validateField, emailSchema, passwordSchema } from '@/utils/validation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [serverError, setServerError] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setServerError('')
+    const fieldErrors = {
+      email: validateField(emailSchema, email),
+      password: validateField(passwordSchema, password),
+    }
+    setErrors({ email: fieldErrors.email, password: fieldErrors.password })
+    if (fieldErrors.email || fieldErrors.password) return
+
     try {
       const res = await authService.login(email, password)
       localStorage.setItem('access_token', res.data.accessToken)
       navigate('/dashboard')
     } catch {
-      setError('Invalid email or password')
+      setServerError('Invalid email or password')
     }
   }
 
@@ -44,9 +54,9 @@ export default function LoginPage() {
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
           Email: <strong>Admin</strong> / Password: <strong>admin</strong>
         </p>
-        {error && (
+        {serverError && (
           <p style={{ color: 'var(--badge-red-text)', marginBottom: '1rem', fontSize: '0.875rem' }}>
-            {error}
+            {serverError}
           </p>
         )}
         <div style={{ marginBottom: '1rem' }}>
@@ -56,16 +66,16 @@ export default function LoginPage() {
           <input
             type="text"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={(e) => { setEmail(e.target.value); setErrors(p => ({ ...p, email: undefined })) }}
             style={{
               width: '100%',
               padding: '0.625rem',
-              border: '1px solid var(--color-border-input)',
+              border: `1px solid ${errors.email ? 'var(--color-danger)' : 'var(--color-border-input)'}`,
               borderRadius: 6,
               fontSize: '1rem',
             }}
           />
+          {errors.email && <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--color-danger)' }}>{errors.email}</p>}
         </div>
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
@@ -74,16 +84,16 @@ export default function LoginPage() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={(e) => { setPassword(e.target.value); setErrors(p => ({ ...p, password: undefined })) }}
             style={{
               width: '100%',
               padding: '0.625rem',
-              border: '1px solid var(--color-border-input)',
+              border: `1px solid ${errors.password ? 'var(--color-danger)' : 'var(--color-border-input)'}`,
               borderRadius: 6,
               fontSize: '1rem',
             }}
           />
+          {errors.password && <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--color-danger)' }}>{errors.password}</p>}
         </div>
         <button
           type="submit"

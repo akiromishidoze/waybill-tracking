@@ -1,127 +1,117 @@
 # Waybill Tracking — Production Readiness Checklist
 
 > **Generated:** 2026-06-23
-> **Scope:** `/home/teccjm/Desktop/waybill-tracking/frontend/dashboard`
+> **Scope:** `/home/teccjm/Desktop/waybill-tracking`
 
 ---
 
-## Critical (Blocks production deployment)
+## 🚨 Critical (App won't function without these)
 
-1. **Separate mock data from service layer** — `src/services/api.ts` has an axios interceptor that overrides ALL API calls with mock data. Move mock interceptors to `src/services/mock-api.ts` that only activates in dev mode. The core `api.ts` should be a clean axios instance.
+1. **User Registration endpoint** — `POST /auth/register` handler is referenced in tests but never implemented. No self-signup flow exists. Users can only be created manually by an admin.
 
-2. **Add missing backend `/auth/me` route** — `store/auth.ts` calls `/auth/me` but no backend route exists. The frontend cannot function in production without this — user profile/auth system is non-functional.
+2. **Password reset endpoint** — Frontend `settingsService.resetPassword()` calls `POST /auth/reset-password` but no backend route exists. No "forgot password" flow, no email-based reset token, no password strength validation.
 
-3. **Remove duplicated `api.ts` files** — Root `/api.ts` (real service, 189 lines, unused) vs `src/services/api.ts` (mock service, 1066 lines, only one used). Consolidate into a single clean architecture.
+3. **File upload endpoint** — Frontend `attachmentService.upload()` exists and `WaybillDetailPage.tsx` has an "Add Attachment" button. No backend file upload route exists — will fail in production.
 
-4. **Remove duplicated `waybill.ts`** — Root `/waybill.ts` (partial types) vs `src/types/waybill.ts` (full comprehensive types). Root file lacks `ErpIntegration`, `DriverAssignment`, customs types, and many others.
+4. **Feature flags endpoint** — `useFeatures.tsx` calls `GET /features` but no backend route is registered. Feature flags handler exists at `internal/feature/handler.go` but never wired in `main.go`.
 
----
+5. **Nginx `try_files` fallback** — Dashboard Dockerfile copies `dist/` to nginx but has no `try_files $uri /index.html` — page refresh on non-root routes returns 404.
 
-## High (Major gaps — must fix before production)
+6. **CI pipeline location** — `ci/github-actions.yml` is in the wrong directory. GitHub Actions requires workflows in `.github/workflows/`. Pipeline will never run.
 
-5. **Add form validation** — `react-hook-form` (v7.52.0) and `zod` (v3.23.8) are installed but never imported. `WaybillNewPage.tsx` uses manual state with only HTML5 `required` attributes. No field-level error messages, no schema validation, no debounced async validation.
+7. **`NewWaybillHandler` receives wrong args** — `main.go` creates `handlers.NewWaybillHandler(waybillRepo)` but the constructor expects `kafkaProducer`, `wsHub`, `esClient`, and `webhookRepo` — none are passed. Kafka/WebSocket/Elasticsearch/webhook dispatch will silently no-op.
 
-6. **Add toast/notification system** — No toast library is installed. Users get no success/error feedback after mutations (creating waybills, deleting records, etc.). Actions silently succeed or fail with no visible feedback.
-
-7. **Implement pagination** — `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. CSS pagination styles are defined in `components.module.css` but no page implements pagination. No page size selector, no "Load More", no infinite scroll.
-
-8. **Replace native `confirm()` with custom modal** — 7 locations use native browser `confirm()` dialogs for destructive actions:
-   - `WaybillDetailPage.tsx:264` — Delete attachment
-   - `UsersPage.tsx:104` — Delete user
-   - `SettingsPage.tsx:211` — Delete team
-   - `SettingsPage.tsx:278` — Delete escalation rule
-   - `CarriersPage.tsx:104` — Delete carrier
-   - `WebhooksPage.tsx:138` — Delete webhook
-   - `AggregatedTrackingPage.tsx:139` — Remove carrier from waybill
-
-9. **Increase test coverage** — Only 4 test files exist (16 tests total) covering only 2 of 42 pages. No tests for mutations, stores, components, or integration flows. No e2e tests (Playwright/Cypress).
-
-10. **Add CI/CD pipeline** — No `.github/`, `.gitlab-ci.yml`, `Jenkinsfile`, or any CI configuration. No pre-commit hooks (husky, lint-staged). No automated lint/test/build pipeline.
-
-11. **Create `.env` configuration** — No `.env` files exist anywhere. No `.env.example`. Environment variables `VITE_API_URL` and `VITE_WS_URL` are referenced but undocumented. No build-time environment validation.
-
-12. **Add error monitoring** — `ErrorBoundary.tsx` only `console.error`s — no Sentry or error reporting service integration. Errors in production are invisible.
-
-13. **Refactor inline styles to CSS modules** — 90%+ of component styles are inline `style={{}}` objects. Massive bundle size, no CSS caching, poor maintainability. CSS module `components.module.css` (527 lines) is barely used — only `WaybillNewPage.tsx` consistently uses it.
-
-14. **Implement internal notes/comments** — PRODUCTION.md #23 — missing feature. `WaybillDetailPage.tsx` has no section for adding operational notes or case comments to a waybill.
-
-15. **Implement route deviation alerts** — ROADMAP.md — missing entirely. No UI component, no backend logic for detecting or displaying route deviations.
-
-16. **Improve auth token security** — JWT stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.
-
-17. **Add missing loading skeletons** — Many list pages lack skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`, etc.). `DashboardPage.tsx` shows `—` placeholders instead of a skeleton/spinner while data loads.
-
-18. **Standardize empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text without contextual messaging. Some pages have no empty state at all (`AuditLogPage`, `CarriersPage`, `BatchStatusPage`).
-
-19. **Fill `src/utils/` directory** — Directory exists but is empty. `formatDateGroup` and `formatFileSize` functions are duplicated inline across pages. Extract date formatting, file size formatting, debounce, and API error handling into utilities.
-
-20. **Add nginx SPA config** — `Dockerfile` copies `dist/` to nginx but has no `try_files` fallback for client-side routing — page refresh on any route returns 404.
-
-21. **Add `.dockerignore`** — No `.dockerignore` file means `node_modules` and other unnecessary files are sent to the Docker build context.
-
-22. **Add Helmet and compression** — Missing `helmet` for HTTP security headers (CSP, HSTS, XSS) and `compression` for gzip/brotli response compression.
+8. **HealthHandler not registered** — `health.go` has a multi-dependency health check handler but it's never wired in `main.go`. Current `GET /health` returns a static `{"status":"ok"}` without checking any dependency.
 
 ---
 
-## Medium (Should fix for production readiness)
+## 🔴 High (Usability / Safety blockers)
 
-23. **Add webhook dispatcher backend** — ENHANCEMENTS.md #23 — Webhook UI exists (`WebhooksPage.tsx`) but backend never actually sends webhooks. `backend/main.py` has no webhook dispatcher.
+9. **Toast/notification system** — No toast library installed. Users get zero success/error feedback after any mutation (creating waybills, deleting records, etc.). Actions silently succeed or fail.
 
-24. **Add API versioning** — All routes use `/api/` with no version prefix. Should be `/api/v1/` for future backward compatibility.
+10. **Form validation** — `react-hook-form` (v7.52.0) and `zod` (v3.23.8) installed but never imported. All forms use bare HTML5 `required` with no field-level error messages, no schema validation, no debounced async validation.
 
-25. **Add feature flags** — ENHANCEMENTS.md #37 — `useFeatures` hook calls `/features` endpoint that doesn't exist on backend. No feature flag system implemented.
+11. **Confirmation modals** — 7 locations use native browser `confirm()` for destructive actions:
+    - `WaybillDetailPage.tsx` — Delete attachment
+    - `UsersPage.tsx` — Delete user
+    - `SettingsPage.tsx` — Delete team, Delete escalation rule
+    - `CarriersPage.tsx` — Delete carrier
+    - `WebhooksPage.tsx` — Delete webhook
+    - `AggregatedTrackingPage.tsx` — Remove carrier from waybill
 
-26. **Add log aggregation** — ENHANCEMENTS.md #36 — No ELK/loki/fluentd integration. Production errors have no centralized logging.
+12. **Pagination in UI** — All list pages fetch unlimited data. `WaybillListPage.tsx` loads ALL waybills at once via `useQuery`. No page selector, no "Load More", no infinite scroll. Frontend will degrade with >500 records.
 
-27. **Add Redis error handling** — ENHANCEMENTS.md #16 — No Redis connection error handling. Backend `redis_client.py` has no fallback if Redis is down.
+13. **Rate limiting on auth endpoints** — `RateLimitMiddleware` exists at `internal/middleware/ratelimit.go` (Redis-based) but is never applied to any route. Login endpoint is unprotected from brute-force attacks. No CAPTCHA.
 
-28. **Remove hardcoded mock credentials** — `LoginPage.tsx:45` shows "Email: Admin / Password: admin" hint. `src/services/api.ts:4-5` hardcodes `MOCK_USER` and `MOCK_TOKEN`. These should be stripped or hidden behind a dev flag.
+14. **CORS `*` everywhere** — Both core-api (`main.go`) and analytics-api (`main.py`) allow all origins. `config.go` has `AllowedOrigins` field but it's unused. No preflight (`OPTIONS`) handling in core-api.
 
-29. **Add role-based route protection** — `ProtectedRoute.tsx` only checks token existence. No role-based routing (role check only happens in sidebar UI). No 403 page or unauthorized state.
+15. **JWT in localStorage** — Token stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.
 
-30. **Implement cold chain/temperature monitoring** — ROADMAP.md — Missing dedicated UI. IoT sensor page (`IotSensorPage.tsx`) partially covers temperature readings but no dedicated cold-chain dashboard exists.
+16. **Empty catch blocks** — Several places silently swallow errors:
+    - `WaybillDetailPage.tsx` (file upload)
+    - `WaybillNewPage.tsx` (create waybill)
+    - `waybill_handler.go` (batch update)
 
-31. **Add request rate limiting** — ENHANCEMENTS.md #12 — No rate-limiting middleware on the backend. Login page has no CAPTCHA, no exponential backoff, no rate-limit feedback.
+17. **Health check doesn't verify dependencies** — Current `GET /health` returns `{"status":"ok"}` without checking PostgreSQL, Redis, Kafka, or Elasticsearch connectivity.
 
-32. **Add health check endpoint** — ENHANCEMENTS.md #18 — No health check for backend dependencies (Redis, database, Kafka). No `/health` endpoint.
+18. **No centralized error reporting** — `ErrorBoundary.tsx` only `console.error`s. No Sentry/DataDog integration. Production errors are invisible.
 
-33. **Add request ID/logging middleware** — ENHANCEMENTS.md #19 — No request correlation ID or structured logging middleware on the backend.
-
-34. **Fix CORS configuration** — ENHANCEMENTS.md #11 — Backend allows `*` origin in `main.go` and `main.py`. Should be locked to specific origins in production.
-
-35. **Add pagination on backend list endpoints** — ENHANCEMENTS.md #14 — Backend `waybill_repo.go:23` hardcodes `LIMIT 100` with no cursor/offset support.
-
-36. **Replace empty catch blocks** — `WaybillDetailPage.tsx:130` (file upload) and `WaybillNewPage.tsx:52` have empty `catch` blocks that silently swallow errors.
+19. **Missing `.env.example`** — No `.env` files exist. Environment variables (`VITE_API_URL`, `VITE_WS_URL`, `JWT_SECRET`, `DATABASE_URL`) are undocumented. No build-time environment validation.
 
 ---
 
-## Low (Nice to have / future improvements)
+## 🟠 Medium (Missing features users expect)
 
-37. **Add e2e tests** — ENHANCEMENTS.md #40 — No Playwright/Cypress configuration for end-to-end testing.
+20. **Waybill DELETE endpoint** — No delete capability for waybills exists on backend or frontend.
 
-38. **Add load tests** — No k6/artillery/Locust scripts for performance and load testing.
+21. **`audit_logs` database table** — No migration creates this table. `AuditLogPage.tsx` uses mock data. Audit logging is non-functional in production.
 
-39. **Add Terraform state backend** — ENHANCEMENTS.md #31 — Terraform config exists but no remote state backend configured.
+22. **Role-based route protection** — `ProtectedRoute.tsx` only checks token existence. Any authenticated user can access admin pages. No 403 page or unauthorized state.
 
-40. **Add database migration tool** — ENHANCEMENTS.md #32 — No Alembic or similar migration tool for the database schema.
+23. **Mobile/responsive layout** — Fixed 260px sidebar, no `useMediaQuery`, no breakpoints, no hamburger menu. Desktop-only.
 
-41. **Add Prometheus alerting rules** — ENHANCEMENTS.md #33 — `prometheus/` directory exists but `alerts.yml` is missing.
+24. **Accessibility** — No `aria-label`, `aria-describedby`, or `role` attributes. No keyboard navigation for sidebar groups. No skip-to-content links. No screen-reader-friendly announcements.
 
-42. **Add API documentation** — ENHANCEMENTS.md #24 — No custom API docs beyond OpenAPI defaults. No Postman collection or developer portal.
+25. **Two duplicate Layout.tsx files** — Root `/Layout.tsx` (older, flat structure) and `src/components/Layout.tsx` (newer, collapsible groups). One should be removed.
 
-43. **Implement analytics ML models** — ENHANCEMENTS.md #39 — `scikit-learn` is in backend dependencies but no ML models are implemented for demand forecasting or anomaly detection.
+26. **ML model directory empty** — `models_data/` exists but is empty. Analytics ML models will crash on first load.
 
-44. **Add dynamic page titles** — `index.html:8` hardcodes the title. No `react-helmet-async` for per-page titles and SEO metadata.
+27. **No `.dockerignore`** — No `.dockerignore` in any service. `node_modules` and build artifacts are sent in Docker build context.
 
-45. **Add responsive design** — No `useMediaQuery`, no mobile-responsive layouts. Application is desktop-only.
+28. **`RegisterHandler` + `respondWithToken` missing** — Test file references these functions. Code doesn't compile.
 
-46. **Add keyboard accessibility** — No focus trapping, no aria labels, no skip-to-content links. Not screen-reader friendly.
+29. **Loading skeletons missing** — Many list pages have no skeleton loaders (`CarriersPage`, `WebhooksPage`, `BatchStatusPage`). `DashboardPage.tsx` shows `—` placeholders instead of skeleton/spinner.
 
-47. **Add noopener/noreferrer on external links** — Several pages link to external URLs without `rel="noopener noreferrer"` (security best practice).
+30. **Standardized empty states** — No reusable `<EmptyState>` component. Some pages show raw "No data" text. Some have no empty state at all (`AuditLogPage`, `CarriersPage`).
 
-48. **Add favicon and PWA support** — `index.html` has no favicon. No service worker or manifest for PWA support.
+31. **Empty `src/utils/` directory** — `formatDateGroup`, `formatFileSize` duplicated inline across pages. Extract into shared utilities.
 
-49. **Add input sanitization** — File uploads accept any file type without validation. Search input is passed directly to API without sanitization.
+32. **Mock credentials in UI** — `LoginPage.tsx` shows "Email: Admin / Password: admin" hint. Should be stripped or behind a dev flag.
 
-50. **Add K8s secret management** — ENHANCEMENTS.md #30 — Kubernetes secrets are placeholder values. No HashiCorp Vault or SealedSecrets integration.
+---
+
+## 🟡 Low (Polish / Nice-to-have)
+
+33. **CSV export** — Excel export exists via analytics API. No CSV export endpoint.
+
+34. **No e2e tests** — No Playwright/Cypress configuration.
+
+35. **WebSocket authentication** — `/ws` endpoint has no auth. Any client can connect and subscribe to tracking events.
+
+36. **API versioning** — All routes use `/api/` with no version prefix (`/api/v1/`).
+
+37. **Dynamic page titles** — `index.html` title is hardcoded. No `react-helmet-async`.
+
+38. **PWA support** — No service worker, no manifest, no favicon.
+
+39. **Backup/restore scripts** — No automated database backup jobs or documented restore procedures.
+
+40. **Input sanitization** — File uploads accept any type without validation. Search input unsanitized.
+
+41. **K8s secret management** — Placeholder values in `infrastructure/k8s/secrets.yaml`. No Vault/SealedSecrets.
+
+42. **Helmet + compression** — No `helmet` for HTTP security headers. No gzip/brotli compression middleware.
+
+43. **API documentation** — No Postman collection or developer portal beyond basic OpenAPI.
+
+44. **Terraform remote state** — `infrastructure/terraform/` configs store state locally. No S3/GCS backend.

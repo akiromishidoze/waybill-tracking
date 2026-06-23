@@ -97,6 +97,7 @@ export const waybillService = {
   update: (id: string, data: Partial<Waybill>) => api.patch<Waybill>(`/waybills/${id}`, data),
   batchStatusUpdate: (ids: string[], status: string, location?: string) =>
     api.post('/waybills/batch-status', { ids, status, location }),
+  delete: (id: string) => api.delete(`/waybills/${id}`),
 }
 
 export const exceptionCodeService = {

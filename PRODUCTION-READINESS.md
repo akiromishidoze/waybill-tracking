@@ -62,7 +62,7 @@
 
 ## 🟠 Medium (Missing features users expect)
 
-20. **Waybill DELETE endpoint** — No delete capability for waybills exists on backend or frontend.
+20. ~~**Waybill DELETE endpoint** — No delete capability for waybills exists on backend or frontend.~~ ✅ Done — `DELETE /waybills/:id` handler + repo method (role-gated OPS/ADMIN), frontend `delete` method in `waybillService`, delete button + `ConfirmModal` on `WaybillDetailPage`.
 
 21. **`audit_logs` database table** — No migration creates this table. `AuditLogPage.tsx` uses mock data. Audit logging is non-functional in production.
 

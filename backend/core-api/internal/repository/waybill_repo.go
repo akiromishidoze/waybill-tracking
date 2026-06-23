@@ -230,6 +230,11 @@ func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill
 	return tx.Commit(ctx)
 }
 
+func (r *WaybillRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM waybills WHERE id = $1`, id)
+	return err
+}
+
 func (r *WaybillRepository) getEvents(ctx context.Context, waybillID string) ([]models.ScanEvent, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, waybill_id, status, location, courier_id, courier_name, timestamp, remark, exception_code, exception_detail, resolved_at, event_type

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
 import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
@@ -41,6 +41,12 @@ function formatDateGroup(dateStr: string): string {
 export default function WaybillDetailPage() {
   const { id } = useParams<{ id: string }>()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const [deleteWaybillId, setDeleteWaybillId] = useState<string | null>(null)
+  const deleteWaybill = useMutation({
+    mutationFn: (wid: string) => waybillService.delete(wid),
+    onSuccess: () => navigate('/waybills'),
+  })
 
   const { data: wb, isLoading } = useQuery({
     queryKey: ['waybill', id],
@@ -166,9 +172,22 @@ export default function WaybillDetailPage() {
         </div>
       )}
       <BackButton fallback="/waybills" />
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-        Waybill #{wb.trackingNumber}
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+          Waybill #{wb.trackingNumber}
+        </h2>
+        <button
+          onClick={() => setDeleteWaybillId(id!)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.375rem',
+            padding: '0.5rem 1rem', background: 'var(--color-surface)',
+            border: '1px solid var(--badge-red-border)', borderRadius: 6,
+            fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--badge-red-text)',
+          }}
+        >
+          <Trash2 size={16} /> Delete Waybill
+        </button>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
@@ -278,6 +297,14 @@ export default function WaybillDetailPage() {
         message="Are you sure you want to delete this attachment? This action cannot be undone."
         onConfirm={() => { if (deleteAttachId) deleteAttachment.mutate(deleteAttachId); setDeleteAttachId(null) }}
         onCancel={() => setDeleteAttachId(null)}
+      />
+      <ConfirmModal
+        open={deleteWaybillId !== null}
+        title="Delete Waybill"
+        message="Are you sure you want to delete this waybill? All associated data will be permanently removed. This action cannot be undone."
+        confirmLabel="Delete Waybill"
+        onConfirm={() => { if (deleteWaybillId) deleteWaybill.mutate(deleteWaybillId); setDeleteWaybillId(null) }}
+        onCancel={() => setDeleteWaybillId(null)}
       />
 
       {wb.returnInfo ? (

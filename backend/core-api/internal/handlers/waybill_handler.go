@@ -195,6 +195,24 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, wb)
 }
 
+func (h *WaybillHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+
+	claims, _ := c.Get("claims")
+	userRole := claims.(map[string]any)["role"].(string)
+	if userRole != "ADMIN" && userRole != "OPS" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only OPS and ADMIN can delete waybills"})
+		return
+	}
+
+	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
 func (h *WaybillHandler) ListExceptionCodes(c *gin.Context) {
 	codes := []models.ExceptionCodeInfo{
 		{Code: models.ExceptionDelay, Label: "Delivery Delayed", Description: "Shipment delayed beyond estimated delivery date"},

@@ -79,6 +79,7 @@ func main() {
 			protected.GET("/waybills/:id", waybillHandler.Get)
 			protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
 			protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+			protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
 			protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
 			protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
 			protected.GET("/attachments/:attachmentId", attachmentHandler.Get)

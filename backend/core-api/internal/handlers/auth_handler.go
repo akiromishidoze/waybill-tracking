@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -100,7 +101,7 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
-func LoginHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
+func LoginHandler(jwtSecret string, db *pgxpool.Pool, auditLogger *repository.AuditLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req loginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -142,6 +143,9 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 		if user.Company.Valid {
 			company = user.Company.String
 		}
+
+		auditLogger.Log(c.Request.Context(), user.ID, user.Name, user.Role,
+			"USER_LOGIN", "user", user.ID, "User logged in", c.ClientIP())
 
 		c.JSON(http.StatusOK, gin.H{
 			"accessToken": tokenStr,

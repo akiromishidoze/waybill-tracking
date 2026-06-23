@@ -48,8 +48,12 @@ func main() {
 	webhookRepo := repository.NewWebhookRepository(db)
 	webhookDispatcher := webhook.NewDispatcher(webhookRepo)
 
+	auditLogRepo := repository.NewAuditLogRepository(db)
+	auditLogger := repository.NewAuditLogger(auditLogRepo)
+	auditLogHandler := handlers.NewAuditLogHandler(auditLogRepo)
+
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher)
+	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, auditLogger)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
@@ -62,7 +66,7 @@ func main() {
 
 	api := r.Group("/api")
 	{
-		api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db))
+		api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
 		api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 		api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
 		api.GET("/features", feature.Handler())
@@ -91,6 +95,7 @@ func main() {
 				admin.GET("/users", handlers.ListUsersHandler(db))
 				admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
 				admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
+				admin.GET("/audit-logs", auditLogHandler.List)
 			}
 		}
 	}

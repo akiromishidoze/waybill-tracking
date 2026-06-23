@@ -20,10 +20,11 @@ type WaybillHandler struct {
 	wsHub *ws.Hub
 	esClient *es.Client
 	webhooks *wh.Dispatcher
+	auditLogger *repository.AuditLogger
 }
 
-func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher) *WaybillHandler {
-	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec, webhooks: wd}
+func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher, al *repository.AuditLogger) *WaybillHandler {
+	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec, webhooks: wd, auditLogger: al}
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
@@ -118,6 +119,10 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 
 	h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
 
+	userName, _ := c.Get("userName")
+	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+		"WAYBILL_CREATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" created", c.ClientIP())
+
 	c.JSON(http.StatusCreated, wb)
 }
 
@@ -192,6 +197,11 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+		"STATUS_UPDATE", "waybill", wb.ID, "Status changed to "+string(wb.Status), c.ClientIP())
+
 	c.JSON(http.StatusOK, wb)
 }
 
@@ -209,6 +219,11 @@ func (h *WaybillHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), userRole,
+		"WAYBILL_DELETE", "waybill", id, "Waybill deleted", c.ClientIP())
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }

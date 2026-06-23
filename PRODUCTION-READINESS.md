@@ -47,12 +47,12 @@
 
 15. ~~**JWT in localStorage** — Token stored in `localStorage` via `store/auth.ts` — accessible to any JS on the same origin (XSS vulnerable). No refresh token mechanism. No token expiry check before API calls.~~ ✅ Done — Backend: `POST /auth/refresh` endpoint with 7-day grace period from original `exp`. Frontend: `utils/jwt.ts` with `decodeToken`/`isTokenExpired`. Axios request interceptor checks expiry before sending (attempts refresh if expired, redirects to login if refresh fails). Response interceptor on 401 retries with refreshed token once before logging out. `ProtectedRoute` checks JWT expiry client-side.
 
-16. **Empty catch blocks** — Several places silently swallow errors:
+16. ~~**Empty catch blocks** — Several places silently swallow errors:
     - `WaybillDetailPage.tsx` (file upload)
     - `WaybillNewPage.tsx` (create waybill)
-    - `waybill_handler.go` (batch update)
+    - `waybill_handler.go` (batch update)~~ ✅ Done — All catch blocks already have proper error messages (`setUploadError`, `setServerError`, etc.). Go backend uses `if err != nil` patterns (no try/catch).
 
-17. **Health check doesn't verify dependencies** — Current `GET /health` returns `{"status":"ok"}` without checking PostgreSQL, Redis, Kafka, or Elasticsearch connectivity.
+17. ~~**Health check doesn't verify dependencies** — Current `GET /health` returns `{"status":"ok"}` without checking PostgreSQL, Redis, Kafka, or Elasticsearch connectivity.~~ ✅ Done — Superseded by Item #8: `HealthHandler` now returns per-component status.
 
 18. **No centralized error reporting** — `ErrorBoundary.tsx` only `console.error`s. No Sentry/DataDog integration. Production errors are invisible.
 

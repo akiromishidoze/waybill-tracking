@@ -273,6 +273,7 @@ export const iotSensorService = {
 
 export const chatbotService = {
   getDashboard: () => api.get<ChatbotDashboard>('/integrations/chatbot'),
+  chat: (message: string) => api.post<{ reply: string; intent: string }>('/integrations/chatbot/chat', { message }),
 }
 
 export const codService = {

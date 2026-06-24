@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { chatbotService } from '@/services/api'
 import {
   MessageSquare, Bot, Send, ThumbsUp, Clock, CheckCircle, Users,
@@ -35,6 +35,24 @@ export default function ChatbotPage() {
     queryFn: () => chatbotService.getDashboard().then(r => r.data),
   })
 
+  const chatMutation = useMutation({
+    mutationFn: (message: string) => chatbotService.chat(message),
+    onSuccess: (res) => {
+      setChat(prev => [...prev, { role: 'bot', content: res.data.reply }])
+    },
+    onError: () => {
+      setChat(prev => [...prev, { role: 'bot', content: 'Sorry, I am unable to respond right now. Please try again later.' }])
+    },
+  })
+
+  const handleSend = () => {
+    if (!input.trim() || chatMutation.isPending) return
+    const message = input.trim()
+    setChat(prev => [...prev, { role: 'user', content: message }])
+    chatMutation.mutate(message)
+    setInput('')
+  }
+
   if (isLoading) {
     return (
       <div style={{ padding: '2rem' }}>
@@ -51,16 +69,6 @@ export default function ChatbotPage() {
   if (!data) return null
 
   const { summary, recentConversations, sampleConversation, quickReplies } = data
-
-  const handleSend = () => {
-    if (!input.trim()) return
-    setChat(prev => [...prev, { role: 'user', content: input.trim() }])
-    const reply = quickReplies.find(q => q.label.toLowerCase().includes(input.toLowerCase().split(' ')[0] || ''))
-    setTimeout(() => {
-      setChat(prev => [...prev, { role: 'bot', content: reply?.response || `Let me look that up for you. Please provide your tracking number so I can assist you better.` }])
-    }, 800)
-    setInput('')
-  }
 
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
@@ -103,8 +111,9 @@ export default function ChatbotPage() {
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
                   maxWidth: '85%', padding: '0.625rem 0.875rem', borderRadius: 12, fontSize: '0.8125rem', lineHeight: 1.5,
-                  background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-bg)',
+                  background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-surface)',
                   color: msg.role === 'user' ? '#fff' : 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border)',
                   borderBottomRightRadius: msg.role === 'user' ? 4 : 12,
                   borderBottomLeftRadius: msg.role === 'bot' ? 4 : 12,
                 }}>
@@ -116,8 +125,9 @@ export default function ChatbotPage() {
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
                   maxWidth: '85%', padding: '0.625rem 0.875rem', borderRadius: 12, fontSize: '0.8125rem', lineHeight: 1.5,
-                  background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-bg)',
+                  background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--color-surface)',
                   color: msg.role === 'user' ? '#fff' : 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border)',
                   borderBottomRightRadius: msg.role === 'user' ? 4 : 12,
                   borderBottomLeftRadius: msg.role === 'bot' ? 4 : 12,
                 }}>
@@ -125,6 +135,16 @@ export default function ChatbotPage() {
                 </div>
               </div>
             ))}
+            {chatMutation.isPending && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ maxWidth: '85%', padding: '0.625rem 0.875rem', borderRadius: 12, fontSize: '0.8125rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-text-muted)', animation: 'pulse 1s infinite' }} />
+                    Shipment Assistant is typing...
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '0.5rem' }}>
             <input
@@ -134,7 +154,7 @@ export default function ChatbotPage() {
               placeholder="Ask about your shipment..."
               style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'var(--color-text-primary)', fontSize: '0.8125rem', outline: 'none' }}
             />
-            <button onClick={handleSend} style={{ padding: '0.5rem 0.75rem', borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
+            <button onClick={handleSend} disabled={chatMutation.isPending} style={{ padding: '0.5rem 0.75rem', borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: chatMutation.isPending ? 'not-allowed' : 'pointer', opacity: chatMutation.isPending ? 0.6 : 1 }}>
               <Send size={18} />
             </button>
           </div>

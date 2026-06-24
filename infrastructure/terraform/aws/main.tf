@@ -9,16 +9,9 @@ terraform {
 
   # Remote state stored in S3 with DynamoDB locking.
   # 1. Create the S3 bucket and DynamoDB table (see backend/aws-bootstrap)
-  # 2. Uncomment the block below and replace <BUCKET_NAME> / <DYNAMODB_TABLE>
-  # 3. Run: terraform init -migrate
-  #
-  # backend "s3" {
-  #   bucket         = "<BUCKET_NAME>"
-  #   key            = "terraform/aws/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "<DYNAMODB_TABLE>"
-  #   encrypt        = true
-  # }
+  # 2. Copy aws/backend.tfbackend.example to backend.tfbackend and fill in values
+  # 3. Run: terraform init -backend-config=backend.tfbackend -migrate
+  backend "s3" {}
 }
 
 provider "aws" {

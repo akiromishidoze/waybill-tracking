@@ -12,14 +12,10 @@ terraform {
   }
 
   # Remote state stored in a GCS bucket.
-  # 1. Run: gsutil mb gs://<BUCKET_NAME>
-  # 2. Uncomment the block below and replace <BUCKET_NAME> / <PREFIX>
-  # 3. Run: terraform init -migrate
-  #
-  # backend "gcs" {
-  #   bucket = "<BUCKET_NAME>"
-  #   prefix = "terraform/gcp"
-  # }
+  # 1. Create the GCS bucket (see backend/gcs-bootstrap)
+  # 2. Copy gcp/backend.tfbackend.example to backend.tfbackend and fill in values
+  # 3. Run: terraform init -backend-config=backend.tfbackend -migrate
+  backend "gcs" {}
 }
 
 provider "google" {

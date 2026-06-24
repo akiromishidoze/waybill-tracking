@@ -45,11 +45,12 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 
 	offset := (page - 1) * limit
 	dataQuery := fmt.Sprintf(`
-		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
-		       recipient_address, recipient_phone, origin, destination, weight,
-		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       carrier_name, carrier_tracking_number, created_at, updated_at
-		FROM waybills%s ORDER BY created_at DESC LIMIT %d OFFSET %d`,
+		SELECT w.id, w.tracking_number, w.shipper_id, w.shipper_name, w.recipient_name,
+		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
+		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
+		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.created_at, w.updated_at
+		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id%s ORDER BY w.created_at DESC LIMIT %d OFFSET %d`,
 		whereClause, limit, offset)
 
 	rows, err := r.db.Query(ctx, dataQuery, args...)
@@ -69,7 +70,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-			&wb.CreatedAt, &wb.UpdatedAt,
+			&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
 		)
 
 		if err != nil {
@@ -88,9 +89,9 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 		       w.recipient_name, w.recipient_address, w.recipient_phone,
 		       w.origin, w.destination, w.weight, w.dimensions, w.service_type,
 		       w.status, w.estimated_delivery, w.actual_delivery,
-		       w.carrier_name, w.carrier_tracking_number,
+		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
 		       w.created_at, w.updated_at
-		FROM waybills w
+		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id
 		JOIN scan_events e ON e.waybill_id = w.id
 		WHERE e.courier_id = $1
 		ORDER BY w.updated_at DESC LIMIT 50`, courierID)
@@ -110,7 +111,7 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-			&wb.CreatedAt, &wb.UpdatedAt,
+			&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -124,17 +125,18 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Waybill, error) {
 	var wb models.Waybill
 	err := r.db.QueryRow(ctx, `
-		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
-		       recipient_address, recipient_phone, origin, destination, weight,
-		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       carrier_name, carrier_tracking_number, created_at, updated_at
-		FROM waybills WHERE id = $1`, id).Scan(
+		SELECT w.id, w.tracking_number, w.shipper_id, w.shipper_name, w.recipient_name,
+		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
+		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
+		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.created_at, w.updated_at
+		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id WHERE w.id = $1`, id).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
 		&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-		&wb.CreatedAt, &wb.UpdatedAt,
+		&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -162,17 +164,18 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 
 	var wb models.Waybill
 	err := r.db.QueryRow(ctx, `
-		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
-		       recipient_address, recipient_phone, origin, destination, weight,
-		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       carrier_name, carrier_tracking_number, created_at, updated_at
-		FROM waybills WHERE tracking_number = $1`, tn).Scan(
+		SELECT w.id, w.tracking_number, w.shipper_id, w.shipper_name, w.recipient_name,
+		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
+		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
+		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.created_at, w.updated_at
+		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id WHERE w.tracking_number = $1`, tn).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
 		&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-		&wb.CreatedAt, &wb.UpdatedAt,
+		&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -217,12 +220,13 @@ func (r *WaybillRepository) Update(ctx context.Context, id string, req models.Up
 			estimated_delivery = $9,
 			carrier_name = $10,
 			carrier_tracking_number = $11,
-			updated_at = $12
-		WHERE id = $13`,
+			team_id = $12,
+			updated_at = $13
+		WHERE id = $14`,
 		req.RecipientName, req.RecipientAddress, req.RecipientPhone,
 		req.Origin, req.Destination, req.Weight, req.Dimensions,
 		req.ServiceType, req.EstimatedDelivery, req.CarrierName,
-		req.CarrierTrackingNumber, time.Now(), id,
+		req.CarrierTrackingNumber, req.TeamID, time.Now(), id,
 	)
 
 	if err != nil {

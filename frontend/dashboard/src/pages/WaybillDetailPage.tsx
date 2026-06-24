@@ -330,32 +330,12 @@ export default function WaybillDetailPage() {
               <DetailRow label="Address" value={wb.recipientAddress} />
             </>
           )}
-          <div style={{ borderTop: '1px solid var(--color-border-subtle)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <Shield size={16} color="#d97706" />
-              <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Team Assignment</span>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <select
-                value={wb.teamId || ''}
-                onChange={(e) => assignTeam.mutate(e.target.value || null)}
-                style={{ flex: 1, padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }}
-                disabled={assignTeam.isPending}
-              >
-                <option value="">Unassigned</option>
-                {(teams || []).map((t: any) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-              {assignTeam.isPending && <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Saving...</span>}
-            </div>
-            {wb.teamName && (
-              <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: 'var(--badge-amber-text)' }}>
-                <Shield size={12} />
-                Currently assigned to <strong>{wb.teamName}</strong>
-              </div>
-            )}
-          </div>
+          <TeamAssignment
+            waybillId={id!}
+            teamId={wb.teamId}
+            teamName={wb.teamName}
+            teams={teams || []}
+          />
         </div>
       </div>
 

@@ -22,7 +22,7 @@ import (
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
-func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -36,11 +36,16 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 	{
 		protected.GET("/auth/me", handlers.MeHandler(db))
+		protected.GET("/teams", teamHandler.List)
+		protected.POST("/teams", teamHandler.Create)
+		protected.PATCH("/teams/:id", teamHandler.Update)
+		protected.DELETE("/teams/:id", teamHandler.Delete)
 		protected.GET("/waybills", waybillHandler.List)
 		protected.GET("/waybills/:id", waybillHandler.Get)
 		protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
 		protected.PATCH("/waybills/:id", waybillHandler.Update)
 		protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+		protected.PATCH("/waybills/:id/assign-team", teamHandler.AssignToWaybill)
 		protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
 		protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
 		protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
@@ -90,6 +95,8 @@ func main() {
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, auditLogger)
+	teamRepo := repository.NewTeamRepository(db)
+	teamHandler := handlers.NewTeamHandler(teamRepo, waybillRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo, cfg.JWTSecret)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
@@ -102,8 +109,8 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
 
-	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)
-	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, attachmentHandler, auditLogHandler, auditLogger)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

@@ -67,6 +67,8 @@ type Waybill struct {
 	ActualDelivery        *time.Time    `json:"actualDelivery,omitempty"`
 	CarrierName           *string       `json:"carrierName,omitempty"`
 	CarrierTrackingNumber *string       `json:"carrierTrackingNumber,omitempty"`
+	TeamID                *string       `json:"teamId,omitempty"`
+	TeamName              string        `json:"teamName,omitempty"`
 	CreatedAt             time.Time     `json:"createdAt"`
 	UpdatedAt             time.Time     `json:"updatedAt"`
 	Events                []ScanEvent   `json:"events,omitempty"`
@@ -119,6 +121,7 @@ type UpdateWaybillRequest struct {
 	EstimatedDelivery     *time.Time `json:"estimatedDelivery,omitempty"`
 	CarrierName           *string    `json:"carrierName,omitempty"`
 	CarrierTrackingNumber *string    `json:"carrierTrackingNumber,omitempty"`
+	TeamID                *string    `json:"teamId,omitempty"`
 }
 
 type StatusUpdateRequest struct {

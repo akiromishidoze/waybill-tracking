@@ -40,43 +40,55 @@ export default function TrackingPage() {
           Enter your tracking number to get real-time status
         </p>
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-          <input
-            type="text"
-            value={trackingNumber}
-            onChange={(e) => setTrackingNumber(e.target.value)}
-            placeholder="e.g. WBT-2024-001234"
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              border: '1px solid var(--color-border)',
-              borderRadius: 8,
-              fontSize: '1rem',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Track
-          </button>
+        <form onSubmit={handleSearch} style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="tracking-number" style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+              Waybill #
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                id="tracking-number"
+                type="text"
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+                placeholder="e.g. WBT-2024-001234"
+                maxLength={32}
+                required
+                aria-describedby={error ? 'tracking-error' : undefined}
+                aria-invalid={error ? 'true' : 'false'}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem 1rem',
+                  border: `1px solid ${error ? 'var(--badge-red-text)' : 'var(--color-border)'}`,
+                  borderRadius: 8,
+                  fontSize: '1rem',
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: '#2563eb',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Track
+              </button>
+            </div>
+          </div>
+          {error && (
+            <p id="tracking-error" role="alert" style={{ color: 'var(--badge-red-text)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+              Shipment not found. Please check your Waybill # and try again.
+            </p>
+          )}
         </form>
 
         {isLoading && <div style={{ maxWidth: 400, margin: '1rem auto', display: 'grid', gap: '0.75rem' }}><SkeletonLine /><SkeletonLine width="80%" /><SkeletonLine width="60%" /></div>}
-        {error && (
-          <p style={{ textAlign: 'center', color: 'var(--badge-red-text)' }}>
-            Shipment not found. Please check your tracking number.
-          </p>
-        )}
 
         {wb && (
           <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem' }}>

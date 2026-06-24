@@ -100,7 +100,7 @@
 
 36. ~~**API versioning** — All routes use `/api/` with no version prefix (`/api/v1/`).~~ ✅ Done — Added `/api/v1/` route mounts to `backend/core-api` and `backend/analytics-api` (with `/api/` kept as a backward-compatible alias). Refactored `core-api/cmd/server/main.go` to share route registration between `/api` and `/api/v1`. Updated `frontend/dashboard/src/services/api.ts` base URL to `/api/v1`, updated the mock interceptor to normalize `/api/v1` paths, and added `/api/v1` to the Vite dev proxy.
 
-37. ~~**Dynamic page titles** — `index.html` title is hardcoded. No `react-helmet-async`.~~ ✅ Done — Added `react-helmet-async` to `frontend/dashboard`, wrapped the app in `HelmetProvider`, created a reusable `PageTitle` component, and applied dynamic titles via the `Layout` component for all protected routes and directly on `LoginPage` and `TrackingPage`.
+37. ~~**Dynamic page titles** — `index.html` title is hardcoded. No `react-helmet-async`.~~ ✅ Done — Created a lightweight `PageTitle` component in `frontend/dashboard/src/components/PageTitle.tsx` that updates `document.title` via `useEffect`. Applied dynamic titles via the `Layout` component for all protected routes and directly on `LoginPage` and `TrackingPage`, avoiding an extra dependency.
 
 38. ~~**PWA support** — No service worker, no manifest, no favicon.~~ ✅ Done — Added a PWA manifest (`public/manifest.json`), a custom SVG favicon (`public/favicon.svg`), `theme-color` and manifest link in `index.html`, and a service worker (`public/service-worker.js`) with install/activate/fetch caching for static assets. Registered the service worker in `src/main.tsx` via `src/utils/registerServiceWorker.ts` (only in production builds).
 

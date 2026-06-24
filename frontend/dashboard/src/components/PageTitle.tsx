@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { useEffect } from 'react'
 
 interface PageTitleProps {
   title: string
@@ -6,9 +6,13 @@ interface PageTitleProps {
 }
 
 export default function PageTitle({ title, suffix = 'Waybill Tracking' }: PageTitleProps) {
-  return (
-    <Helmet>
-      <title>{`${title} — ${suffix}`}</title>
-    </Helmet>
-  )
+  useEffect(() => {
+    const originalTitle = document.title
+    document.title = `${title} — ${suffix}`
+    return () => {
+      document.title = originalTitle
+    }
+  }, [title, suffix])
+
+  return null
 }

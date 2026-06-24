@@ -93,7 +93,19 @@ curl -X POST http://localhost:8080/api/v1/waybills/<id>/scans \
 
 Each scan updates the waybill status and triggers Kafka/Elasticsearch/webhook events.
 
-## 6. Connect E-Commerce Platforms
+## 6. Enable Real-Time GPS Tracking
+
+GPS locations are stored in the `gps_locations` hypertable and exposed via REST/WebSocket.
+
+1. Apply migration `012_gps_locations.sql` (TimescaleDB hypertable).
+2. Verify backend endpoints:
+   - `POST /api/v1/gps/location` — submit a location update.
+   - `GET /api/v1/gps/waybills` — list current waybill positions.
+   - `GET /api/v1/gps/waybills/:id/history` — location history for a waybill.
+3. Use the dashboard **GPS Simulator** page to send test coordinates.
+4. Open the **Real-Time GPS Tracking** map page to view live markers. The frontend uses WebSocket subscriptions to refresh markers automatically.
+
+## 7. Connect E-Commerce Platforms
 
 1. Go to **Integrations > E-Commerce Platform Connectors**.
 2. Click **Add Platform**.

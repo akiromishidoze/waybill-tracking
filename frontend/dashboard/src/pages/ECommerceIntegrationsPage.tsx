@@ -1,8 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { eCommerceService } from '@/services/api'
+import type { ECommercePlatform } from '@/types/waybill'
 import {
   ShoppingCart, RefreshCw, CheckCircle, XCircle, Link2,
-  Globe, Package, AlertTriangle,
+  Globe, Package, AlertTriangle, Plus, X,
 } from 'lucide-react'
 import BackButton from '@/components/BackButton'
 
@@ -23,11 +25,46 @@ function ago(iso: string | null) {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
+const PLATFORM_OPTIONS = ['Shopify', 'Lazada', 'Shopee', 'Amazon', 'WooCommerce', 'Other']
+
 export default function ECommerceIntegrationsPage() {
+  const queryClient = useQueryClient()
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState<Partial<ECommercePlatform>>({
+    platform: '',
+    storeName: '',
+    storeUrl: '',
+    webhookUrl: '',
+  })
+  const [formError, setFormError] = useState('')
+
   const { data, isLoading } = useQuery({
     queryKey: ['ecommerce'],
     queryFn: () => eCommerceService.getDashboard().then(r => r.data),
   })
+
+  const createPlatform = useMutation({
+    mutationFn: (data: Partial<ECommercePlatform>) => eCommerceService.createPlatform(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ecommerce'] })
+      setShowAdd(false)
+      setForm({ platform: '', storeName: '', storeUrl: '', webhookUrl: '' })
+      setFormError('')
+    },
+    onError: (err: any) => {
+      setFormError(err?.response?.data?.error || 'Failed to add platform. Please try again.')
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError('')
+    if (!form.platform || !form.storeName) {
+      setFormError('Platform and store name are required.')
+      return
+    }
+    createPlatform.mutate(form)
+  }
 
   if (isLoading) {
     return (
@@ -49,7 +86,15 @@ export default function ECommerceIntegrationsPage() {
   return (
     <div style={{ padding: '2rem', maxWidth: 1400 }}>
       <BackButton fallback="/dashboard" />
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>E-Commerce Platform Connectors</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>E-Commerce Platform Connectors</h1>
+        <button
+          onClick={() => setShowAdd(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.625rem 1.25rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem' }}
+        >
+          <Plus size={16} /> Add Platform
+        </button>
+      </div>
 
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
@@ -163,6 +208,75 @@ export default function ECommerceIntegrationsPage() {
           </table>
         </div>
       </div>
+
+      {showAdd && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', width: '100%', maxWidth: 480, boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Add E-Commerce Platform</h2>
+              <button onClick={() => setShowAdd(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Platform</label>
+                <select
+                  value={form.platform || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, platform: e.target.value }))}
+                  style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }}
+                >
+                  <option value="">Select platform...</option>
+                  {PLATFORM_OPTIONS.map((p) => (<option key={p} value={p}>{p}</option>))}
+                </select>
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Store Name</label>
+                <input
+                  type="text"
+                  value={form.storeName || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, storeName: e.target.value }))}
+                  placeholder="My Store"
+                  style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem' }}
+                />
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Store URL</label>
+                <input
+                  type="text"
+                  value={form.storeUrl || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, storeUrl: e.target.value }))}
+                  placeholder="https://store.example.com"
+                  style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem' }}
+                />
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Webhook URL</label>
+                <input
+                  type="text"
+                  value={form.webhookUrl || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, webhookUrl: e.target.value }))}
+                  placeholder="https://store.example.com/webhooks/waybill"
+                  style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem' }}
+                />
+              </div>
+              {formError && <p style={{ color: 'var(--badge-red-text)', fontSize: '0.8125rem', marginBottom: '1rem' }}>{formError}</p>}
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setShowAdd(false)} style={{ padding: '0.625rem 1.25rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createPlatform.isPending}
+                  style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
+                >
+                  {createPlatform.isPending ? 'Adding...' : 'Add Platform'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

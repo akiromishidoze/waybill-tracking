@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard, ChatbotDashboard } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, ChatbotDashboard } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -252,6 +252,11 @@ export const carbonFootprintService = {
 
 export const eCommerceService = {
   getDashboard: () => api.get<ECommerceDashboard>('/integrations/ecommerce'),
+  listPlatforms: () => api.get<ECommercePlatform[]>('/integrations/ecommerce/platforms'),
+  createPlatform: (data: Partial<ECommercePlatform>) => api.post<ECommercePlatform>('/integrations/ecommerce/platforms', data),
+  updatePlatform: (id: string, data: Partial<ECommercePlatform>) => api.patch<ECommercePlatform>(`/integrations/ecommerce/platforms/${id}`, data),
+  deletePlatform: (id: string) => api.delete(`/integrations/ecommerce/platforms/${id}`),
+  listSyncLogs: () => api.get<ECommerceSyncLog[]>('/integrations/ecommerce/sync-logs'),
 }
 
 export const whiteLabelService = {

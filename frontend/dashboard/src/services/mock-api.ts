@@ -574,7 +574,7 @@ const db: Record<string, any[]> = {
 let dbSettings: AppSettings = { ...seedSettings }
 
 export function installMockInterceptor(api: AxiosInstance) {
-  api.interceptors.request.use((config: any) => {
+  api.interceptors.request.use(async (config: any) => {
     let url: string = (config.url || '').replace(/^\/api(?:\/v1)?/, '') || '/'
     const { method } = config
 
@@ -673,6 +673,17 @@ export function installMockInterceptor(api: AxiosInstance) {
     if (method === 'post' && url === '/gps/location') {
       const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
       mock({ id: uid(), waybillId: body.waybillId, latitude: body.latitude, longitude: body.longitude, speed: body.speed, heading: body.heading, recordedAt: new Date().toISOString() })
+      return config
+    }
+    if (method === 'post' && url === '/waybills/import') {
+      const file = config.data?.get?.('file') as File | undefined
+      let created = 0
+      if (file && typeof file.text === 'function') {
+        const text = await file.text()
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '')
+        created = Math.max(0, lines.length - 1)
+      }
+      mock({ created, failed: 0, errors: [] })
       return config
     }
     if (method === 'get' && key === 'settings') {

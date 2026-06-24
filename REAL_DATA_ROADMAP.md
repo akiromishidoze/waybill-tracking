@@ -199,6 +199,6 @@ Before real users interact with the system:
 - [ ] E-commerce platform connected.
 - [ ] White-label portal configured and enabled.
 - [ ] Teams created and assigned.
-- [ ] Bulk import tested (when implemented).
+- [x] Bulk import page and backend endpoint implemented; works with mock data in dev mode.
 - [ ] External webhooks/integrations connected.
 - [ ] Data flow verified end-to-end.

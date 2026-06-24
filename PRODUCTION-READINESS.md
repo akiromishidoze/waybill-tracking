@@ -106,7 +106,7 @@
 
 39. ~~**Backup/restore scripts** — No automated database backup jobs or documented restore procedures.~~ ✅ Done — Added `scripts/backup-db.sh` and `scripts/restore-db.sh` for PostgreSQL, with configurable host/port/credentials via environment variables, timestamped gzip backups, and an interactive confirmation prompt on restore. Documented usage in `scripts/README.md`.
 
-40. **Input sanitization** — File uploads accept any type without validation. Search input unsanitized.
+40. ~~**Input sanitization** — File uploads accept any type without validation. Search input unsanitized.~~ ✅ Done — Added `internal/utils/sanitize.go` with helpers for sanitizing search terms and validating file names, sizes, and MIME types. Applied sanitization to the waybill search endpoint (`handlers/waybill_handler.go`) and the attachment upload endpoint (`handlers/attachment_handler.go`). Added unit tests for the sanitization helpers and handler validation.
 
 41. **K8s secret management** — Placeholder values in `infrastructure/k8s/secrets.yaml`. No Vault/SealedSecrets.
 

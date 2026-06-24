@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/utils"
 )
 
 type Attachment struct {
@@ -66,8 +67,18 @@ func (h *AttachmentHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	if req.FileSize > 10*1024*1024 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file size exceeds 10MB limit"})
+	if err := utils.ValidateFileSize(req.FileSize, 10*1024*1024); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := utils.ValidateFileName(req.FileName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := utils.ValidateFileType(req.FileType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

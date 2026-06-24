@@ -32,7 +32,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 	var args []interface{}
 
 	if search != "" {
-		whereClause = ` WHERE tracking_number ILIKE '%' || $1 || '%' OR shipper_name ILIKE '%' || $1 || '%' OR recipient_name ILIKE '%' || $1 || '%'`
+		whereClause = ` WHERE tracking_number ILIKE '%' || $1 || '%' ESCAPE '\\' OR shipper_name ILIKE '%' || $1 || '%' ESCAPE '\\' OR recipient_name ILIKE '%' || $1 || '%' ESCAPE '\\'`
 		args = append(args, search)
 	}
 

@@ -10,6 +10,7 @@ import (
 	"github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	"github.com/waybill-tracking/core-api/internal/utils"
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
@@ -28,7 +29,7 @@ func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, h
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
-	search := c.Query("search")
+	search := utils.SanitizeSearchTerm(c.Query("search"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 

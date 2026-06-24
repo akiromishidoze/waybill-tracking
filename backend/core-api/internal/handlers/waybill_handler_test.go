@@ -227,3 +227,18 @@ func TestCreateWaybill_EmptyBody(t *testing.T) {
 		t.Errorf("expected 400 for empty body, got %d", w.Code)
 	}
 }
+
+func TestSanitizeSearchTerm(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	h := NewWaybillHandler(nil, nil, nil)
+	r := gin.New()
+	r.GET("/waybills", h.List)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/waybills?search=%25drop+table", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("expected 500 when repo is nil, got %d", w.Code)
+	}
+}

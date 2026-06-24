@@ -92,7 +92,7 @@
 
 ## 🟡 Low (Polish / Nice-to-have)
 
-33. **CSV export** — Excel export exists via analytics API. No CSV export endpoint.
+33. ~~**CSV export** — Excel export exists via analytics API. No CSV export endpoint.~~ ✅ Done — Added `GET /api/reports/export/csv` to `backend/analytics-api/app/api/reports.py` with the same date-range filter and columns as the Excel export. Refactored shared row-fetching and header logic, and added tests in `tests/test_reports.py`.
 
 34. **No e2e tests** — No Playwright/Cypress configuration.
 

@@ -104,7 +104,7 @@
 
 38. ~~**PWA support** — No service worker, no manifest, no favicon.~~ ✅ Done — Added a PWA manifest (`public/manifest.json`), a custom SVG favicon (`public/favicon.svg`), `theme-color` and manifest link in `index.html`, and a service worker (`public/service-worker.js`) with install/activate/fetch caching for static assets. Registered the service worker in `src/main.tsx` via `src/utils/registerServiceWorker.ts` (only in production builds).
 
-39. **Backup/restore scripts** — No automated database backup jobs or documented restore procedures.
+39. ~~**Backup/restore scripts** — No automated database backup jobs or documented restore procedures.~~ ✅ Done — Added `scripts/backup-db.sh` and `scripts/restore-db.sh` for PostgreSQL, with configurable host/port/credentials via environment variables, timestamped gzip backups, and an interactive confirmation prompt on restore. Documented usage in `scripts/README.md`.
 
 40. **Input sanitization** — File uploads accept any type without validation. Search input unsanitized.
 

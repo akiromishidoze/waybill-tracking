@@ -112,6 +112,6 @@
 
 42. ~~**Helmet + compression** — No `helmet` for HTTP security headers. No gzip/brotli compression middleware.~~ ✅ Done — Added `internal/middleware/security.go` (CSP, HSTS over TLS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy) and `internal/middleware/gzip.go` (gzip compression for responses >= 1KB when the client accepts gzip). Wired both into `cmd/server/main.go` and added unit tests in `internal/middleware/security_test.go` and `internal/middleware/gzip_test.go`.
 
-43. **API documentation** — No Postman collection or developer portal beyond basic OpenAPI.
+43. ~~**API documentation** — No Postman collection or developer portal beyond basic OpenAPI.~~ ✅ Done — Created a comprehensive Postman collection (`backend/core-api/Waybill Tracking API.postman_collection.json`) covering core-api auth, waybills, tracking, attachments, admin endpoints, and analytics-api stats, SLA, anomalies, predictive ETA, and Excel/CSV exports. Added `backend/API.md` with usage instructions and collection-variable documentation. The analytics-api already provides FastAPI OpenAPI docs at `/docs`.
 
 44. **Terraform remote state** — `infrastructure/terraform/` configs store state locally. No S3/GCS backend.

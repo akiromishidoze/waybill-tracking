@@ -1,0 +1,338 @@
+{
+  "info": {
+    "name": "Waybill Tracking API",
+    "description": "Postman collection for the Waybill Tracking platform (core-api and analytics-api). Set the `baseUrl` and `token` collection variables before running requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password\",\n  \"role\": \"SHIPPER\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Waybills",
+      "item": [
+        {
+          "name": "List Waybills",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/waybills?search=&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "waybills"],
+              "query": [
+                {"key": "search", "value": ""},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Waybill",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/waybills/{{waybillId}}"
+          }
+        },
+        {
+          "name": "Create Waybill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shipper_name\": \"Acme Corp\",\n  \"recipient_name\": \"Jane Doe\",\n  \"origin\": \"New York, NY\",\n  \"destination\": \"Los Angeles, CA\",\n  \"weight_kg\": 2.5\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/waybills"
+          }
+        },
+        {
+          "name": "Update Waybill Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"location\": \"Memphis, TN\",\n  \"notes\": \"Departed origin hub\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/waybills/{{waybillId}}/status"
+          }
+        },
+        {
+          "name": "Delete Waybill",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/waybills/{{waybillId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tracking",
+      "item": [
+        {
+          "name": "Public Track",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/track/{{trackingNumber}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "item": [
+        {
+          "name": "List Attachments",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/waybills/{{waybillId}}/attachments"
+          }
+        },
+        {
+          "name": "Upload Attachment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "file", "type": "file", "src": "example.pdf"}
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/waybills/{{waybillId}}/attachments"
+          }
+        },
+        {
+          "name": "Get Attachment",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/attachments/{{attachmentId}}"
+          }
+        },
+        {
+          "name": "Delete Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/attachments/{{attachmentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{baseUrl}}/api/v1/users"
+          }
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"OPS\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/role"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+          }
+        },
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit-logs?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "audit-logs"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "50"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{analyticsUrl}}/api/v1/analytics/stats"
+          }
+        },
+        {
+          "name": "SLA Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{analyticsUrl}}/api/v1/analytics/sla?from_date=2024-01-01&to_date=2024-12-31",
+              "host": ["{{analyticsUrl}}"],
+              "path": ["api", "v1", "analytics", "sla"],
+              "query": [
+                {"key": "from_date", "value": "2024-01-01"},
+                {"key": "to_date", "value": "2024-12-31"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Anomalies",
+          "request": {
+            "method": "GET",
+            "url": "{{analyticsUrl}}/api/v1/analytics/anomalies"
+          }
+        },
+        {
+          "name": "Predict ETA",
+          "request": {
+            "method": "GET",
+            "url": "{{analyticsUrl}}/api/v1/analytics/predict-eta/{{waybillId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Export Excel",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{analyticsUrl}}/api/v1/reports/export?from_date=2024-01-01&to_date=2024-12-31",
+              "host": ["{{analyticsUrl}}"],
+              "path": ["api", "v1", "reports", "export"],
+              "query": [
+                {"key": "from_date", "value": "2024-01-01"},
+                {"key": "to_date", "value": "2024-12-31"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export CSV",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{analyticsUrl}}/api/v1/reports/export/csv?from_date=2024-01-01&to_date=2024-12-31",
+              "host": ["{{analyticsUrl}}"],
+              "path": ["api", "v1", "reports", "export", "csv"],
+              "query": [
+                {"key": "from_date", "value": "2024-01-01"},
+                {"key": "to_date", "value": "2024-12-31"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Core Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080", "type": "string"},
+    {"key": "analyticsUrl", "value": "http://localhost:8000", "type": "string"},
+    {"key": "token", "value": "", "type": "string"},
+    {"key": "refreshToken", "value": "", "type": "string"},
+    {"key": "waybillId", "value": "", "type": "string"},
+    {"key": "trackingNumber", "value": "", "type": "string"},
+    {"key": "attachmentId", "value": "", "type": "string"},
+    {"key": "userId", "value": "", "type": "string"}
+  ]
+}

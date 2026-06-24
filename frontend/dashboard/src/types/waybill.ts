@@ -612,33 +612,33 @@ export interface IotSensorDashboard {
   }[]
 }
 
-export interface ChatbotMessage {
+export interface GPSLocation {
   id: string
-  role: 'user' | 'bot'
-  content: string
-  timestamp: string
-  intent?: string
+  waybillId: string
+  courierId?: string
+  latitude: number
+  longitude: number
+  accuracy?: number
+  altitude?: number
+  speed?: number
+  heading?: number
+  batteryLevel?: number
+  recordedAt: string
+  createdAt: string
 }
 
-export interface ChatbotConversation {
+export interface WaybillGPSView {
   id: string
-  customerName: string
-  query: string
-  intent: string
-  resolved: boolean
-  messages: number
-  timestamp: string
-}
-
-export interface ChatbotDashboard {
-  summary: {
-    totalConversations: number
-    totalMessages: number
-    avgSatisfaction: number
-    resolvedWithoutAgent: number
-    activeNow: number
-  }
-  recentConversations: ChatbotConversation[]
-  sampleConversation: ChatbotMessage[]
-  quickReplies: { label: string; response: string }[]
+  trackingNumber: string
+  recipientName: string
+  status: string
+  origin: string
+  destination: string
+  lastLocation: string
+  latitude: number
+  longitude: number
+  speed?: number
+  heading?: number
+  recordedAt: string
+  slaBreached: boolean
 }

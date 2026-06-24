@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -269,6 +269,13 @@ export const whiteLabelService = {
 
 export const iotSensorService = {
   getDashboard: () => api.get<IotSensorDashboard>('/integrations/iot-sensors'),
+}
+
+export const gpsService = {
+  createLocation: (data: Partial<GPSLocation>) => api.post<GPSLocation>('/gps/location', data),
+  listCurrent: () => api.get<WaybillGPSView[]>('/gps/waybills'),
+  getHistory: (id: string) => api.get<GPSLocation[]>(`/gps/waybills/${id}/history`),
+  getLatest: (id: string) => api.get<GPSLocation>(`/gps/waybills/${id}/latest`),
 }
 
 export const codService = {

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import { useQuery } from '@tanstack/react-query'
-import { analyticsService } from '@/services/api'
+import { gpsService } from '@/services/api'
+import type { WaybillGPSView } from '@/types/waybill'
 import { MapPin, Truck, AlertTriangle } from 'lucide-react'
 import L from 'leaflet'
 import PageContainer from '@/components/PageContainer'
@@ -33,13 +34,32 @@ const getStatusColor = (status: string) => {
 }
 
 export default function MapViewPage() {
-  const [selectedWaybill, setSelectedWaybill] = useState<any>(null)
+  const [selectedWaybill, setSelectedWaybill] = useState<WaybillGPSView | null>(null)
 
-  const { data: waybills } = useQuery({
-    queryKey: ['waybills-map'],
-    queryFn: () => analyticsService.getWaybillsMap().then((r) => r.data),
+  const { data: waybills, refetch } = useQuery({
+    queryKey: ['gps-waybills'],
+    queryFn: () => gpsService.listCurrent().then((r) => r.data),
     refetchInterval: 15000,
   })
+
+  useEffect(() => {
+    const wsUrl = `${import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:')}//${window.location.host}/ws`
+    const socket = new WebSocket(wsUrl)
+    socket.onopen = () => {
+      socket.send(JSON.stringify({ action: 'subscribe', trackingNumber: '*' }))
+    }
+    socket.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data)
+        if (msg.type === 'gps_update') {
+          refetch()
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return () => socket.close()
+  }, [refetch])
 
   function MapEvents() {
     useMapEvents({
@@ -69,10 +89,10 @@ export default function MapViewPage() {
 
             <MapEvents />
 
-            {waybills?.map((wb: any) => (
+            {waybills?.map((wb: WaybillGPSView) => (
               <Marker
                 key={wb.id}
-                position={wb.currentCoords}
+                position={[wb.latitude, wb.longitude]}
                 icon={icon}
                 eventHandlers={{ click: () => setSelectedWaybill(wb) }}
               >
@@ -125,7 +145,7 @@ export default function MapViewPage() {
               </div>
               <div>
                 <div className="text-slate-500">Last Update</div>
-                <div className="font-medium">{new Date(selectedWaybill.lastUpdate).toLocaleTimeString()}</div>
+                <div className="font-medium">{new Date(selectedWaybill.recordedAt).toLocaleTimeString()}</div>
               </div>
             </div>
           </div>

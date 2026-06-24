@@ -38,6 +38,7 @@ import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
 import WhiteLabelPortalPage from './pages/WhiteLabelPortalPage'
 import WaybillImportPage from './pages/WaybillImportPage'
 import IotSensorPage from './pages/IotSensorPage'
+import GPSSimulatorPage from './pages/GPSSimulatorPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import UnauthorizedPage from './pages/UnauthorizedPage'
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/webhooks" element={<WebhooksPage />} />
           </Route>
           <Route path="/map" element={<MapViewPage />} />
+          <Route path="/gps-simulator" element={<GPSSimulatorPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/escalations" element={<EscalationsPage />} />
           <Route path="/driver-app" element={<DriverAppPage />} />

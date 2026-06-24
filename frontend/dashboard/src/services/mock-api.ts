@@ -1,5 +1,5 @@
 import type { AxiosInstance } from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, AppSettings, Team, Attachment, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard, ChatbotDashboard } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, AppSettings, Team, Attachment, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard } from '@/types/waybill'
 
 const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -448,32 +448,6 @@ const seedIotDashboard: IotSensorDashboard = {
   ],
 }
 
-const seedChatbotDashboard: ChatbotDashboard = {
-  summary: { totalConversations: 3840, totalMessages: 28400, avgSatisfaction: 4.3, resolvedWithoutAgent: 72, activeNow: 18 },
-  recentConversations: [
-    { id: 'conv-001', customerName: 'Juan Dela Cruz', query: 'Where is my package LBC-2024-1001?', intent: 'tracking_status', resolved: true, messages: 4, timestamp: ago(1) },
-    { id: 'conv-002', customerName: 'Maria Santos', query: 'Can I change delivery address?', intent: 'change_address', resolved: true, messages: 6, timestamp: ago(2) },
-    { id: 'conv-003', customerName: 'Antonio Lopez', query: 'What is the delivery fee for Davao?', intent: 'pricing', resolved: true, messages: 3, timestamp: ago(3) },
-    { id: 'conv-004', customerName: 'Elena Martinez', query: 'My parcel is delayed, what happened?', intent: 'delay_reason', resolved: false, messages: 8, timestamp: ago(5) },
-    { id: 'conv-005', customerName: 'Ricardo Dimagiba', query: 'When will my shipment arrive?', intent: 'eta_query', resolved: true, messages: 2, timestamp: ago(6) },
-    { id: 'conv-006', customerName: 'Grace Villar', query: 'I need a proof of delivery', intent: 'pod_request', resolved: false, messages: 5, timestamp: ago(8) },
-  ],
-  sampleConversation: [
-    { id: 'msg-001', role: 'user', content: 'Where is my package LBC-2024-1001?', timestamp: ago(1) },
-    { id: 'msg-002', role: 'bot', content: 'I found your shipment **LBC-2024-1001**. It is currently **IN TRANSIT** and estimated to arrive by **June 25, 2026**. The last scan was at **Pasig City Hub** at **2:30 PM**.', timestamp: ago(1), intent: 'tracking_status' },
-    { id: 'msg-003', role: 'user', content: 'Can you send me the tracking link?', timestamp: ago(1) },
-    { id: 'msg-004', role: 'bot', content: 'Here is your real-time tracking link: [Track LBC-2024-1001](https://track.waybilltrack.com/LBC-2024-1001). You can also opt-in for SMS updates by replying YES.', timestamp: ago(1), intent: 'tracking_link' },
-    { id: 'msg-005', role: 'user', content: 'Thank you!', timestamp: ago(1) },
-    { id: 'msg-006', role: 'bot', content: 'You\'re welcome, Juan! If you need anything else, just ask. 😊', timestamp: ago(1) },
-  ],
-  quickReplies: [
-    { label: 'Track my package', response: 'Please provide your tracking number and I will check the status for you.' },
-    { label: 'Delivery ETA', response: 'I can check the estimated delivery time. Please share your tracking number.' },
-    { label: 'Change address', response: 'To change your delivery address, please provide your tracking number and the new address.' },
-    { label: 'File a claim', response: 'I can help you start a claim. Please share your tracking number and a brief description of the issue.' },
-  ],
-}
-
 const seedCarbonFootprint: CarbonFootprint = {
   summary: { totalEmissions: 28450, avgPerShipment: 38.2, totalShipments: 745, offsetCredits: 5000, netEmissions: 23450, vsLastMonth: -5.2 },
   byCarrier: [
@@ -712,10 +686,6 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
     if (method === 'get' && key === 'integrations/iot-sensors') {
       mock(seedIotDashboard)
-      return config
-    }
-    if (method === 'get' && key === 'integrations/chatbot') {
-      mock(seedChatbotDashboard)
       return config
     }
     if (method === 'get' && key === 'analytics/sla') {

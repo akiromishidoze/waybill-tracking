@@ -21,6 +21,7 @@ const navGroups: NavGroup[] = [
       { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
       { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
       { to: '/map', label: 'GPS Tracking', icon: MapPin },
+      { to: '/gps-simulator', label: 'GPS Simulator', icon: Navigation },
       { to: '/geofence', label: 'Geofence Events', icon: Map },
       { to: '/roadmap/tracking', label: 'Roadmap', icon: Eye },
     ],

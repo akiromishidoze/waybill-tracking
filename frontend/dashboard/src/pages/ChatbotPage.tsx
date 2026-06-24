@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { chatbotService } from '@/services/api'
 import {
   MessageSquare, Bot, Send, ThumbsUp, Clock, CheckCircle, Users,
-  XCircle, Zap,
+  XCircle, Zap, Trash2,
 } from 'lucide-react'
 import BackButton from '@/components/BackButton'
+
+const CHAT_STORAGE_KEY = 'waybill-chatbot-conversation'
 
 function ago(iso: string | null) {
   if (!iso) return '—'
@@ -28,7 +30,19 @@ const INTENT_COLORS: Record<string, string> = {
 
 export default function ChatbotPage() {
   const [input, setInput] = useState('')
-  const [chat, setChat] = useState<{ role: string; content: string }[]>([])
+  const [chat, setChat] = useState<{ role: string; content: string }[]>(() => {
+    try {
+      const saved = localStorage.getItem(CHAT_STORAGE_KEY)
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chat))
+  }, [chat])
 
   const { data, isLoading } = useQuery({
     queryKey: ['chatbot'],
@@ -45,12 +59,21 @@ export default function ChatbotPage() {
     },
   })
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chat, chatMutation.isPending])
+
   const handleSend = () => {
     if (!input.trim() || chatMutation.isPending) return
     const message = input.trim()
     setChat(prev => [...prev, { role: 'user', content: message }])
     chatMutation.mutate(message)
     setInput('')
+  }
+
+  const clearConversation = () => {
+    setChat([])
+    localStorage.removeItem(CHAT_STORAGE_KEY)
   }
 
   if (isLoading) {
@@ -98,15 +121,22 @@ export default function ChatbotPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Chatbot UI */}
-        <div style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', height: 560 }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Bot size={20} color="var(--color-primary)" />
             <span style={{ fontWeight: 600 }}>Shipment Assistant</span>
             <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--status-green)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-green)', display: 'inline-block' }} /> Online
             </span>
+            <button
+              onClick={clearConversation}
+              title="Clear conversation"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}
+            >
+              <Trash2 size={12} /> Clear
+            </button>
           </div>
-          <div style={{ flex: 1, padding: '1rem', height: 360, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+          <div style={{ flex: 1, minHeight: 0, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
             {sampleConversation.map(msg => (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{
@@ -145,6 +175,7 @@ export default function ChatbotPage() {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
           <div style={{ padding: '0.75rem 1rem', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '0.5rem' }}>
             <input

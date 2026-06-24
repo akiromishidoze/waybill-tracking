@@ -110,7 +110,7 @@
 
 41. ~~**K8s secret management** — Placeholder values in `infrastructure/k8s/secrets.yaml`. No Vault/SealedSecrets.~~ ✅ Done — Replaced hardcoded base64 placeholder values in `infrastructure/k8s/secrets.yaml` with `stringData` placeholders and clear annotations. Added `secrets.yaml.example` as a reference, `sealed-secrets.yaml.example` for Bitnami SealedSecrets usage, and `infrastructure/k8s/README.md` documenting SealedSecrets, External Secrets Operator, SOPS, and manual workflows.
 
-42. **Helmet + compression** — No `helmet` for HTTP security headers. No gzip/brotli compression middleware.
+42. ~~**Helmet + compression** — No `helmet` for HTTP security headers. No gzip/brotli compression middleware.~~ ✅ Done — Added `internal/middleware/security.go` (CSP, HSTS over TLS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy) and `internal/middleware/gzip.go` (gzip compression for responses >= 1KB when the client accepts gzip). Wired both into `cmd/server/main.go` and added unit tests in `internal/middleware/security_test.go` and `internal/middleware/gzip_test.go`.
 
 43. **API documentation** — No Postman collection or developer portal beyond basic OpenAPI.
 

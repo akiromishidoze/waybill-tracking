@@ -97,7 +97,9 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
+	r.Use(middleware.Gzip())
 
 	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)
 	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)

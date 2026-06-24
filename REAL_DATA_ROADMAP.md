@@ -114,7 +114,7 @@ GPS locations are stored in the `gps_locations` hypertable and exposed via REST/
 
 Next step: implement a periodic sync worker or webhook listener that reads orders from the platform API and creates corresponding waybills.
 
-## 7. Configure the White-Label Portal
+## 8. Configure the White-Label Portal
 
 1. Go to **Integrations > White-Label Portal**.
 2. Click **Edit Configuration**.
@@ -122,14 +122,14 @@ Next step: implement a periodic sync worker or webhook listener that reads order
 4. Enable the portal.
 5. Real customers can then use the public tracking URL to look up their waybills.
 
-## 8. Add Teams and Assign Waybills
+## 9. Add Teams and Assign Waybills
 
 1. Create teams via `POST /api/v1/teams` or the UI.
 2. Assign waybills to teams via `PATCH /api/v1/waybills/<id>/assign-team`.
 
 This routes operational work to the correct team.
 
-## 9. Upload Attachments
+## 10. Upload Attachments
 
 For proof of delivery, invoices, or damage photos:
 
@@ -139,7 +139,7 @@ curl -X POST http://localhost:8080/api/v1/waybills/<waybillId>/attachments \
   -F "file=@/path/to/pod.pdf"
 ```
 
-## 10. Import Bulk Data
+## 11. Import Bulk Data
 
 For real-world migration, add a CSV/Excel import feature:
 
@@ -148,7 +148,7 @@ For real-world migration, add a CSV/Excel import feature:
 - Required columns: `origin`, `destination`, `recipientName`, `recipientAddress`, `recipientPhone`, `carrierName`, `serviceType`.
 - Optional columns: `trackingNumber`, `recipientEmail`, `referenceNumber`, `teamId`.
 
-## 11. Connect External Systems
+## 12. Connect External Systems
 
 Enable real data flow from external systems:
 
@@ -157,7 +157,7 @@ Enable real data flow from external systems:
 - **E-commerce webhooks** — Shopify/Lazada/Shopee send order events to your webhook URL, which creates waybills automatically.
 - **Analytics** — the analytics service reads directly from PostgreSQL, so it stays accurate as data is inserted.
 
-## 12. Verify Data Flow
+## 13. Verify Data Flow
 
 After inserting real data, confirm:
 
@@ -170,7 +170,7 @@ After inserting real data, confirm:
 - Audit logs are recorded.
 - Analytics dashboard reflects the new data.
 
-## 13. Production Hardening
+## 14. Production Hardening
 
 Before real users interact with the system:
 
@@ -187,10 +187,15 @@ Before real users interact with the system:
 ## Quick Checklist
 
 - [ ] Infrastructure services are running.
+  - **Current blocker:** PostgreSQL password authentication fails when the backend starts.
 - [ ] Database migrations are applied.
+  - `001_init.sql` and `012_gps_locations.sql` are ready.
 - [ ] Admin user exists.
 - [ ] First real waybill created via UI or API.
 - [ ] Scan events added for that waybill.
+- [x] GPS tracking endpoints, migration, and dashboard pages are implemented.
+  - `POST /api/v1/gps/location`, `GET /api/v1/gps/waybills`, WebSocket live updates.
+  - Frontend uses CartoDB (free) tiles.
 - [ ] E-commerce platform connected.
 - [ ] White-label portal configured and enabled.
 - [ ] Teams created and assigned.

@@ -1,38 +1,111 @@
-import { io, Socket } from 'socket.io-client'
+const RECONNECT_DELAY_MS = 1000
 
-let socket: Socket | null = null
+let socket: WebSocket | null = null
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+let activeToken: string | undefined
+const subscribedTrackingNumbers = new Set<string>()
+const callbacks = new Map<string, Set<(data: unknown) => void>>()
 
-export function connectSocket(token?: string): Socket {
-  if (socket?.connected) return socket
+function buildWebSocketUrl(token?: string): string {
+  let base = import.meta.env.VITE_WS_URL as string | undefined
+  if (!base) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    base = `${protocol}//${window.location.host}/ws`
+  }
+  if (!token) return base
+  const separator = base.includes('?') ? '&' : '?'
+  return `${base}${separator}token=${encodeURIComponent(token)}`
+}
 
-  socket = io(import.meta.env.VITE_WS_URL || '/ws', {
-    transports: ['websocket'],
-    auth: { token },
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: Infinity,
-  })
+function sendMessage(payload: unknown) {
+  if (socket?.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(payload))
+  }
+}
 
-  socket.on('connect', () => console.log('[WS] connected'))
-  socket.on('disconnect', () => console.log('[WS] disconnected'))
-  socket.on('error', (err) => console.error('[WS] error', err))
+function reconnect() {
+  if (reconnectTimer) return
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null
+    connectSocket(activeToken)
+  }, RECONNECT_DELAY_MS)
+}
 
-  return socket
+export function connectSocket(token?: string): WebSocket {
+  activeToken = token
+  if (socket?.readyState === WebSocket.OPEN) return socket
+
+  const ws = new WebSocket(buildWebSocketUrl(token))
+  socket = ws
+
+  ws.onopen = () => {
+    console.log('[WS] connected')
+    subscribedTrackingNumbers.forEach((tn) => {
+      sendMessage({ action: 'subscribe', trackingNumber: tn })
+    })
+  }
+
+  ws.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data)
+      if (msg.type === 'waybill_update' && msg.trackingNumber) {
+        const cbs = callbacks.get(msg.trackingNumber)
+        cbs?.forEach((cb) => cb(msg.data))
+      }
+    } catch (err) {
+      console.error('[WS] failed to parse message', err)
+    }
+  }
+
+  ws.onerror = (err) => {
+    console.error('[WS] error', err)
+  }
+
+  ws.onclose = () => {
+    console.log('[WS] disconnected')
+    reconnect()
+  }
+
+  return ws
 }
 
 export function disconnectSocket(): void {
-  socket?.disconnect()
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  socket?.close()
   socket = null
+  subscribedTrackingNumbers.clear()
+  callbacks.clear()
 }
 
 export function subscribeToWaybill(
   trackingNumber: string,
-  callback: (data: any) => void,
+  callback: (data: unknown) => void,
 ): () => void {
-  const s = socket || connectSocket()
-  s.emit('subscribe', { trackingNumber })
-  s.on(`waybill:${trackingNumber}`, callback)
-  return () => s.off(`waybill:${trackingNumber}`)
+  const s = connectSocket(activeToken)
+
+  if (!subscribedTrackingNumbers.has(trackingNumber)) {
+    subscribedTrackingNumbers.add(trackingNumber)
+    callbacks.set(trackingNumber, new Set())
+    if (s.readyState === WebSocket.OPEN) {
+      sendMessage({ action: 'subscribe', trackingNumber })
+    }
+  }
+
+  callbacks.get(trackingNumber)!.add(callback)
+
+  return () => {
+    const cbs = callbacks.get(trackingNumber)
+    if (!cbs) return
+    cbs.delete(callback)
+    if (cbs.size === 0) {
+      callbacks.delete(trackingNumber)
+      subscribedTrackingNumbers.delete(trackingNumber)
+      sendMessage({ action: 'unsubscribe', trackingNumber })
+    }
+  }
 }
 
 export { socket }

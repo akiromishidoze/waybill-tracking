@@ -10,6 +10,8 @@ import (
 type Client struct {
 	Conn           *websocket.Conn
 	Subscriptions  map[string]bool
+	UserID         string
+	UserRole       string
 	mu             sync.Mutex
 }
 

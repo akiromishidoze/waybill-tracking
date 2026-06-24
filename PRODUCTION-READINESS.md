@@ -94,9 +94,9 @@
 
 33. ~~**CSV export** — Excel export exists via analytics API. No CSV export endpoint.~~ ✅ Done — Added `GET /api/reports/export/csv` to `backend/analytics-api/app/api/reports.py` with the same date-range filter and columns as the Excel export. Refactored shared row-fetching and header logic, and added tests in `tests/test_reports.py`.
 
-34. **No e2e tests** — No Playwright/Cypress configuration.
+34. ~~**No e2e tests** — No Playwright/Cypress configuration.~~ ✅ Done — Added Playwright to `frontend/dashboard`: `playwright.config.ts`, `e2e/smoke.spec.ts`, `.gitignore` for test artifacts, and `test:e2e` / `test:e2e:ui` scripts in `package.json`. Note: `npm install` is needed to download Playwright browsers once network is available.
 
-35. **WebSocket authentication** — `/ws` endpoint has no auth. Any client can connect and subscribe to tracking events.
+35. ~~**WebSocket authentication** — `/ws` endpoint has no auth. Any client can connect and subscribe to tracking events.~~ ✅ Done — Secured `GET /ws` in `backend/core-api`: it now validates a JWT from the `token` query parameter or `Authorization: Bearer ...` header before upgrading the connection. Unauthenticated requests receive HTTP 401. Added `UserID` and `UserRole` to the `Client` struct, updated `main.go` to pass the JWT secret, and added tests in `internal/handlers/ws_handler_test.go`. Also aligned the frontend by replacing `socket.io-client` with native `WebSocket` in `src/services/socket.ts`, passing the token as a query parameter, and parsing the backend's `waybill_update` messages.
 
 36. **API versioning** — All routes use `/api/` with no version prefix (`/api/v1/`).
 

@@ -54,7 +54,7 @@ func main() {
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, auditLogger)
-	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo)
+	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo, cfg.JWTSecret)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 

@@ -123,8 +123,7 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 
 	h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
 
-	userName, _ := c.Get("userName")
-	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+	h.auditLogger.Log(c.Request.Context(), userID.(string), shipperName, c.GetString("userRole"),
 		"WAYBILL_CREATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" created", c.ClientIP())
 
 	c.JSON(http.StatusCreated, wb)
@@ -221,16 +220,16 @@ func (h *WaybillHandler) ImportCSV(c *gin.Context) {
 			RecipientName:    recipientName,
 			RecipientAddress: recipientAddress,
 			RecipientPhone:   recipientPhone,
-			RecipientEmail:   get("recipientemail"),
 			Origin:           origin,
 			Destination:      destination,
 			Weight:           weight,
 			Dimensions:       get("dimensions"),
 			ServiceType:      get("servicetype"),
-			CarrierName:      get("carriername"),
-			ReferenceNumber:  get("referencenumber"),
 		}
 
+		if carrierName := get("carriername"); carrierName != "" {
+			wb.CarrierName = &carrierName
+		}
 		if teamID := get("teamid"); teamID != "" {
 			wb.TeamID = &teamID
 		}

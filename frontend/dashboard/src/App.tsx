@@ -38,7 +38,6 @@ import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
 import WhiteLabelPortalPage from './pages/WhiteLabelPortalPage'
 import WaybillImportPage from './pages/WaybillImportPage'
 import IotSensorPage from './pages/IotSensorPage'
-import ChatbotPage from './pages/ChatbotPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import UnauthorizedPage from './pages/UnauthorizedPage'
@@ -92,7 +91,6 @@ export default function App() {
           <Route path="/integrations/ecommerce" element={<ECommerceIntegrationsPage />} />
           <Route path="/integrations/white-label" element={<WhiteLabelPortalPage />} />
           <Route path="/integrations/iot-sensors" element={<IotSensorPage />} />
-          <Route path="/integrations/chatbot" element={<ChatbotPage />} />
           <Route path="/roadmap/tracking" element={<RoadmapTrackingPage />} />
           <Route path="/roadmap/operations" element={<RoadmapOperationsPage />} />
           <Route path="/roadmap/analytics" element={<RoadmapAnalyticsPage />} />

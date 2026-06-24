@@ -7,12 +7,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
+	"github.com/waybill-tracking/core-api/internal/models"
+	"github.com/waybill-tracking/core-api/internal/repository"
 	"log"
 	"net/http"
 	"time"
-	"github.com/waybill-tracking/core-api/internal/models"
-	"github.com/waybill-tracking/core-api/internal/repository"
 )
 
 type Dispatcher struct {
@@ -39,9 +38,9 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event string, waybillID strin
 	}
 
 	payload := models.WebhookEventPayload{
-		Event: event,
+		Event:     event,
 		WaybillID: waybillID,
-		Data: data,
+		Data:      data,
 		Timestamp: time.Now(),
 	}
 

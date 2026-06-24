@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	"net/http"
 )
 
 type WebhookHandler struct {
@@ -40,9 +40,9 @@ func (h *WebhookHandler) Create(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	hook := &models.Webhook{
-		ID: uuid.New().String(),
+		ID:     uuid.New().String(),
 		UserID: userID.(string),
-		URL: req.URL,
+		URL:    req.URL,
 		Events: req.Events,
 		Secret: req.Secret,
 		Active: true,
@@ -83,16 +83,16 @@ func (h *WebhookHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if req.URL != nil {
-		hook.URL = *req.URL
+	if req.URL != "" {
+		hook.URL = req.URL
 	}
 
-	if req.Events != nil {
+	if len(req.Events) > 0 {
 		hook.Events = req.Events
 	}
 
-	if req.Secret != nil {
-		hook.Secret = *req.Secret
+	if req.Secret != "" {
+		hook.Secret = req.Secret
 	}
 
 	if req.Active != nil {

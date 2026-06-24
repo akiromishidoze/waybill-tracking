@@ -8,11 +8,23 @@ import (
 )
 
 type Client struct {
-	Conn           *websocket.Conn
-	Subscriptions  map[string]bool
-	UserID         string
-	UserRole       string
-	mu             sync.Mutex
+	Conn          *websocket.Conn
+	Subscriptions map[string]bool
+	UserID        string
+	UserRole      string
+	mu            sync.Mutex
+}
+
+func (c *Client) Subscribe(trackingNumber string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.Subscriptions[trackingNumber] = true
+}
+
+func (c *Client) Unsubscribe(trackingNumber string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.Subscriptions, trackingNumber)
 }
 
 type Hub struct {
@@ -38,9 +50,9 @@ func (h *Hub) Unregister(client *Client) {
 
 func (h *Hub) BroadcastWaybillUpdate(trackingNumber string, data interface{}) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type": "waybill_update",
+		"type":           "waybill_update",
 		"trackingNumber": trackingNumber,
-		"data": data,
+		"data":           data,
 	})
 
 	h.mu.RLock()

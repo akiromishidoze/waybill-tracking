@@ -104,13 +104,9 @@ func (h *WSHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		switch req.Action {
 		case "subscribe":
-			client.mu.Lock()
-			client.Subscriptions[req.TrackingNumber] = true
-			client.mu.Unlock()
+			client.Subscribe(req.TrackingNumber)
 		case "unsubscribe":
-			client.mu.Lock()
-			delete(client.Subscriptions, req.TrackingNumber)
-			client.mu.Unlock()
+			client.Unsubscribe(req.TrackingNumber)
 		}
 	}
 }

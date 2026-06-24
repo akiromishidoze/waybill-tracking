@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"path/filepath"
 	"time"
 
@@ -22,7 +21,7 @@ import (
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
-func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, chatbotHandler *handlers.ChatbotHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -59,9 +58,6 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/integrations/white-label", whiteLabelHandler.GetPortal)
 		protected.PATCH("/integrations/white-label", whiteLabelHandler.UpdateConfig)
 
-		protected.GET("/integrations/chatbot", chatbotHandler.Dashboard)
-		protected.POST("/integrations/chatbot/chat", chatbotHandler.Chat)
-
 		protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
 		protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
 		protected.GET("/attachments/:attachmentId", attachmentHandler.Get)
@@ -96,7 +92,7 @@ func main() {
 		Addr: cfg.RedisURL,
 	})
 
-	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers)
+	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer kafkaProducer.Close()
 
 	wsHub := ws.NewHub()
@@ -116,8 +112,6 @@ func main() {
 	ecommerceHandler := handlers.NewECommerceHandler(ecommerceRepo)
 	whiteLabelRepo := repository.NewWhiteLabelRepository(db)
 	whiteLabelHandler := handlers.NewWhiteLabelHandler(whiteLabelRepo)
-	chatbotRepo := repository.NewChatbotRepository(db, waybillRepo)
-	chatbotHandler := handlers.NewChatbotHandler(chatbotRepo)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo, cfg.JWTSecret)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
@@ -130,8 +124,8 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
 
-	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, chatbotHandler, attachmentHandler, auditLogHandler, auditLogger)
-	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, chatbotHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, attachmentHandler, auditLogHandler, auditLogger)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

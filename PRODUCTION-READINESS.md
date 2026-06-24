@@ -98,7 +98,7 @@
 
 35. ~~**WebSocket authentication** — `/ws` endpoint has no auth. Any client can connect and subscribe to tracking events.~~ ✅ Done — Secured `GET /ws` in `backend/core-api`: it now validates a JWT from the `token` query parameter or `Authorization: Bearer ...` header before upgrading the connection. Unauthenticated requests receive HTTP 401. Added `UserID` and `UserRole` to the `Client` struct, updated `main.go` to pass the JWT secret, and added tests in `internal/handlers/ws_handler_test.go`. Also aligned the frontend by replacing `socket.io-client` with native `WebSocket` in `src/services/socket.ts`, passing the token as a query parameter, and parsing the backend's `waybill_update` messages.
 
-36. **API versioning** — All routes use `/api/` with no version prefix (`/api/v1/`).
+36. ~~**API versioning** — All routes use `/api/` with no version prefix (`/api/v1/`).~~ ✅ Done — Added `/api/v1/` route mounts to `backend/core-api` and `backend/analytics-api` (with `/api/` kept as a backward-compatible alias). Refactored `core-api/cmd/server/main.go` to share route registration between `/api` and `/api/v1`. Updated `frontend/dashboard/src/services/api.ts` base URL to `/api/v1`, updated the mock interceptor to normalize `/api/v1` paths, and added `/api/v1` to the Vite dev proxy.
 
 37. **Dynamic page titles** — `index.html` title is hardcoded. No `react-helmet-async`.
 

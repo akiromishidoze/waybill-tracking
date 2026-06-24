@@ -601,7 +601,7 @@ let dbSettings: AppSettings = { ...seedSettings }
 
 export function installMockInterceptor(api: AxiosInstance) {
   api.interceptors.request.use((config: any) => {
-    let url: string = (config.url || '').replace(/^\/api/, '') || '/'
+    let url: string = (config.url || '').replace(/^\/api(?:\/v1)?/, '') || '/'
     const { method } = config
 
     function mock(data: any, status = 200) {

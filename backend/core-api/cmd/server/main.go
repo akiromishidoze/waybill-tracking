@@ -22,6 +22,41 @@ import (
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
+	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
+	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
+	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
+	api.GET("/features", feature.Handler())
+
+	public := api.Group("")
+	public.GET("/track/:trackingNumber", waybillHandler.Track)
+	public.GET("/exception-codes", waybillHandler.ListExceptionCodes)
+
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+	{
+		protected.GET("/auth/me", handlers.MeHandler(db))
+		protected.GET("/waybills", waybillHandler.List)
+		protected.GET("/waybills/:id", waybillHandler.Get)
+		protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
+		protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+		protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
+		protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
+		protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
+		protected.GET("/attachments/:attachmentId", attachmentHandler.Get)
+		protected.DELETE("/attachments/:attachmentId", attachmentHandler.Delete)
+
+		admin := protected.Group("")
+		admin.Use(middleware.RoleMiddleware("ADMIN"))
+		{
+			admin.GET("/users", handlers.ListUsersHandler(db))
+			admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
+			admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
+			admin.GET("/audit-logs", auditLogHandler.List)
+		}
+	}
+}
+
 func main() {
 	cfg := config.Load()
 
@@ -64,41 +99,8 @@ func main() {
 
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 
-	api := r.Group("/api")
-	{
-		api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
-		api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
-		api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
-		api.GET("/features", feature.Handler())
-
-		public := api.Group("")
-		public.GET("/track/:trackingNumber", waybillHandler.Track)
-		public.GET("/exception-codes", waybillHandler.ListExceptionCodes)
-
-		protected := api.Group("")
-		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		{
-			protected.GET("/auth/me", handlers.MeHandler(db))
-			protected.GET("/waybills", waybillHandler.List)
-			protected.GET("/waybills/:id", waybillHandler.Get)
-			protected.POST("/waybills", middleware.RoleMiddleware("SHIPPER", "OPS", "ADMIN"), waybillHandler.Create)
-			protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
-			protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
-			protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
-			protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
-			protected.GET("/attachments/:attachmentId", attachmentHandler.Get)
-			protected.DELETE("/attachments/:attachmentId", attachmentHandler.Delete)
-
-			admin := protected.Group("")
-			admin.Use(middleware.RoleMiddleware("ADMIN"))
-			{
-				admin.GET("/users", handlers.ListUsersHandler(db))
-				admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
-				admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
-				admin.GET("/audit-logs", auditLogHandler.List)
-			}
-		}
-	}
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, attachmentHandler, auditLogHandler, auditLogger)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

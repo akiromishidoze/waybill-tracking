@@ -3,7 +3,7 @@ import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, Audit
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   headers: { 'Content-Type': 'application/json' },
 })
 

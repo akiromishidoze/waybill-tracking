@@ -261,6 +261,7 @@ export const eCommerceService = {
 
 export const whiteLabelService = {
   getPortal: () => api.get<WhiteLabelPortalData>('/integrations/white-label'),
+  updateConfig: (data: Partial<WhiteLabelPortalData['config']>) => api.patch<WhiteLabelPortalData['config']>('/integrations/white-label', data),
 }
 
 export const iotSensorService = {

@@ -155,12 +155,25 @@ func (r *ChatbotRepository) ProcessMessage(ctx context.Context, userID string, m
 }
 
 func extractTrackingNumber(text string) string {
-	re := regexp.MustCompile(`(?i)\b(WB[A-Z0-9]{6,}|\d{9,}|TRK[A-Z0-9]{6,})\b`)
-	matches := re.FindStringSubmatch(text)
-	if len(matches) > 0 {
-		return strings.ToUpper(matches[0])
+	// Supports formats like WB123456789, WBT-XXXXXXXX, JT-2024-3001, TRK-ABC123, 123456789
+	re := regexp.MustCompile(`(?i)\b[A-Z0-9]{2,}(?:-[A-Z0-9]+){1,3}\b|\b[A-Z0-9]{6,}\b|\b\d{9,}\b`)
+	matches := re.FindAllString(text, -1)
+	for _, m := range matches {
+		candidate := strings.ToUpper(strings.TrimSpace(m))
+		if len(candidate) >= 6 && containsDigit(candidate) {
+			return candidate
+		}
 	}
 	return ""
+}
+
+func containsDigit(text string) bool {
+	for _, r := range text {
+		if r >= '0' && r <= '9' {
+			return true
+		}
+	}
+	return false
 }
 
 func containsAny(text string, words []string) bool {

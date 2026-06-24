@@ -625,6 +625,22 @@ export function installMockInterceptor(api: AxiosInstance) {
       mock(seedWaybills.filter(w => ['IN_TRANSIT', 'AT_SORTING_CENTER', 'OUT_FOR_DELIVERY'].includes(w.status)).map(w => ({ id: w.id, trackingNumber: w.trackingNumber, status: w.status, origin: w.origin, destination: w.destination, slaBreached: w.slaBreached })))
       return config
     }
+    if (method === 'get' && key === 'gps/waybills') {
+      mock(seedWaybills.filter(w => !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(w.status)).map((w, i) => ({
+        id: w.id,
+        trackingNumber: w.trackingNumber,
+        recipientName: w.recipientName,
+        status: w.status,
+        origin: w.origin,
+        destination: w.destination,
+        lastLocation: 'Mock GPS',
+        latitude: 14.5 + Math.sin(i) * 2,
+        longitude: 121.0 + Math.cos(i) * 2,
+        recordedAt: ago(0.1),
+        slaBreached: w.slaBreached,
+      })))
+      return config
+    }
     if (method === 'get' && collKey === 'waybills' && url.includes('/dwell')) {
       mock(seedDwellAlerts.filter(d => d.waybillId === itemId).map(d => ({ id: d.id, waybillId: d.waybillId, trackingNumber: d.trackingNumber, facility: d.facility, arrivedAt: d.arrivedAt, isActive: true, durationMinutes: d.durationMinutes } satisfies DwellSegment)))
       return config
@@ -652,6 +668,11 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
     if (method === 'post' && url === '/waybills/batch-status') {
       mock({ success: true, updatedCount: 2 })
+      return config
+    }
+    if (method === 'post' && url === '/gps/location') {
+      const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
+      mock({ id: uid(), waybillId: body.waybillId, latitude: body.latitude, longitude: body.longitude, speed: body.speed, heading: body.heading, recordedAt: new Date().toISOString() })
       return config
     }
     if (method === 'get' && key === 'settings') {

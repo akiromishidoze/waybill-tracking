@@ -36,11 +36,12 @@ const getStatusColor = (status: string) => {
 export default function MapViewPage() {
   const [selectedWaybill, setSelectedWaybill] = useState<WaybillGPSView | null>(null)
 
-  const { data: waybills, refetch } = useQuery({
+  const { data: waybillsRaw, refetch } = useQuery({
     queryKey: ['gps-waybills'],
     queryFn: () => gpsService.listCurrent().then((r) => r.data),
     refetchInterval: 15000,
   })
+  const waybills = Array.isArray(waybillsRaw) ? waybillsRaw : []
 
   useEffect(() => {
     const wsUrl = `${import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:')}//${window.location.host}/ws`

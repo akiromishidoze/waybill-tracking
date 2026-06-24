@@ -1,0 +1,17 @@
+{
+  "name": "Waybill Tracking Dashboard",
+  "short_name": "WaybillTrack",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "description": "Real-time waybill tracking and logistics dashboard",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

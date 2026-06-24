@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import PageTitle from '@/components/PageTitle'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
   Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity, MessageSquare,
@@ -146,10 +147,58 @@ function NavGroupSection({ group }: { group: NavGroup }) {
   )
 }
 
+const routeTitles: Record<string, string> = {
+  '/dashboard': 'Dashboard',
+  '/waybills': 'Waybills',
+  '/analytics': 'Analytics',
+  '/users': 'Users',
+  '/audit-logs': 'Audit Logs',
+  '/carriers': 'Carriers',
+  '/webhooks': 'Webhooks',
+  '/escalations': 'Escalations',
+  '/batch-status': 'Batch Status',
+  '/settings': 'Settings',
+  '/map': 'GPS Tracking',
+  '/tracking/aggregated': 'Multi-Carrier Tracking',
+  '/returns': 'Returns',
+  '/geofence': 'Geofence Events',
+  '/dwell-alerts': 'Dwell Alerts',
+  '/scheduled-reports': 'Scheduled Reports',
+  '/carrier-performance': 'Carrier Performance',
+  '/region-performance': 'Region Performance',
+  '/cost-analytics': 'Cost Analytics',
+  '/demand-forecast': 'Demand Forecast',
+  '/carbon-footprint': 'Carbon Footprint',
+  '/iot-sensors': 'IoT Sensors',
+  '/chatbot': 'Chatbot',
+  '/customs-compliance': 'Customs Compliance',
+  '/cod': 'COD',
+  '/erp-integrations': 'ERP Integrations',
+  '/bi-integrations': 'BI Integrations',
+  '/ecommerce-integrations': 'E-Commerce Integrations',
+  '/white-label': 'White Label Portal',
+  '/driver-app': 'Driver App',
+  '/dynamic-rerouting': 'Dynamic Rerouting',
+  '/auto-communications': 'Auto Communications',
+  '/roadmap/tracking': 'Roadmap Tracking',
+  '/roadmap/operations': 'Roadmap Operations',
+  '/roadmap/analytics': 'Roadmap Analytics',
+  '/roadmap/integrations': 'Roadmap Integrations',
+  '/unauthorized': 'Unauthorized',
+}
+
+function getPageTitle(pathname: string): string {
+  if (routeTitles[pathname]) return routeTitles[pathname]
+  if (pathname.startsWith('/waybills/')) return 'Waybill Details'
+  if (pathname.startsWith('/tracking/')) return 'Tracking'
+  return 'Dashboard'
+}
+
 export default function Layout() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const location = useLocation()
 
   const handleLogout = () => {
     localStorage.removeItem('access_token')
@@ -157,8 +206,10 @@ export default function Layout() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+    <>
+      <PageTitle title={getPageTitle(location.pathname)} />
+      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        <a href="#main-content" className="skip-link">Skip to main content</a>
       <aside role="complementary" aria-label="Sidebar navigation" style={{ width: 260, background: '#1e293b', color: '#fff', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: '1.5rem' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>WaybillTrack</h1>
@@ -230,5 +281,6 @@ export default function Layout() {
         </ErrorBoundary>
       </main>
     </div>
-  )
+  </>
+)
 }

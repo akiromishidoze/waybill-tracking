@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService } from '@/services/api'
 import { SkeletonLine } from '@/components/Skeleton'
+import PageTitle from '@/components/PageTitle'
 
 export default function TrackingPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
@@ -20,15 +21,17 @@ export default function TrackingPage() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        background: 'var(--color-bg)',
-      }}
-    >
+    <>
+      <PageTitle title="Track Shipment" />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: 'var(--color-bg)',
+        }}
+      >
       <div style={{ width: '100%', maxWidth: 600, padding: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 700, textAlign: 'center', marginBottom: '0.5rem' }}>
           Track Your Shipment
@@ -128,5 +131,6 @@ export default function TrackingPage() {
         )}
       </div>
     </div>
-  )
+  </>
+)
 }

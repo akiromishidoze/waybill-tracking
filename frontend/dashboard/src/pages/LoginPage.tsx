@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { authService } from '@/services/api'
+import PageTitle from '@/components/PageTitle'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -27,8 +28,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
+    <>
+      <PageTitle title="Sign In" />
+      <div
+        style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -116,5 +119,6 @@ export default function LoginPage() {
         </button>
       </form>
     </div>
-  )
+  </>
+)
 }

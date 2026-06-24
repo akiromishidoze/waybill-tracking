@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
@@ -93,11 +93,6 @@ export default function WaybillDetailPage() {
   const { data: teams } = useQuery({
     queryKey: ['teams'],
     queryFn: () => teamService.list().then((r) => r.data),
-  })
-
-  const assignTeam = useMutation({
-    mutationFn: (teamId: string | null) => teamService.assignToWaybill(id!, teamId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['waybill', id] }),
   })
 
   const { data: eta } = useQuery({
@@ -620,6 +615,80 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
       <span style={{ width: 140, color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>{label}</span>
       <span style={{ fontWeight: 500 }}>{value}</span>
+    </div>
+  )
+}
+
+function TeamAssignment({ waybillId, teamId, teamName, teams }: { waybillId: string; teamId?: string; teamName?: string; teams: any[] }) {
+  const [selectedTeamId, setSelectedTeamId] = useState(teamId || '')
+  const [assignError, setAssignError] = useState('')
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    setSelectedTeamId(teamId || '')
+  }, [teamId])
+
+  const assignTeam = useMutation({
+    mutationFn: (teamIdValue: string | null) => teamService.assignToWaybill(waybillId, teamIdValue),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waybill', waybillId] })
+      setAssignError('')
+    },
+    onError: (err: any) => {
+      setAssignError(err?.response?.data?.error || 'Failed to assign team. Please try again.')
+    },
+  })
+
+  const handleAssign = () => {
+    assignTeam.mutate(selectedTeamId || null)
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--color-border-subtle)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <Shield size={16} color="#d97706" />
+        <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Team Assignment</span>
+      </div>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <select
+          value={selectedTeamId}
+          onChange={(e) => {
+            setSelectedTeamId(e.target.value)
+            setAssignError('')
+          }}
+          style={{ flex: 1, padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }}
+        >
+          <option value="">Unassigned</option>
+          {teams.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleAssign}
+          disabled={assignTeam.isPending || selectedTeamId === (teamId || '')}
+          style={{
+            padding: '0.5rem 1rem',
+            background: selectedTeamId === (teamId || '') ? 'var(--color-border)' : '#2563eb',
+            color: selectedTeamId === (teamId || '') ? 'var(--color-text-muted)' : '#fff',
+            border: 'none',
+            borderRadius: 6,
+            fontSize: '0.8125rem',
+            fontWeight: 500,
+            cursor: selectedTeamId === (teamId || '') ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {assignTeam.isPending ? 'Assigning...' : 'Assign'}
+        </button>
+      </div>
+      {assignError && (
+        <p style={{ color: 'var(--badge-red-text)', fontSize: '0.75rem', marginTop: '0.375rem' }}>{assignError}</p>
+      )}
+      {teamName && !assignError && (
+        <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: 'var(--badge-amber-text)' }}>
+          <Shield size={12} />
+          Currently assigned to <strong>{teamName}</strong>
+        </div>
+      )}
     </div>
   )
 }

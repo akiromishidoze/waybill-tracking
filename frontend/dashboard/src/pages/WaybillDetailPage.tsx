@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
 import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
 import ConfirmModal from '@/components/ConfirmModal'
-import type { ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
+import type { Waybill, ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
@@ -44,6 +44,51 @@ export default function WaybillDetailPage() {
     queryFn: () => waybillService.get(id!).then((r) => r.data),
     enabled: !!id,
   })
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<Partial<Waybill>>({})
+  const [editError, setEditError] = useState('')
+
+  const updateWaybill = useMutation({
+    mutationFn: () => waybillService.update(id!, editForm),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waybill', id] })
+      setIsEditing(false)
+      setEditError('')
+    },
+    onError: (err: any) => {
+      setEditError(err?.response?.data?.error || 'Failed to update waybill. Please try again.')
+    },
+  })
+
+  const startEditing = () => {
+    if (!wb) return
+    setEditForm({
+      serviceType: wb.serviceType,
+      weight: wb.weight,
+      dimensions: wb.dimensions,
+      origin: wb.origin,
+      destination: wb.destination,
+      estimatedDelivery: wb.estimatedDelivery,
+      recipientName: wb.recipientName,
+      recipientPhone: wb.recipientPhone,
+      recipientAddress: wb.recipientAddress,
+      carrierName: wb.carrierName,
+      carrierTrackingNumber: wb.carrierTrackingNumber,
+    })
+    setIsEditing(true)
+    setEditError('')
+  }
+
+  const cancelEditing = () => {
+    setIsEditing(false)
+    setEditForm({})
+    setEditError('')
+  }
+
+  const handleFieldChange = (field: keyof Waybill, value: string | number) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }))
+  }
 
   const { data: teams } = useQuery({
     queryKey: ['teams'],
@@ -161,29 +206,91 @@ export default function WaybillDetailPage() {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
           Waybill #{wb.trackingNumber}
         </h2>
-        <button
-          onClick={() => setDeleteWaybillId(id!)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.375rem',
-            padding: '0.5rem 1rem', background: 'var(--color-surface)',
-            border: '1px solid var(--badge-red-border)', borderRadius: 6,
-            fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--badge-red-text)',
-          }}
-        >
-          <Trash2 size={16} /> Delete Waybill
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {isEditing ? (
+            <>
+              <button
+                onClick={() => updateWaybill.mutate()}
+                disabled={updateWaybill.isPending}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  padding: '0.5rem 1rem', background: '#2563eb',
+                  border: 'none', borderRadius: 6,
+                  fontSize: '0.8125rem', cursor: 'pointer', color: '#fff',
+                }}
+              >
+                {updateWaybill.isPending ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                onClick={cancelEditing}
+                disabled={updateWaybill.isPending}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                  padding: '0.5rem 1rem', background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border-input)', borderRadius: 6,
+                  fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--color-text-muted)',
+                }}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={startEditing}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.375rem',
+                padding: '0.5rem 1rem', background: 'var(--color-surface)',
+                border: '1px solid var(--color-border-input)', borderRadius: 6,
+                fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--color-text)',
+              }}
+            >
+              Edit Waybill
+            </button>
+          )}
+          <button
+            onClick={() => setDeleteWaybillId(id!)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.375rem',
+              padding: '0.5rem 1rem', background: 'var(--color-surface)',
+              border: '1px solid var(--badge-red-border)', borderRadius: 6,
+              fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--badge-red-text)',
+            }}
+          >
+            <Trash2 size={16} /> Delete Waybill
+          </button>
+        </div>
       </div>
+
+      {editError && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: 'var(--badge-red-bg)', border: '1px solid var(--badge-red-border)', borderRadius: 8, marginBottom: '1rem', color: 'var(--badge-red-text)', fontSize: '0.875rem', fontWeight: 500 }}>
+          <AlertTriangle size={18} />
+          {editError}
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Shipment Info</h3>
           <DetailRow label="Status" value={wb.status} />
-          <DetailRow label="Service Type" value={wb.serviceType} />
-          <DetailRow label="Weight" value={`${wb.weight} kg`} />
-          <DetailRow label="Dimensions" value={wb.dimensions} />
-          <DetailRow label="Origin" value={wb.origin} />
-          <DetailRow label="Destination" value={wb.destination} />
-          <DetailRow label="Est. Delivery" value={wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'} />
+          {isEditing ? (
+            <>
+              <FormField label="Service Type" value={editForm.serviceType || ''} onChange={(v) => handleFieldChange('serviceType', v)} />
+              <FormField label="Weight (kg)" type="number" value={String(editForm.weight ?? '')} onChange={(v) => handleFieldChange('weight', parseFloat(v) || 0)} />
+              <FormField label="Dimensions" value={editForm.dimensions || ''} onChange={(v) => handleFieldChange('dimensions', v)} placeholder="e.g. 10x10x10 cm" />
+              <FormField label="Origin" value={editForm.origin || ''} onChange={(v) => handleFieldChange('origin', v)} />
+              <FormField label="Destination" value={editForm.destination || ''} onChange={(v) => handleFieldChange('destination', v)} />
+              <FormField label="Est. Delivery" type="date" value={editForm.estimatedDelivery ? editForm.estimatedDelivery.split('T')[0] : ''} onChange={(v) => handleFieldChange('estimatedDelivery', v ? new Date(v).toISOString() : '')} />
+            </>
+          ) : (
+            <>
+              <DetailRow label="Service Type" value={wb.serviceType} />
+              <DetailRow label="Weight" value={`${wb.weight} kg`} />
+              <DetailRow label="Dimensions" value={wb.dimensions} />
+              <DetailRow label="Origin" value={wb.origin} />
+              <DetailRow label="Destination" value={wb.destination} />
+              <DetailRow label="Est. Delivery" value={wb.estimatedDelivery ? new Date(wb.estimatedDelivery).toLocaleDateString() : '—'} />
+            </>
+          )}
           <DetailRow label="SLA Status" value={wb.slaBreached ? 'Breached' : 'On Time'} />
           {eta && (
             <>
@@ -193,19 +300,36 @@ export default function WaybillDetailPage() {
               <DetailRow label="Based On" value={eta.basedOn} />
             </>
           )}
-          {wb.carrierName && (
+          {isEditing ? (
             <>
-              <DetailRow label="Carrier" value={wb.carrierName} />
-              <DetailRow label="Carrier Tracking" value={wb.carrierTrackingNumber || '—'} />
+              <FormField label="Carrier" value={editForm.carrierName || ''} onChange={(v) => handleFieldChange('carrierName', v)} placeholder="e.g. FedEx" />
+              <FormField label="Carrier Tracking" value={editForm.carrierTrackingNumber || ''} onChange={(v) => handleFieldChange('carrierTrackingNumber', v)} />
             </>
+          ) : (
+            wb.carrierName && (
+              <>
+                <DetailRow label="Carrier" value={wb.carrierName} />
+                <DetailRow label="Carrier Tracking" value={wb.carrierTrackingNumber || '—'} />
+              </>
+            )
           )}
         </div>
 
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10 }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Recipient</h3>
-          <DetailRow label="Name" value={wb.recipientName} />
-          <DetailRow label="Phone" value={wb.recipientPhone} />
-          <DetailRow label="Address" value={wb.recipientAddress} />
+          {isEditing ? (
+            <>
+              <FormField label="Name" value={editForm.recipientName || ''} onChange={(v) => handleFieldChange('recipientName', v)} />
+              <FormField label="Phone" value={editForm.recipientPhone || ''} onChange={(v) => handleFieldChange('recipientPhone', v)} />
+              <FormField label="Address" value={editForm.recipientAddress || ''} onChange={(v) => handleFieldChange('recipientAddress', v)} placeholder="Full delivery address" />
+            </>
+          ) : (
+            <>
+              <DetailRow label="Name" value={wb.recipientName} />
+              <DetailRow label="Phone" value={wb.recipientPhone} />
+              <DetailRow label="Address" value={wb.recipientAddress} />
+            </>
+          )}
           <div style={{ borderTop: '1px solid var(--color-border-subtle)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <Shield size={16} color="#d97706" />
@@ -516,6 +640,28 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
       <span style={{ width: 140, color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>{label}</span>
       <span style={{ fontWeight: 500 }}>{value}</span>
+    </div>
+  )
+}
+
+function FormField({ label, value, onChange, type = 'text', placeholder }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '0.75rem' }}>
+      <label style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          padding: '0.5rem',
+          border: '1px solid var(--color-border-input)',
+          borderRadius: 6,
+          fontSize: '0.875rem',
+          background: 'var(--color-surface)',
+          color: 'var(--color-text)',
+        }}
+      />
     </div>
   )
 }

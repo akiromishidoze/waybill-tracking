@@ -1,0 +1,2 @@
+ALTER TABLE waybills ADD COLUMN IF NOT EXISTS carrier_name VARCHAR(255);
+ALTER TABLE waybills ADD COLUMN IF NOT EXISTS carrier_tracking_number VARCHAR(100);

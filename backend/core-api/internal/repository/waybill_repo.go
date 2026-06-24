@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/internal/models"
+	"time"
 )
 
 type WaybillRepository struct {
@@ -48,7 +48,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
 		       recipient_address, recipient_phone, origin, destination, weight,
 		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       created_at, updated_at
+		       carrier_name, carrier_tracking_number, created_at, updated_at
 		FROM waybills%s ORDER BY created_at DESC LIMIT %d OFFSET %d`,
 		whereClause, limit, offset)
 
@@ -68,7 +68,8 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 			&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
-			&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
+			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
+			&wb.CreatedAt, &wb.UpdatedAt,
 		)
 
 		if err != nil {
@@ -87,6 +88,7 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 		       w.recipient_name, w.recipient_address, w.recipient_phone,
 		       w.origin, w.destination, w.weight, w.dimensions, w.service_type,
 		       w.status, w.estimated_delivery, w.actual_delivery,
+		       w.carrier_name, w.carrier_tracking_number,
 		       w.created_at, w.updated_at
 		FROM waybills w
 		JOIN scan_events e ON e.waybill_id = w.id
@@ -107,7 +109,8 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 			&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
-			&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
+			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
+			&wb.CreatedAt, &wb.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -124,13 +127,14 @@ func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Way
 		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
 		       recipient_address, recipient_phone, origin, destination, weight,
 		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       created_at, updated_at
+		       carrier_name, carrier_tracking_number, created_at, updated_at
 		FROM waybills WHERE id = $1`, id).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
 		&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
-		&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
+		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
+		&wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -161,13 +165,14 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 		SELECT id, tracking_number, shipper_id, shipper_name, recipient_name,
 		       recipient_address, recipient_phone, origin, destination, weight,
 		       dimensions, service_type, status, estimated_delivery, actual_delivery,
-		       created_at, updated_at
+		       carrier_name, carrier_tracking_number, created_at, updated_at
 		FROM waybills WHERE tracking_number = $1`, tn).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
 		&wb.RecipientName, &wb.RecipientAddress, &wb.RecipientPhone,
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
-		&wb.ActualDelivery, &wb.CreatedAt, &wb.UpdatedAt,
+		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
+		&wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -196,6 +201,40 @@ func (r *WaybillRepository) Create(ctx context.Context, wb *models.Waybill) erro
 	)
 
 	return err
+}
+
+func (r *WaybillRepository) Update(ctx context.Context, id string, req models.UpdateWaybillRequest) error {
+	_, err := r.db.Exec(ctx, `
+		UPDATE waybills SET
+			recipient_name = $1,
+			recipient_address = $2,
+			recipient_phone = $3,
+			origin = $4,
+			destination = $5,
+			weight = $6,
+			dimensions = $7,
+			service_type = $8,
+			estimated_delivery = $9,
+			carrier_name = $10,
+			carrier_tracking_number = $11,
+			updated_at = $12
+		WHERE id = $13`,
+		req.RecipientName, req.RecipientAddress, req.RecipientPhone,
+		req.Origin, req.Destination, req.Weight, req.Dimensions,
+		req.ServiceType, req.EstimatedDelivery, req.CarrierName,
+		req.CarrierTrackingNumber, time.Now(), id,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	cacheKey := fmt.Sprintf("track:*")
+	iter := r.redis.Scan(ctx, 0, cacheKey, 0).Iterator()
+	for iter.Next(ctx) {
+		r.redis.Del(ctx, iter.Val())
+	}
+	return nil
 }
 
 func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill, event models.ScanEvent) error {

@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"log"
-	"net/http"
-	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
@@ -13,15 +10,18 @@ import (
 	"github.com/waybill-tracking/core-api/internal/utils"
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
+	"log"
+	"net/http"
+	"strconv"
 )
 
 type WaybillHandler struct {
-	repo *repository.WaybillRepository
+	repo          *repository.WaybillRepository
 	kafkaProducer *kafka.Producer
-	wsHub *ws.Hub
-	esClient *es.Client
-	webhooks *wh.Dispatcher
-	auditLogger *repository.AuditLogger
+	wsHub         *ws.Hub
+	esClient      *es.Client
+	webhooks      *wh.Dispatcher
+	auditLogger   *repository.AuditLogger
 }
 
 func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher, al *repository.AuditLogger) *WaybillHandler {
@@ -89,19 +89,19 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	shipperName, _ := userName.(string)
 
 	wb := &models.Waybill{
-		ID: uuid.New().String(),
-		TrackingNumber: generateTrackingNumber(),
-		ShipperID: userID.(string),
-		ShipperName: shipperName,
-		Status: models.StatusCreated,
-		RecipientName: req.RecipientName,
+		ID:               uuid.New().String(),
+		TrackingNumber:   generateTrackingNumber(),
+		ShipperID:        userID.(string),
+		ShipperName:      shipperName,
+		Status:           models.StatusCreated,
+		RecipientName:    req.RecipientName,
 		RecipientAddress: req.RecipientAddress,
-		RecipientPhone: req.RecipientPhone,
-		Origin: req.Origin,
-		Destination: req.Destination,
-		Weight: req.Weight,
-		Dimensions: req.Dimensions,
-		ServiceType: req.ServiceType,
+		RecipientPhone:   req.RecipientPhone,
+		Origin:           req.Origin,
+		Destination:      req.Destination,
+		Weight:           req.Weight,
+		Dimensions:       req.Dimensions,
+		ServiceType:      req.ServiceType,
 	}
 
 	if err := h.repo.Create(c.Request.Context(), wb); err != nil {
@@ -125,6 +125,52 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 		"WAYBILL_CREATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" created", c.ClientIP())
 
 	c.JSON(http.StatusCreated, wb)
+}
+
+func (h *WaybillHandler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var req models.UpdateWaybillRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	wb, err := h.repo.GetByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		return
+	}
+
+	if err := h.repo.Update(c.Request.Context(), id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	wb.RecipientName = req.RecipientName
+	wb.RecipientAddress = req.RecipientAddress
+	wb.RecipientPhone = req.RecipientPhone
+	wb.Origin = req.Origin
+	wb.Destination = req.Destination
+	wb.Weight = req.Weight
+	wb.Dimensions = req.Dimensions
+	wb.ServiceType = req.ServiceType
+	wb.EstimatedDelivery = req.EstimatedDelivery
+	wb.CarrierName = req.CarrierName
+	wb.CarrierTrackingNumber = req.CarrierTrackingNumber
+
+	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
+		log.Printf("elasticsearch index error: %v", err)
+	}
+
+	h.webhooks.Dispatch(c.Request.Context(), "waybill.updated", wb.ID, wb)
+
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+		"WAYBILL_UPDATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" updated", c.ClientIP())
+
+	c.JSON(http.StatusOK, wb)
 }
 
 func (h *WaybillHandler) UpdateStatus(c *gin.Context) {

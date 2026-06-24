@@ -36,6 +36,7 @@ import DemandForecastingPage from './pages/DemandForecastingPage'
 import CarbonFootprintPage from './pages/CarbonFootprintPage'
 import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
 import WhiteLabelPortalPage from './pages/WhiteLabelPortalPage'
+import WaybillImportPage from './pages/WaybillImportPage'
 import IotSensorPage from './pages/IotSensorPage'
 import ChatbotPage from './pages/ChatbotPage'
 import Layout from './components/Layout'
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/waybills" element={<WaybillListPage />} />
+          <Route path="/waybills/import" element={<WaybillImportPage />} />
           <Route path="/waybills/:id" element={<WaybillDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/tracking/aggregated" element={<AggregatedTrackingPage />} />

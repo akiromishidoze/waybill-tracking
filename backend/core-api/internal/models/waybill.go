@@ -109,6 +109,29 @@ type CreateWaybillRequest struct {
 	ServiceType      string  `json:"serviceType"`
 }
 
+type ImportWaybillRow struct {
+	TrackingNumber   string  `json:"trackingNumber,omitempty"`
+	RecipientName    string  `json:"recipientName"`
+	RecipientAddress string  `json:"recipientAddress"`
+	RecipientPhone   string  `json:"recipientPhone"`
+	RecipientEmail   string  `json:"recipientEmail,omitempty"`
+	Origin           string  `json:"origin"`
+	Destination      string  `json:"destination"`
+	Weight           float64 `json:"weight,omitempty"`
+	Dimensions       string  `json:"dimensions,omitempty"`
+	ServiceType      string  `json:"serviceType,omitempty"`
+	CarrierName      string  `json:"carrierName,omitempty"`
+	ReferenceNumber  string  `json:"referenceNumber,omitempty"`
+	TeamID           string  `json:"teamId,omitempty"`
+}
+
+type ImportWaybillResult struct {
+	Created    int      `json:"created"`
+	Failed     int      `json:"failed"`
+	Errors     []string `json:"errors,omitempty"`
+	WaybillIDs []string `json:"waybillIds,omitempty"`
+}
+
 type UpdateWaybillRequest struct {
 	RecipientName         string     `json:"recipientName"`
 	RecipientAddress      string     `json:"recipientAddress"`

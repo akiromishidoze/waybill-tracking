@@ -98,6 +98,9 @@ export const waybillService = {
   batchStatusUpdate: (ids: string[], status: string, location?: string) =>
     api.post('/waybills/batch-status', { ids, status, location }),
   delete: (id: string) => api.delete(`/waybills/${id}`),
+  importCSV: (formData: FormData) => api.post<{ created: number; failed: number; errors: string[] }>('/waybills/import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 }
 
 export const exceptionCodeService = {

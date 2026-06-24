@@ -5,7 +5,7 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import PageTitle from '@/components/PageTitle'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity, MessageSquare,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity, MessageSquare, UploadCloud,
 } from 'lucide-react'
 
 interface NavGroup {
@@ -150,6 +150,7 @@ function NavGroupSection({ group }: { group: NavGroup }) {
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/waybills': 'Waybills',
+  '/waybills/import': 'Import Waybills',
   '/analytics': 'Analytics',
   '/users': 'Users',
   '/audit-logs': 'Audit Logs',
@@ -232,6 +233,9 @@ export default function Layout() {
           </NavLink>
           <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Waybills">
             <Package size={20} aria-hidden="true" /> Waybills
+          </NavLink>
+          <NavLink to="/waybills/import" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Import Waybills">
+            <UploadCloud size={20} aria-hidden="true" /> Import Waybills
           </NavLink>
           <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Analytics">
             <BarChart3 size={20} aria-hidden="true" /> Analytics

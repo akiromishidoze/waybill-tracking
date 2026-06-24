@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/csv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
@@ -10,9 +11,11 @@ import (
 	"github.com/waybill-tracking/core-api/internal/utils"
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type WaybillHandler struct {
@@ -125,6 +128,139 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 		"WAYBILL_CREATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" created", c.ClientIP())
 
 	c.JSON(http.StatusCreated, wb)
+}
+
+func (h *WaybillHandler) ImportCSV(c *gin.Context) {
+	file, _, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing file: " + err.Error()})
+		return
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1
+	reader.TrimLeadingSpace = true
+
+	header, err := reader.Read()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unable to read CSV header: " + err.Error()})
+		return
+	}
+
+	colIndex := make(map[string]int)
+	for i, col := range header {
+		colIndex[strings.ToLower(strings.TrimSpace(col))] = i
+	}
+
+	required := []string{"recipientname", "recipientaddress", "recipientphone", "origin", "destination"}
+	for _, col := range required {
+		if _, ok := colIndex[col]; !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "missing required column: " + col})
+			return
+		}
+	}
+
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	shipperName, _ := userName.(string)
+
+	result := models.ImportWaybillResult{Errors: []string{}, WaybillIDs: []string{}}
+	line := 2
+
+	for {
+		row, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			result.Failed++
+			result.Errors = append(result.Errors, "line "+strconv.Itoa(line)+": "+err.Error())
+			line++
+			continue
+		}
+
+		get := func(name string) string {
+			if idx, ok := colIndex[name]; ok && idx < len(row) {
+				return strings.TrimSpace(row[idx])
+			}
+			return ""
+		}
+
+		recipientName := get("recipientname")
+		recipientAddress := get("recipientaddress")
+		recipientPhone := get("recipientphone")
+		origin := get("origin")
+		destination := get("destination")
+
+		if recipientName == "" || recipientAddress == "" || recipientPhone == "" || origin == "" || destination == "" {
+			result.Failed++
+			result.Errors = append(result.Errors, "line "+strconv.Itoa(line)+": missing required value")
+			line++
+			continue
+		}
+
+		weight := 0.0
+		if w := get("weight"); w != "" {
+			if parsed, err := strconv.ParseFloat(w, 64); err == nil {
+				weight = parsed
+			}
+		}
+
+		trackingNumber := get("trackingnumber")
+		if trackingNumber == "" {
+			trackingNumber = generateTrackingNumber()
+		}
+
+		wb := &models.Waybill{
+			ID:               uuid.New().String(),
+			TrackingNumber:   trackingNumber,
+			ShipperID:        userID.(string),
+			ShipperName:      shipperName,
+			Status:           models.StatusCreated,
+			RecipientName:    recipientName,
+			RecipientAddress: recipientAddress,
+			RecipientPhone:   recipientPhone,
+			RecipientEmail:   get("recipientemail"),
+			Origin:           origin,
+			Destination:      destination,
+			Weight:           weight,
+			Dimensions:       get("dimensions"),
+			ServiceType:      get("servicetype"),
+			CarrierName:      get("carriername"),
+			ReferenceNumber:  get("referencenumber"),
+		}
+
+		if teamID := get("teamid"); teamID != "" {
+			wb.TeamID = &teamID
+		}
+
+		if err := h.repo.Create(c.Request.Context(), wb); err != nil {
+			result.Failed++
+			result.Errors = append(result.Errors, "line "+strconv.Itoa(line)+": "+err.Error())
+			line++
+			continue
+		}
+
+		if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
+			log.Printf("kafka import publish error: %v", err)
+		}
+		if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
+			log.Printf("elasticsearch import index error: %v", err)
+		}
+		h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
+
+		result.Created++
+		result.WaybillIDs = append(result.WaybillIDs, wb.ID)
+		line++
+	}
+
+	if userName, ok := c.Get("userName"); ok {
+		h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+			"WAYBILL_IMPORT", "waybill", "", "Imported "+strconv.Itoa(result.Created)+" waybills", c.ClientIP())
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func (h *WaybillHandler) Update(c *gin.Context) {

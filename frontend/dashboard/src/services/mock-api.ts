@@ -709,7 +709,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
 
     // Pass real-backend resources through without mocking
-    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings']
+    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings', 'analytics']
     if (realBackendKeys.includes(key) || realBackendKeys.includes(collKey)) {
       return config
     }

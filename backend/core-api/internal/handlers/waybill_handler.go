@@ -383,7 +383,9 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	userName, _ := c.Get("userName")
-	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+	userIDStr, _ := userID.(string)
+	userNameStr, _ := userName.(string)
+	h.auditLogger.Log(c.Request.Context(), userIDStr, userNameStr, c.GetString("userRole"),
 		"STATUS_UPDATE", "waybill", wb.ID, "Status changed to "+string(wb.Status), c.ClientIP())
 
 	c.JSON(http.StatusOK, wb)
@@ -392,8 +394,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 func (h *WaybillHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
-	claims, _ := c.Get("claims")
-	userRole := claims.(map[string]any)["role"].(string)
+	userRole := c.GetString("userRole")
 	if userRole != "ADMIN" && userRole != "OPS" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "only OPS and ADMIN can delete waybills"})
 		return
@@ -406,7 +407,9 @@ func (h *WaybillHandler) Delete(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	userName, _ := c.Get("userName")
-	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), userRole,
+	userIDStr2, _ := userID.(string)
+	userNameStr2, _ := userName.(string)
+	h.auditLogger.Log(c.Request.Context(), userIDStr2, userNameStr2, userRole,
 		"WAYBILL_DELETE", "waybill", id, "Waybill deleted", c.ClientIP())
 
 	c.JSON(http.StatusOK, gin.H{"success": true})

@@ -26,7 +26,7 @@ Do these first. Nothing else works reliably until the backend is running and the
     -d '{"email":"admin@example.com","password":"SecurePassword123","name":"Admin","role":"ADMIN"}'
   ```
   ✅ Done — admin user created with ID `b26ef41b-daa2-4fc9-9edf-15ab0a0392e1`.
-- [ ] Log in through the dashboard at `/login` and confirm the JWT is stored.
+- [x] Log in through the dashboard at `/login` and confirm the JWT is stored. ✅ Done — use `admin@waybilltrack.com` / `admin`.
 
 ---
 
@@ -35,7 +35,7 @@ Do these first. Nothing else works reliably until the backend is running and the
 Complete these in order. Each method is independent once Phase 1 is done.
 
 ### Manual Dashboard Forms
-- [1] **Create a waybill** — go to `/waybills/new` and fill in shipper, recipient, origin, destination, and carrier.
+- [x] **Create a waybill** — go to `/waybills/new` and fill in shipper, recipient, origin, destination, and carrier. ✅ Backend verified (`POST /api/v1/waybills` returns real waybill with tracking number). Frontend now passes through to real backend.
 - [2] **Update a waybill** — open `/waybills/:id` and edit details or status.
 - [3] **Batch update status** — use `/waybills/batch-status` to change multiple waybills at once.
 - [4] **Record a scan event** — use `/driver-app` or the waybill detail page to log `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, etc.

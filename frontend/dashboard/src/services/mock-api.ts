@@ -724,6 +724,12 @@ export function installMockInterceptor(api: AxiosInstance) {
       return config
     }
 
+    // Pass real-backend resources through without mocking
+    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs']
+    if (realBackendKeys.includes(key) || realBackendKeys.includes(collKey)) {
+      return config
+    }
+
     // --- Generic collection/item handlers (run after specific path handlers) ---
     if (method === 'get' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
       const item = db[collKey].find((x: any) => x.id === itemId || x.waybillId === itemId)
@@ -807,6 +813,14 @@ export function installMockInterceptor(api: AxiosInstance) {
     if (method === 'post' || method === 'put' || method === 'patch') {
       const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
       const now = new Date().toISOString()
+
+      if (idMatch && realBackendKeys.includes(collKey)) {
+        return config
+      }
+
+      if (key && realBackendKeys.includes(key)) {
+        return config
+      }
 
       if (idMatch && db[collKey]) {
         const idx = db[collKey].findIndex((x: any) => x.id === itemId)

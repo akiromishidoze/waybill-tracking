@@ -89,7 +89,11 @@ export const authService = {
 }
 
 export const waybillService = {
-  list: (params?: Record<string, any>) => api.get<Waybill[]>('/waybills', { params }),
+  list: (params?: Record<string, any>) => api.get<any>('/waybills', { params }).then(r => ({
+    ...r,
+    data: Array.isArray(r.data) ? r.data : (r.data?.data ?? []),
+    meta: r.data?.meta ?? null,
+  })),
   get: (id: string) => api.get<Waybill>(`/waybills/${id}`),
   track: (trackingNumber: string) => api.get<Waybill>(`/track/${trackingNumber}`),
   create: (data: Partial<Waybill>) => api.post<Waybill>('/waybills', data),

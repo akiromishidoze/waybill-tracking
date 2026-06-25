@@ -46,11 +46,11 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - **Status:** Frontend ✅ / Backend ✅
 
 ### Bulk CSV Import
-- [9] Download the template from `/waybills/import`.
-- [10] Fill in required columns: `recipientName`, `recipientAddress`, `recipientPhone`, `origin`, `destination`.
-- [11] Add optional columns: `trackingNumber`, `recipientEmail`, `weight`, `dimensions`, `serviceType`, `carrierName`, `referenceNumber`, `teamId`.
-- [12] Upload the CSV and verify the result shows `created` and `failed` counts.
-- [13] Check `/waybills` to confirm the imported rows appear.
+- [9] Download the template from `/waybills/import`. ✅
+- [10] Fill in required columns: `recipientName`, `recipientAddress`, `recipientPhone`, `origin`, `destination`. ✅
+- [11] Add optional columns: `trackingNumber`, `recipientEmail`, `weight`, `dimensions`, `serviceType`, `carrierName`, `referenceNumber`, `teamId`. ✅
+- [12] Upload the CSV and verify the result shows `created` and `failed` counts. ✅
+- [13] Check `/waybills` to confirm the imported rows appear. ✅
 - **Status:** Frontend ✅ / Backend ✅
 
 ### Driver / Courier Mobile Workflow

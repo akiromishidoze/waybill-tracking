@@ -17,8 +17,9 @@ func NewWebhookHandler(repo *repository.WebhookRepository) *WebhookHandler {
 }
 
 func (h *WebhookHandler) List(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	hooks, err := h.repo.ListByUser(c.Request.Context(), userID.(string))
+	userIDRaw, _ := c.Get("userID")
+	userID, _ := userIDRaw.(string)
+	hooks, err := h.repo.ListByUser(c.Request.Context(), userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -38,10 +39,11 @@ func (h *WebhookHandler) Create(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	userIDRaw, _ := c.Get("userID")
+	userIDStr, _ := userIDRaw.(string)
 	hook := &models.Webhook{
 		ID:     uuid.New().String(),
-		UserID: userID.(string),
+		UserID: userIDStr,
 		URL:    req.URL,
 		Events: req.Events,
 		Secret: req.Secret,
@@ -67,9 +69,10 @@ func (h *WebhookHandler) Update(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	userIDRaw2, _ := c.Get("userID")
+	userIDStr2, _ := userIDRaw2.(string)
 
-	if hook.UserID != userID.(string) {
+	if hook.UserID != userIDStr2 {
 		c.JSON(http.StatusForbidden, gin.H{"error": "not your webhook"})
 
 		return
@@ -118,9 +121,10 @@ func (h *WebhookHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	userIDRaw3, _ := c.Get("userID")
+	userIDStr3, _ := userIDRaw3.(string)
 
-	if hook.UserID != userID.(string) {
+	if hook.UserID != userIDStr3 {
 		c.JSON(http.StatusForbidden, gin.H{"error": "not your webhook"})
 
 		return

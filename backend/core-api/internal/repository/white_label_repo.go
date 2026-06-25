@@ -18,17 +18,21 @@ func NewWhiteLabelRepository(db *pgxpool.Pool) *WhiteLabelRepository {
 
 func (r *WhiteLabelRepository) GetConfig(ctx context.Context) (*models.WhiteLabelConfig, error) {
 	var c models.WhiteLabelConfig
+	var logoURL, customDomain *string
 	err := r.db.QueryRow(ctx, `
-		SELECT id, brand_name, logo_url, custom_domain, primary_color, support_email, support_phone,
-		       enabled, portal_url, created_at, updated_at
+		SELECT id, COALESCE(brand_name,''), logo_url, custom_domain,
+		       COALESCE(primary_color,''), COALESCE(support_email,''), COALESCE(support_phone,''),
+		       enabled, COALESCE(portal_url,''), created_at, updated_at
 		FROM white_label_config
 		ORDER BY created_at LIMIT 1`).Scan(
-		&c.ID, &c.BrandName, &c.LogoURL, &c.CustomDomain, &c.PrimaryColor, &c.SupportEmail, &c.SupportPhone,
+		&c.ID, &c.BrandName, &logoURL, &customDomain, &c.PrimaryColor, &c.SupportEmail, &c.SupportPhone,
 		&c.Enabled, &c.PortalURL, &c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
+	c.LogoURL = logoURL
+	c.CustomDomain = customDomain
 	return &c, nil
 }
 
@@ -69,9 +73,9 @@ func (r *WhiteLabelRepository) PortalStats(ctx context.Context) (*models.WhiteLa
 		return nil, err
 	}
 
-	// Registered customers placeholder: count distinct shipper/recipient contact combinations
+	// Registered customers placeholder: count distinct shippers
 	if err := r.db.QueryRow(ctx, `
-		SELECT COUNT(DISTINCT shipper_email) FROM waybills WHERE shipper_email IS NOT NULL`).Scan(&stats.TotalRegisteredCustomers); err != nil {
+		SELECT COUNT(DISTINCT shipper_id) FROM waybills`).Scan(&stats.TotalRegisteredCustomers); err != nil {
 		return nil, err
 	}
 

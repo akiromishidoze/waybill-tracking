@@ -656,8 +656,7 @@ export function installMockInterceptor(api: AxiosInstance) {
       mock(['waybill.created', 'waybill.updated', 'waybill.delivered', 'exception.raised'])
       return config
     }
-    if (method === 'post' && url === '/waybills/batch-status') {
-      mock({ success: true, updatedCount: 2 })
+    if (url === '/waybills/batch-status') {
       return config
     }
     if (method === 'post' && url === '/gps/location') {
@@ -828,11 +827,6 @@ export function installMockInterceptor(api: AxiosInstance) {
           db[collKey][idx] = { ...db[collKey][idx], ...body, updatedAt: now }
           mock(db[collKey][idx])
         }
-        return config
-      }
-
-      if (key === 'waybills/batch-status') {
-        mock({ success: true, updatedCount: (body.ids || []).length })
         return config
       }
 

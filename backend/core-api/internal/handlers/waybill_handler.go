@@ -412,6 +412,64 @@ func (h *WaybillHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
+func (h *WaybillHandler) BatchUpdateStatus(c *gin.Context) {
+	var req struct {
+		IDs      []string             `json:"ids" binding:"required"`
+		Status   models.WaybillStatus `json:"status" binding:"required"`
+		Location string               `json:"location"`
+		Remark   *string              `json:"remark,omitempty"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if len(req.IDs) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ids must not be empty"})
+		return
+	}
+
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	userIDStr, _ := userID.(string)
+	userNameStr, _ := userName.(string)
+
+	updated := 0
+	var errs []string
+
+	for _, id := range req.IDs {
+		wb, err := h.repo.GetByID(c.Request.Context(), id)
+		if err != nil {
+			errs = append(errs, id+": not found")
+			continue
+		}
+		if !models.IsValidTransition(wb.Status, req.Status) {
+			errs = append(errs, id+": invalid transition from "+string(wb.Status)+" to "+string(req.Status))
+			continue
+		}
+		event := models.ScanEvent{
+			ID:        uuid.New().String(),
+			WaybillID: id,
+			Status:    req.Status,
+			Location:  req.Location,
+			Remark:    req.Remark,
+			EventType: models.EventScan,
+		}
+		wb.Status = req.Status
+		if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {
+			errs = append(errs, id+": "+err.Error())
+			continue
+		}
+		h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+		h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
+		updated++
+	}
+
+	h.auditLogger.Log(c.Request.Context(), userIDStr, userNameStr, c.GetString("userRole"),
+		"WAYBILL_BATCH_STATUS", "waybill", "", "Batch status update to "+string(req.Status), c.ClientIP())
+
+	c.JSON(http.StatusOK, gin.H{"updatedCount": updated, "errors": errs})
+}
+
 func (h *WaybillHandler) ListExceptionCodes(c *gin.Context) {
 	codes := []models.ExceptionCodeInfo{
 		{Code: models.ExceptionDelay, Label: "Delivery Delayed", Description: "Shipment delayed beyond estimated delivery date"},

@@ -390,6 +390,76 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, wb)
 }
 
+func (h *WaybillHandler) CreateScan(c *gin.Context) {
+	id := c.Param("id")
+	var req models.StatusUpdateRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	wb, err := h.repo.GetByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		return
+	}
+
+	if !models.IsValidTransition(wb.Status, req.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid status transition from " + string(wb.Status) + " to " + string(req.Status),
+		})
+		return
+	}
+
+	eventType := models.EventScan
+	if req.EventType != nil {
+		eventType = *req.EventType
+	} else if req.ExceptionCode != nil {
+		eventType = models.EventException
+	} else if isMilestoneStatus(req.Status) {
+		eventType = models.EventMilestone
+	}
+
+	event := models.ScanEvent{
+		ID:              uuid.New().String(),
+		WaybillID:       id,
+		Status:          req.Status,
+		Location:        req.Location,
+		Remark:          req.Remark,
+		ExceptionCode:   req.ExceptionCode,
+		ExceptionDetail: req.ExceptionDetail,
+		ResolvedAt:      req.ResolvedAt,
+		EventType:       eventType,
+	}
+
+	wb.Status = req.Status
+
+	if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.kafkaProducer.PublishScanEvent(c.Request.Context(), event); err != nil {
+		log.Printf("kafka publish scan event error: %v", err)
+	}
+	if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
+		log.Printf("kafka publish status change error: %v", err)
+	}
+
+	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
+
+	userID, _ := c.Get("userID")
+	userName, _ := c.Get("userName")
+	userIDStr, _ := userID.(string)
+	userNameStr, _ := userName.(string)
+	h.auditLogger.Log(c.Request.Context(), userIDStr, userNameStr, c.GetString("userRole"),
+		"SCAN_CREATE", "waybill", wb.ID, "Scan event: "+string(req.Status), c.ClientIP())
+
+	c.JSON(http.StatusCreated, gin.H{"event": event, "waybill": wb})
+}
+
 func (h *WaybillHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 

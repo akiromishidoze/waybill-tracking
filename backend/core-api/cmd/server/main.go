@@ -46,6 +46,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/waybills/:id", waybillHandler.Get)
 		protected.PATCH("/waybills/:id", waybillHandler.Update)
 		protected.PATCH("/waybills/:id/status", waybillHandler.UpdateStatus)
+		protected.POST("/waybills/:id/scans", waybillHandler.CreateScan)
 		protected.PATCH("/waybills/:id/assign-team", teamHandler.AssignToWaybill)
 		protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
 

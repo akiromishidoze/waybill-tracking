@@ -21,7 +21,7 @@ import (
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
-func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger) {
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler) {
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -63,6 +63,12 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/gps/waybills", gpsHandler.ListCurrent)
 		protected.GET("/gps/waybills/:id/history", gpsHandler.GetHistory)
 		protected.GET("/gps/waybills/:id/latest", gpsHandler.GetLatest)
+
+		protected.GET("/driver-assignments", driverHandler.ListAssignments)
+		protected.POST("/driver-assignments", middleware.RoleMiddleware("OPS", "ADMIN"), driverHandler.CreateAssignment)
+		protected.GET("/driver-assignments/:id", driverHandler.GetAssignment)
+		protected.POST("/driver-assignments/:id/status", driverHandler.UpdateAssignmentStatus)
+		protected.GET("/driver-scans", driverHandler.ListScans)
 
 		protected.GET("/waybills/:id/attachments", attachmentHandler.List)
 		protected.POST("/waybills/:id/attachments", attachmentHandler.Upload)
@@ -124,6 +130,8 @@ func main() {
 	gpsHandler := handlers.NewGPSHandler(gpsRepo, wsHub)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo, cfg.JWTSecret)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
+	driverRepo := repository.NewDriverRepository(db)
+	driverHandler := handlers.NewDriverHandler(driverRepo)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	feature.RegisterAll(feature.DefaultFlags)
@@ -134,8 +142,8 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
 
-	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger)
-	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger)
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

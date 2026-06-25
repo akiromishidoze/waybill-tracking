@@ -302,7 +302,9 @@ func (h *WaybillHandler) Update(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 	userName, _ := c.Get("userName")
-	h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
+	userIDStr, _ := userID.(string)
+	userNameStr, _ := userName.(string)
+	h.auditLogger.Log(c.Request.Context(), userIDStr, userNameStr, c.GetString("userRole"),
 		"WAYBILL_UPDATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" updated", c.ClientIP())
 
 	c.JSON(http.StatusOK, wb)

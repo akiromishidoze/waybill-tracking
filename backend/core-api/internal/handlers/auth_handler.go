@@ -40,6 +40,7 @@ func respondWithToken(c *gin.Context, jwtSecret, userID, email, name, role, comp
 	claims := jwt.MapClaims{
 		"sub":   userID,
 		"email": email,
+		"name":  name,
 		"role":  role,
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),
 	}

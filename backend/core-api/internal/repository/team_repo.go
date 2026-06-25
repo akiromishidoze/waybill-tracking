@@ -25,7 +25,7 @@ func (r *TeamRepository) List(ctx context.Context) ([]models.Team, error) {
 	}
 	defer rows.Close()
 
-	var teams []models.Team
+	teams := []models.Team{}
 	for rows.Next() {
 		var t models.Team
 		if err := rows.Scan(&t.ID, &t.Name, &t.Description, &t.Color, &t.CreatedAt, &t.UpdatedAt); err != nil {

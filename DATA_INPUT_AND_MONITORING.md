@@ -40,7 +40,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - [3] **Batch update status** — use `/waybills/batch-status` to change multiple waybills at once. ✅
 - [4] **Record a scan event** — use `/driver-app` or the waybill detail page to log `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, etc. ✅
 - [5] **Assign a driver** — in `/driver-app` or the waybill detail page, assign a courier to a waybill. ✅
-- [6] **Create teams / users / carriers** — go to `/teams`, `/users`, `/carriers`.
+- [6] **Create teams / users / carriers** — go to `/teams`, `/users`, `/carriers`. ✅
 - [7] **Configure integrations** — set up e-commerce, webhooks, ERP, and white-label portal in `/integrations/*`.
 - [8] **Update app settings** — go to `/settings` for notifications, branding, and thresholds.
 - **Status:** Frontend ✅ / Backend ✅

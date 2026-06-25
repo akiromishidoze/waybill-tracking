@@ -4,6 +4,32 @@ This document lists every way to add real-world data into WaybillTrack and every
 
 ---
 
+## Implementation Status: Frontend vs. Backend
+
+| Feature | Frontend | Backend | Notes |
+| --- | --- | --- | --- |
+| Manual waybill forms | ✅ | ✅ | Pages and API endpoints ready. |
+| Bulk CSV import | ✅ | ✅ | Mocked in dev; works for real once backend is running. |
+| Driver / courier workflow | ✅ | ⚠️ | UI ready; some backend scan/assignment endpoints exist. |
+| REST API input | N/A | ✅ | All core endpoints are implemented. |
+| E-commerce connectors | ✅ | ⚠️ | UI ready; backend sync worker still needed. |
+| External webhooks | ✅ | ✅ | Webhook dispatcher and UI implemented. |
+| ERP / WMS integration | ✅ | ⚠️ | UI ready; no backend connector yet. |
+| White-label portal | ✅ | ⚠️ | UI config page ready; public portal route not exposed yet. |
+| Live GPS map | ✅ | ✅ | Map + GPS endpoints + migration ready. |
+| Real-time dashboard | ✅ | ⚠️ | UI ready; analytics backend uses mock/sample data. |
+| Tracking / aggregated views | ✅ | ⚠️ | UI ready; some backend endpoints exist. |
+| Analytics & reporting | ✅ | ⚠️ | UI ready; most endpoints return sample data. |
+| Alerts / exceptions / geofencing | ✅ | ⚠️ | UI ready; backend logic partially implemented. |
+| Audit logs | ✅ | ✅ | Full UI and backend logging implemented. |
+| IoT sensor monitoring | ✅ | ⚠️ | UI ready; backend sensor ingestion not fully wired. |
+| Backend event pipeline | N/A | ✅ | Kafka, Redis, Elasticsearch, webhooks configured. |
+| Email / SMS notifications | ✅ | ⚠️ | UI settings ready; Celery workers need to be running. |
+
+**Legend:** ✅ = implemented / ready, ⚠️ = partially implemented or needs wiring, N/A = not a frontend feature.
+
+---
+
 ## A. How to Input / Insert / Add Real-World Data
 
 ### 1. Manual Dashboard Forms (Operations / Admin)

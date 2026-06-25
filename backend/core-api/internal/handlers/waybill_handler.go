@@ -160,9 +160,10 @@ func (h *WaybillHandler) ImportCSV(c *gin.Context) {
 		}
 	}
 
-	userID, _ := c.Get("userID")
-	userName, _ := c.Get("userName")
-	shipperName, _ := userName.(string)
+	userIDRaw, _ := c.Get("userID")
+	userNameRaw, _ := c.Get("userName")
+	userIDStr, _ := userIDRaw.(string)
+	shipperName, _ := userNameRaw.(string)
 
 	result := models.ImportWaybillResult{Errors: []string{}, WaybillIDs: []string{}}
 	line := 2
@@ -214,7 +215,7 @@ func (h *WaybillHandler) ImportCSV(c *gin.Context) {
 		wb := &models.Waybill{
 			ID:               uuid.New().String(),
 			TrackingNumber:   trackingNumber,
-			ShipperID:        userID.(string),
+			ShipperID:        userIDStr,
 			ShipperName:      shipperName,
 			Status:           models.StatusCreated,
 			RecipientName:    recipientName,
@@ -254,10 +255,8 @@ func (h *WaybillHandler) ImportCSV(c *gin.Context) {
 		line++
 	}
 
-	if userName, ok := c.Get("userName"); ok {
-		h.auditLogger.Log(c.Request.Context(), userID.(string), userName.(string), c.GetString("userRole"),
-			"WAYBILL_IMPORT", "waybill", "", "Imported "+strconv.Itoa(result.Created)+" waybills", c.ClientIP())
-	}
+	h.auditLogger.Log(c.Request.Context(), userIDStr, shipperName, c.GetString("userRole"),
+		"WAYBILL_IMPORT", "waybill", "", "Imported "+strconv.Itoa(result.Created)+" waybills", c.ClientIP())
 
 	c.JSON(http.StatusOK, result)
 }

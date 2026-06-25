@@ -36,7 +36,7 @@ type AttachmentHandler struct {
 }
 
 func (h *AttachmentHandler) List(c *gin.Context) {
-	waybillID := c.Param("waybillId")
+	waybillID := c.Param("id")
 
 	rows, err := h.db.Query(c, `SELECT id, waybill_id, file_name, file_type, file_size, data, uploaded_by, uploaded_at FROM attachments WHERE waybill_id=$1 ORDER BY uploaded_at DESC`, waybillID)
 	if err != nil {
@@ -58,7 +58,7 @@ func (h *AttachmentHandler) List(c *gin.Context) {
 }
 
 func (h *AttachmentHandler) Upload(c *gin.Context) {
-	waybillID := c.Param("waybillId")
+	waybillID := c.Param("id")
 	userID, _ := c.Get("userID")
 
 	var req uploadRequest

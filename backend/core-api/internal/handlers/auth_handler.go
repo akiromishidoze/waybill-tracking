@@ -66,8 +66,8 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		if len(req.Password) < 8 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
+		if len(req.Password) < 5 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
 			return
 		}
 
@@ -235,8 +235,8 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		if len(req.NewPassword) < 8 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
+		if len(req.NewPassword) < 5 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
 			return
 		}
 

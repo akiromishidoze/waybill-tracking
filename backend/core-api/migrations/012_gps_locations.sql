@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS gps_locations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
     waybill_id UUID NOT NULL REFERENCES waybills(id) ON DELETE CASCADE,
     courier_id UUID REFERENCES users(id) ON DELETE SET NULL,
     latitude DECIMAL(10, 8) NOT NULL,
@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS gps_locations (
     heading DECIMAL(5, 2),
     battery_level DECIMAL(5, 2),
     recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, recorded_at)
 );
 
 CREATE INDEX IF NOT EXISTS idx_gps_locations_waybill_id ON gps_locations(waybill_id);

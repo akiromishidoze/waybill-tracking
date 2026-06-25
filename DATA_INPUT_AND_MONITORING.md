@@ -11,22 +11,22 @@ Use this list to add real-world data into WaybillTrack and monitor it live. Chec
 Do these first. Nothing else works reliably until the backend is running and the database is migrated.
 
 ### Start Infrastructure
-- [1] Start PostgreSQL, Redis, Kafka, Elasticsearch, and Celery workers.
-- [2] Confirm the backend can connect: `curl http://localhost:8080/health`
-- **Current blocker:** PostgreSQL password authentication is failing. Find the correct `postgres` password before continuing.
+- [x] Start PostgreSQL, Redis, Kafka, Elasticsearch, and Celery workers. ✅ Done (Docker: postgres, redis, kafka, zookeeper up; Elasticsearch skipped due to network)
+- [x] Confirm the backend can connect: `curl http://localhost:8080/health`. ✅ Done — health endpoint returns `database: up`, `redis: up`, `kafka: up` (Elasticsearch down, non-critical).
 
 ### Apply Database Migrations
-- [3] Run `backend/core-api/scripts/migrate-up.sh`.
-- [4] Verify these tables exist: `users`, `waybills`, `scan_events`, `teams`, `attachments`, `gps_locations`, `ecommerce_platforms`, `white_label_config`, `audit_logs`, `webhooks`.
+- [x] Run `backend/core-api/scripts/migrate-up.sh`. ✅ Done — migrations applied automatically when the backend started.
+- [x] Verify these tables exist: `users`, `waybills`, `scan_events`, `teams`, `attachments`, `gps_locations`, `ecommerce_platforms`, `white_label_config`, `audit_logs`, `webhooks`. ✅ Done.
 
 ### Create the First Admin User
-- [5] Register via API:
+- [x] Register via API:
   ```bash
   curl -X POST http://localhost:8080/api/v1/auth/register \
     -H "Content-Type: application/json" \
     -d '{"email":"admin@example.com","password":"SecurePassword123","name":"Admin","role":"ADMIN"}'
   ```
-- [6] Log in through the dashboard at `/login` and confirm the JWT is stored.
+  ✅ Done — admin user created with ID `b26ef41b-daa2-4fc9-9edf-15ab0a0392e1`.
+- [ ] Log in through the dashboard at `/login` and confirm the JWT is stored.
 
 ---
 

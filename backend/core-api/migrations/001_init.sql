@@ -38,17 +38,19 @@ CREATE INDEX idx_waybills_status ON waybills(status);
 CREATE INDEX idx_waybills_created_at ON waybills(created_at DESC);
 
 CREATE TABLE scan_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID NOT NULL DEFAULT gen_random_uuid(),
     waybill_id UUID NOT NULL REFERENCES waybills(id) ON DELETE CASCADE,
     status VARCHAR(50) NOT NULL,
     location VARCHAR(255) NOT NULL DEFAULT '',
     courier_id UUID REFERENCES users(id),
     courier_name VARCHAR(255),
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    remark TEXT
+    remark TEXT,
+    PRIMARY KEY (id, timestamp)
 );
 
 CREATE INDEX idx_scan_events_waybill_id ON scan_events(waybill_id);
 CREATE INDEX idx_scan_events_timestamp ON scan_events(timestamp DESC);
 
+CREATE EXTENSION IF NOT EXISTS timescaledb;
 SELECT create_hypertable('scan_events', 'timestamp', if_not_exists => TRUE);

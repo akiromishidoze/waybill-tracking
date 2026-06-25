@@ -63,8 +63,8 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/gps/waybills/:id/history", gpsHandler.GetHistory)
 		protected.GET("/gps/waybills/:id/latest", gpsHandler.GetLatest)
 
-		protected.GET("/waybills/:waybillId/attachments", attachmentHandler.List)
-		protected.POST("/waybills/:waybillId/attachments", attachmentHandler.Upload)
+		protected.GET("/waybills/:id/attachments", attachmentHandler.List)
+		protected.POST("/waybills/:id/attachments", attachmentHandler.Upload)
 		protected.GET("/attachments/:attachmentId", attachmentHandler.Get)
 		protected.DELETE("/attachments/:attachmentId", attachmentHandler.Delete)
 
@@ -93,9 +93,11 @@ func main() {
 		log.Fatalf("migration failed: %v", err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: cfg.RedisURL,
-	})
+	rdbOpts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatalf("failed to parse redis url: %v", err)
+	}
+	rdb := redis.NewClient(rdbOpts)
 
 	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 	defer kafkaProducer.Close()

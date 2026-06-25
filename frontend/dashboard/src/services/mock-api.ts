@@ -582,17 +582,7 @@ export function installMockInterceptor(api: AxiosInstance) {
       config.adapter = () => Promise.resolve({ data, status, statusText: 'OK', headers: { 'content-type': 'application/json' }, config })
     }
 
-    if (url.includes('/auth/login') && method === 'post') {
-      const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
-      if (body?.email && body?.password) {
-        mock({ accessToken: MOCK_TOKEN, user: MOCK_USER })
-      } else {
-        mock({ error: 'Invalid credentials' }, 401)
-      }
-      return config
-    }
-    if (url.includes('/auth/me') && method === 'get') {
-      if (localStorage.getItem('access_token') === MOCK_TOKEN) mock(MOCK_USER)
+    if (url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/auth/register') || url.includes('/auth/refresh')) {
       return config
     }
 

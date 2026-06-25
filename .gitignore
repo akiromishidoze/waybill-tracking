@@ -26,3 +26,6 @@ infrastructure/docker/nginx/certs/*.pem
 
 # Production readiness checklist — local working notes
 PRODUCTION-READINESS.md
+
+# Local task tracking — not committed
+DATA_INPUT_AND_MONITORING.md

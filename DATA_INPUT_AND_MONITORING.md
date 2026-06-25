@@ -38,7 +38,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - [x] **Create a waybill** — go to `/waybills/new` and fill in shipper, recipient, origin, destination, and carrier. ✅ Backend verified (`POST /api/v1/waybills` returns real waybill with tracking number). Frontend now passes through to real backend.
 - [2] **Update a waybill** — open `/waybills/:id` and edit details or status.✅
 - [3] **Batch update status** — use `/waybills/batch-status` to change multiple waybills at once. ✅
-- [4] **Record a scan event** — use `/driver-app` or the waybill detail page to log `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, etc.
+- [4] **Record a scan event** — use `/driver-app` or the waybill detail page to log `PICKED_UP`, `IN_TRANSIT`, `OUT_FOR_DELIVERY`, etc. ✅
 - [5] **Assign a driver** — in `/driver-app` or the waybill detail page, assign a courier to a waybill.
 - [6] **Create teams / users / carriers** — go to `/teams`, `/users`, `/carriers`.
 - [7] **Configure integrations** — set up e-commerce, webhooks, ERP, and white-label portal in `/integrations/*`.

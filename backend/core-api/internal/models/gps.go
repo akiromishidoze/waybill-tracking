@@ -42,6 +42,6 @@ type WaybillGPSView struct {
 	Longitude      float64   `json:"longitude"`
 	Speed          *float64  `json:"speed,omitempty"`
 	Heading        *float64  `json:"heading,omitempty"`
-	RecordedAt     time.Time `json:"recordedAt"`
+	RecordedAt     *time.Time `json:"recordedAt,omitempty"`
 	SLABreached    bool      `json:"slaBreached"`
 }

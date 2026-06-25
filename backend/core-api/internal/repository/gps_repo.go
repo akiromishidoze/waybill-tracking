@@ -79,12 +79,23 @@ func (r *GPSRepository) ListCurrentWaybillViews(ctx context.Context) ([]models.W
 	}
 	defer rows.Close()
 
-	var views []models.WaybillGPSView
+	views := []models.WaybillGPSView{}
 	for rows.Next() {
 		var v models.WaybillGPSView
+		var speed, heading *float64
+		var recordedAt *time.Time
 		if err := rows.Scan(&v.ID, &v.TrackingNumber, &v.RecipientName, &v.Status, &v.Origin, &v.Destination,
-			&v.Latitude, &v.Longitude, &v.Speed, &v.Heading, &v.RecordedAt, &v.SLABreached); err != nil {
+			&v.Latitude, &v.Longitude, &speed, &heading, &recordedAt, &v.SLABreached); err != nil {
 			return nil, err
+		}
+		if speed != nil {
+			v.Speed = speed
+		}
+		if heading != nil {
+			v.Heading = heading
+		}
+		if recordedAt != nil {
+			v.RecordedAt = recordedAt
 		}
 		v.LastLocation = "GPS"
 		views = append(views, v)

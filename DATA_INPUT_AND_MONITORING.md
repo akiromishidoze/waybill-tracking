@@ -76,7 +76,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - **Status:** Frontend ✅ / Backend ⚠️ (sync worker needed)
 
 ### External Webhooks (Outbound)
-- [27] Go to `/integrations/webhooks` and click **Add Webhook**.
+- [27] Go to `/integrations/webhooks` and click **Add Webhook**. ✅
 - [28] Choose events: `waybill.created`, `scan.updated`, `waybill.delivered`.
 - [29] Trigger a waybill event and confirm the external endpoint receives the payload.
 - **Status:** Frontend ✅ / Backend ✅

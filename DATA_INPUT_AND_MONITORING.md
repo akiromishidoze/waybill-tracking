@@ -65,7 +65,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - [19] Add a scan event via `POST /api/v1/waybills/:id/scans`. ✅ 
 - [20] Submit a GPS location via `POST /api/v1/gps/location`. ✅
 - [21] Upload an attachment via `POST /api/v1/waybills/:waybillId/attachments`.✅
-- [22] Bulk import via `POST /api/v1/waybills/import`. 
+- [22] Bulk import via `POST /api/v1/waybills/import`. ✅
 - **Status:** Backend ✅
 
 ### E-Commerce Platform Connectors

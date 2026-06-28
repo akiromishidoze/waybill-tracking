@@ -136,7 +136,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Frontend ✅ / Backend ✅
 
 ### IoT Sensor Monitoring
-- [19] Open `/iot-sensors` and verify the dashboard loads.
+- [19] Open `/iot-sensors` and verify the dashboard loads. ✅
 - [20] Submit a sensor reading via API or integration and confirm it appears.
 - **Status:** Frontend ✅ / Backend ⚠️
 

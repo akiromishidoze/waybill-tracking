@@ -148,9 +148,9 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Backend ✅
 
 ### Email / SMS Notifications
-- [25] Open `/settings` and configure notification triggers.
-- [26] Trigger a delivery event and confirm the email/SMS is sent.
-- [27] Verify Celery workers are processing the queue.
+- [25] Open `/settings` and configure notification triggers. ✅
+- [26] Trigger a delivery event and confirm the email/SMS is sent. ✅
+- [27] Verify Celery workers are processing the queue. ✅
 - **Status:** Frontend ✅ / Backend ⚠️
 
 ---

@@ -118,7 +118,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Frontend ✅ / Backend ⚠️
 
 ### Analytics & Reporting
-- [10] Open `/analytics` and verify charts load.
+- [10] Open `/analytics` and verify charts load. ✅
 - [11] Check `/analytics/carrier-performance`, `/analytics/sla`, `/analytics/cost`, and `/analytics/demand-forecasting`.
 - [12] Schedule a report in `/analytics/scheduled-reports` and confirm delivery.
 - **Status:** Frontend ✅ / Backend ⚠️ (most endpoints return sample data)

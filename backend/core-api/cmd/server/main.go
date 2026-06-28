@@ -21,7 +21,7 @@ import (
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
-func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler, carrierHandler *handlers.CarrierHandler, webhookHandler *handlers.WebhookHandler, settingsHandler *handlers.SettingsHandler, analyticsHandler *handlers.AnalyticsHandler, ecommerceWebhookHandler *handlers.ECommerceWebhookHandler) {
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler, carrierHandler *handlers.CarrierHandler, webhookHandler *handlers.WebhookHandler, settingsHandler *handlers.SettingsHandler, analyticsHandler *handlers.AnalyticsHandler, ecommerceWebhookHandler *handlers.ECommerceWebhookHandler, erpHandler *handlers.ErpHandler) {
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, auditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -85,6 +85,13 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.POST("/webhooks", webhookHandler.Create)
 		protected.PATCH("/webhooks/:id", webhookHandler.Update)
 		protected.DELETE("/webhooks/:id", webhookHandler.Delete)
+
+		protected.GET("/erp-integrations", erpHandler.List)
+		protected.POST("/erp-integrations", erpHandler.Create)
+		protected.PATCH("/erp-integrations/:id", erpHandler.Update)
+		protected.DELETE("/erp-integrations/:id", erpHandler.Delete)
+		protected.POST("/erp-integrations/:id/test", erpHandler.Test)
+		protected.POST("/erp-integrations/:id/sync", erpHandler.Sync)
 
 		protected.GET("/carriers", carrierHandler.List)
 		protected.POST("/carriers", middleware.RoleMiddleware("OPS", "ADMIN"), carrierHandler.Create)
@@ -165,6 +172,8 @@ func main() {
 	settingsHandler := handlers.NewSettingsHandler(db)
 	analyticsHandler := handlers.NewAnalyticsHandler(db)
 	ecommerceWebhookHandler := handlers.NewECommerceWebhookHandler(waybillRepo, ecommerceRepo, db)
+	erpRepo := repository.NewErpRepository(db)
+	erpHandler := handlers.NewErpHandler(erpRepo)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	feature.RegisterAll(feature.DefaultFlags)
@@ -175,8 +184,8 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
 
-	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler)
-	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler)
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

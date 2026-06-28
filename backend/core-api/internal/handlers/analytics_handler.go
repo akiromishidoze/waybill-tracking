@@ -56,15 +56,21 @@ func (h *AnalyticsHandler) Stats(c *gin.Context) {
 
 func (h *AnalyticsHandler) SLAReport(c *gin.Context) {
 	ctx := context.Background()
-	from := c.DefaultQuery("from", time.Now().AddDate(0, 0, -7).Format(time.RFC3339))
-	to := c.DefaultQuery("to", time.Now().Format(time.RFC3339))
+	from := c.DefaultQuery("from", time.Now().AddDate(0, 0, -7).Format("2006-01-02"))
+	to := c.DefaultQuery("to", time.Now().Format("2006-01-02"))
+	if len(from) == 10 {
+		from = from + "T00:00:00Z"
+	}
+	if len(to) == 10 {
+		to = to + "T23:59:59Z"
+	}
 
 	rows, err := h.db.Query(ctx, `
-		SELECT DATE(updated_at) as date, COUNT(*) as total,
+		SELECT DATE(updated_at)::text as date, COUNT(*) as total,
 		       SUM(CASE WHEN sla_breached=false THEN 1 ELSE 0 END) as on_time,
 		       SUM(CASE WHEN sla_breached=true THEN 1 ELSE 0 END) as breached
 		FROM waybills
-		WHERE updated_at BETWEEN $1 AND $2
+		WHERE updated_at BETWEEN $1::timestamptz AND $2::timestamptz
 		GROUP BY DATE(updated_at)
 		ORDER BY date`, from, to)
 	if err != nil {

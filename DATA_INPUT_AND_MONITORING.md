@@ -127,7 +127,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - [13] Open `/operations/dwell-alerts` and confirm alerts are generated for stalled shipments. ✅
 - [14] Open `/escalations` and verify exception handling workflow. ✅
 - [15] Open `/geofence-events` and confirm geofence entries/exits are recorded. ✅
-- [16] Open `/auto-communications` and verify triggers are firing.
+- [16] Open `/auto-communications` and verify triggers are firing. ✅
 - **Status:** Frontend ✅ / Backend ⚠️
 
 ### Audit Logs

@@ -78,11 +78,11 @@ Complete these in order. Each method is independent once Phase 1 is done.
 ### External Webhooks (Outbound)
 - [27] Go to `/integrations/webhooks` and click **Add Webhook**. ✅
 - [28] Choose events: `waybill.created`, `scan.updated`, `waybill.delivered`. ✅
-- [29] Trigger a waybill event and confirm the external endpoint receives the payload.
+- [29] Trigger a waybill event and confirm the external endpoint receives the payload. ✅
 - **Status:** Frontend ✅ / Backend ✅
 
 ### ERP / WMS Integration
-- [30] Go to `/integrations/erp` and add an ERP connection.
+- [30] Go to `/integrations/erp` and add an ERP connection. ✅
 - [31] Test the connection.
 - [32] Sync waybills from the ERP into the dashboard.
 - **Status:** Frontend ✅ / Backend ⚠️ (connector not yet implemented)

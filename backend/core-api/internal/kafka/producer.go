@@ -14,7 +14,6 @@ type Producer struct {
 func NewProducer(brokers, defaultTopic string) *Producer {
 	w := &kafka.Writer{
 		Addr:     kafka.TCP(brokers),
-		Topic:    defaultTopic,
 		Balancer: &kafka.LeastBytes{},
 	}
 
@@ -36,6 +35,15 @@ func (p *Producer) PublishStatusChange(ctx context.Context, wb models.Waybill) e
 	return p.writer.WriteMessages(ctx, kafka.Message{
 		Topic: "status-changes",
 		Key: []byte(wb.ID),
+		Value: data,
+	})
+}
+
+func (p *Producer) PublishGPSEvent(ctx context.Context, loc models.GPSLocation) error {
+	data, _ := json.Marshal(loc)
+	return p.writer.WriteMessages(ctx, kafka.Message{
+		Topic: "gps.location",
+		Key: []byte(loc.WaybillID),
 		Value: data,
 	})
 }

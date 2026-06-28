@@ -1,23 +1,26 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 )
 
 type GPSHandler struct {
-	repo  *repository.GPSRepository
-	wsHub *ws.Hub
+	repo          *repository.GPSRepository
+	wsHub         *ws.Hub
+	kafkaProducer *kafka.Producer
 }
 
-func NewGPSHandler(repo *repository.GPSRepository, wsHub *ws.Hub) *GPSHandler {
-	return &GPSHandler{repo: repo, wsHub: wsHub}
+func NewGPSHandler(repo *repository.GPSRepository, wsHub *ws.Hub, kafkaProducer *kafka.Producer) *GPSHandler {
+	return &GPSHandler{repo: repo, wsHub: wsHub, kafkaProducer: kafkaProducer}
 }
 
 func (h *GPSHandler) CreateLocation(c *gin.Context) {
@@ -65,6 +68,12 @@ func (h *GPSHandler) CreateLocation(c *gin.Context) {
 			"longitude":  req.Longitude,
 			"recordedAt": recordedAt,
 		})
+	}
+
+	if h.kafkaProducer != nil {
+		if err := h.kafkaProducer.PublishGPSEvent(c.Request.Context(), *loc); err != nil {
+			log.Printf("kafka publish gps event error: %v", err)
+		}
 	}
 
 	c.JSON(http.StatusCreated, loc)

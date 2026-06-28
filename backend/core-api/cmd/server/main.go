@@ -190,7 +190,7 @@ func main() {
 	whiteLabelRepo := repository.NewWhiteLabelRepository(db)
 	whiteLabelHandler := handlers.NewWhiteLabelHandler(whiteLabelRepo)
 	gpsRepo := repository.NewGPSRepository(db)
-	gpsHandler := handlers.NewGPSHandler(gpsRepo, wsHub)
+	gpsHandler := handlers.NewGPSHandler(gpsRepo, wsHub, kafkaProducer)
 	wsHandler := handlers.NewWSHandler(wsHub, waybillRepo, cfg.JWTSecret)
 	attachmentHandler := handlers.NewAttachmentHandler(db)
 	driverRepo := repository.NewDriverRepository(db)

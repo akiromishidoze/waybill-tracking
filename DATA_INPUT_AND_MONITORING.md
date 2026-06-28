@@ -107,8 +107,8 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Frontend ✅ / Backend ✅
 
 ### Real-Time Dashboard
-- [5] Open `/dashboard` and confirm stats reflect real waybill counts.
-- [6] Check SLA cards and recent activity feed.
+- [5] Open `/dashboard` and confirm stats reflect real waybill counts. ✅
+- [6] Check SLA cards and recent activity feed. 
 - [7] Refresh the page after creating a waybill and confirm the numbers update.
 - **Status:** Frontend ✅ / Backend ⚠️ (analytics still uses sample data)
 

@@ -26,7 +26,7 @@ func (r *ECommerceRepository) ListPlatforms(ctx context.Context) ([]models.EComm
 	}
 	defer rows.Close()
 
-	var platforms []models.ECommercePlatform
+	platforms := []models.ECommercePlatform{}
 	for rows.Next() {
 		var p models.ECommercePlatform
 		if err := rows.Scan(
@@ -111,7 +111,7 @@ func (r *ECommerceRepository) ListSyncLogs(ctx context.Context, limit int) ([]mo
 	}
 	defer rows.Close()
 
-	var logs []models.ECommerceSyncLog
+	logs := []models.ECommerceSyncLog{}
 	for rows.Next() {
 		var l models.ECommerceSyncLog
 		if err := rows.Scan(&l.ID, &l.PlatformID, &l.Platform, &l.StoreName, &l.Status, &l.OrdersSynced, &l.ErrorsCount, &l.SyncedAt); err != nil {

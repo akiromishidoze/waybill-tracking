@@ -683,7 +683,6 @@ export function installMockInterceptor(api: AxiosInstance) {
       return config
     }
     if (method === 'get' && key === 'integrations/ecommerce') {
-      mock(seedECommerceDashboard)
       return config
     }
     if (method === 'get' && key === 'integrations/white-label') {
@@ -709,7 +708,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
 
     // Pass real-backend resources through without mocking
-    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings', 'analytics']
+    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings', 'analytics', 'integrations']
     if (realBackendKeys.includes(key) || realBackendKeys.includes(collKey)) {
       return config
     }

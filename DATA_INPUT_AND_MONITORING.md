@@ -89,7 +89,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 
 ### White-Label Public Portal
 - [33] Go to `/integrations/white-label` and configure brand name, color, support contacts, and portal URL. ✅
-- [34] Enable the portal. 
+- [34] Enable the portal. ✅
 - [35] Open the public tracking URL and look up a real tracking number.
 - **Status:** Frontend ✅ / Backend ⚠️ (public portal route not exposed yet)
 

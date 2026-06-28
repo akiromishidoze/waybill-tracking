@@ -141,7 +141,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Frontend ✅ / Backend ⚠️
 
 ### Backend Event Pipeline Monitoring
-- [21] Confirm Kafka is publishing `waybill.created`, `scan.updated`, and `gps.location` events.
+- [21] Confirm Kafka is publishing `waybill.created`, `scan.updated`, and `gps.location` events. ✅
 - [22] Confirm Elasticsearch indexes new waybills for search.
 - [23] Confirm Redis invalidates cache on updates.
 - [24] Confirm webhooks are dispatched to configured URLs.

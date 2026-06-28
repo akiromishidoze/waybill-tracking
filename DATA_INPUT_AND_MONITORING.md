@@ -132,7 +132,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 
 ### Audit Logs
 - [17] Open `/audit-logs` and confirm every create/update action is logged. ✅
-- [18] Verify user, role, action type, and timestamp are recorded.
+- [18] Verify user, role, action type, and timestamp are recorded. ✅
 - **Status:** Frontend ✅ / Backend ✅
 
 ### IoT Sensor Monitoring

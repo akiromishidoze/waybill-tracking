@@ -72,7 +72,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 - [23] Go to `/integrations/ecommerce` and click **Add Platform**. ✅
 - [24] Enter platform name, store name, store URL, and webhook URL. ✅
 - [25] Save the platform. ✅
-- [26] Send a test order webhook to the configured URL and verify a waybill is created.
+- [26] Send a test order webhook to the configured URL and verify a waybill is created. ✅
 - **Status:** Frontend ✅ / Backend ⚠️ (sync worker needed)
 
 ### External Webhooks (Outbound)

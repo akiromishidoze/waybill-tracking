@@ -83,7 +83,7 @@ Complete these in order. Each method is independent once Phase 1 is done.
 
 ### ERP / WMS Integration
 - [30] Go to `/integrations/erp` and add an ERP connection. ✅
-- [31] Test the connection.
+- [31] Test the connection. ✅
 - [32] Sync waybills from the ERP into the dashboard.
 - **Status:** Frontend ✅ / Backend ⚠️ (connector not yet implemented)
 

@@ -113,8 +113,8 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - **Status:** Frontend ✅ / Backend ⚠️ (analytics still uses sample data)
 
 ### Tracking & Aggregated Views
-- [8] Open `/tracking` and search for a real tracking number.
-- [9] Open `/aggregated-tracking` and confirm the waybill appears in the list.
+- [8] Open `/tracking` and search for a real tracking number. ✅
+- [9] Open `/aggregated-tracking` and confirm the waybill appears in the list. ✅
 - **Status:** Frontend ✅ / Backend ⚠️
 
 ### Analytics & Reporting

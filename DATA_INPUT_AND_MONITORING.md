@@ -103,7 +103,7 @@ Use these screens and tools to watch the data you entered in Phase 2.
 - [1] Open `/map` and confirm active shipments appear as markers. ✅
 - [2] Use `/gps-simulator` to send a new coordinate for a waybill. ✅
 - [3] Return to `/map` and confirm the marker moves within 15 seconds. ✅
-- [4] (With backend running) confirm WebSocket live updates instead of polling.
+- [4] (With backend running) confirm WebSocket live updates instead of polling. ✅
 - **Status:** Frontend ✅ / Backend ✅
 
 ### Real-Time Dashboard

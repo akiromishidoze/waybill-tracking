@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from app.api import analytics, reports, health
+from app.api import analytics, reports, health, notifications
 from app.core.config import settings
 
 origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()]
@@ -26,7 +26,9 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(analytics.router, prefix="/api/v1/analytics")
 app.include_router(reports.router, prefix="/api/v1/reports")
+app.include_router(notifications.router, prefix="/api/v1/notifications")
 app.include_router(analytics.router, prefix="/api/analytics")
 app.include_router(reports.router, prefix="/api/reports")
+app.include_router(notifications.router, prefix="/api/notifications")
 
 Instrumentator().instrument(app).expose(app)

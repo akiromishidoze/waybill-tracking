@@ -5,8 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
+	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/models"
+	"github.com/waybill-tracking/core-api/internal/notifications"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	"github.com/waybill-tracking/core-api/internal/utils"
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
@@ -24,11 +26,12 @@ type WaybillHandler struct {
 	wsHub         *ws.Hub
 	esClient      *es.Client
 	webhooks      *wh.Dispatcher
+	notifications *notifications.Dispatcher
 	auditLogger   *repository.AuditLogger
 }
 
-func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher, al *repository.AuditLogger) *WaybillHandler {
-	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec, webhooks: wd, auditLogger: al}
+func NewWaybillHandler(repo *repository.WaybillRepository, kp *kafka.Producer, hub *ws.Hub, ec *es.Client, wd *wh.Dispatcher, nd *notifications.Dispatcher, al *repository.AuditLogger) *WaybillHandler {
+	return &WaybillHandler{repo: repo, kafkaProducer: kp, wsHub: hub, esClient: ec, webhooks: wd, notifications: nd, auditLogger: al}
 }
 
 func (h *WaybillHandler) List(c *gin.Context) {
@@ -379,6 +382,10 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
+
+	if feature.IsEnabled("NOTIFICATIONS") && wb.Status == models.StatusDelivered {
+		h.notifications.DispatchDeliveryNotification(c.Request.Context(), wb)
+	}
 
 	userID, _ := c.Get("userID")
 	userName, _ := c.Get("userName")

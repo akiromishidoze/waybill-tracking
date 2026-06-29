@@ -60,7 +60,7 @@ var DefaultFlags = []Flag{
 	{Key: "ANOMALY_DETECTION", Default: false},
 	{Key: "EXPORT_CSV", Default: true},
 	{Key: "COURIER_ASSIGNMENTS", Default: true},
-	{Key: "NOTIFICATIONS", Default: false},
+	{Key: "NOTIFICATIONS", Default: true},
 	{Key: "ETA_PREDICTION", Default: false},
 	{Key: "BETA_DASHBOARD", Default: false},
 }

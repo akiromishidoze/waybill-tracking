@@ -31,7 +31,7 @@ def send_email_notification(to: str, subject: str, body: str):
         return
 
     message = Mail(
-        from_email="noreply@waybilltracking.com",
+        from_email=settings.SENDER_EMAIL,
         to_emails=to,
         subject=subject,
         html_content=body,
@@ -61,7 +61,7 @@ def send_sms_notification(to: str, message: str):
         client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
         twilio_msg = client.messages.create(
             to=to,
-            from_="+12025551234",
+            from_=settings.SENDER_PHONE,
             body=message,
         )
 

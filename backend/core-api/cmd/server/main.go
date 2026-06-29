@@ -16,6 +16,7 @@ import (
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
 	"github.com/waybill-tracking/core-api/internal/middleware"
 	"github.com/waybill-tracking/core-api/internal/migrator"
+	"github.com/waybill-tracking/core-api/internal/notifications"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	"github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
@@ -184,7 +185,8 @@ func main() {
 	auditLogHandler := handlers.NewAuditLogHandler(auditLogRepo)
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, auditLogger)
+	notificationDispatcher := notifications.NewDispatcher(cfg.AnalyticsAPIURL, cfg.InternalAPIKey)
+	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, notificationDispatcher, auditLogger)
 	teamRepo := repository.NewTeamRepository(db)
 	teamHandler := handlers.NewTeamHandler(teamRepo, waybillRepo)
 	ecommerceRepo := repository.NewECommerceRepository(db)

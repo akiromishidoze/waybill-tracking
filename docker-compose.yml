@@ -70,6 +70,8 @@ services:
       ELASTICSEARCH_URL: "http://elasticsearch:9200"
       KAFKA_BROKERS: "kafka:9092"
       JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
+      ANALYTICS_API_URL: "http://analytics-api:8000"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-change-me-in-production}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,6 +93,9 @@ services:
       REDIS_URL: "redis://redis:6379/0"
       KAFKA_BROKERS: "kafka:9092"
       JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-change-me-in-production}"
+      SENDER_EMAIL: "${SENDER_EMAIL:-noreply@waybilltracking.com}"
+      SENDER_PHONE: "${SENDER_PHONE:-+12025551234}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,6 +110,11 @@ services:
     environment:
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/waybill"
       REDIS_URL: "redis://redis:6379/0"
+      SENDGRID_KEY: "${SENDGRID_KEY:-}"
+      TWILIO_SID: "${TWILIO_SID:-}"
+      TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN:-}"
+      SENDER_EMAIL: "${SENDER_EMAIL:-noreply@waybilltracking.com}"
+      SENDER_PHONE: "${SENDER_PHONE:-+12025551234}"
     depends_on:
       - redis
       - analytics-api

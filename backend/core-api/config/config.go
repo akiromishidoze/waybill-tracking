@@ -18,6 +18,8 @@ type Config struct {
 	TwilioSID        string
 	TwilioAuthToken  string
 	SendGridKey      string
+	AnalyticsAPIURL  string
+	InternalAPIKey   string
 	MigrationsDir    string
 	AllowedOrigins   []string
 }
@@ -38,6 +40,8 @@ func Load() *Config {
 		TwilioSID: getEnv("TWILIO_SID", ""),
 		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),
 		SendGridKey: getEnv("SENDGRID_KEY", ""),
+		AnalyticsAPIURL: getEnv("ANALYTICS_API_URL", "http://localhost:8000"),
+		InternalAPIKey: getEnv("INTERNAL_API_KEY", ""),
 		AllowedOrigins: getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 

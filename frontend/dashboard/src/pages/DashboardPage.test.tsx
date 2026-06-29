@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DashboardPage from './DashboardPage'
 
@@ -15,7 +16,9 @@ function renderWithProviders(ui: React.ReactElement) {
   })
 
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    </BrowserRouter>,
   )
 }
 
@@ -33,8 +36,8 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Pending Pickup')).toBeDefined()
   })
 
-  it('renders SLA chart heading', () => {
+  it('renders Dashboard heading', () => {
     renderWithProviders(<DashboardPage />)
-    expect(screen.getByText('SLA Compliance (%)')).toBeDefined()
+    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeDefined()
   })
 })

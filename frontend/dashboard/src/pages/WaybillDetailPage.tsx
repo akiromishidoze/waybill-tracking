@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Package, Truck, MapPin, CheckCircle, XCircle, RotateCcw, Ban, ScanLine, AlertTriangle, FileText, User, Shield, Paperclip, Download, Trash2, Upload, ArrowLeftRight, RefreshCw, Clock, LogIn, LogOut } from 'lucide-react'
 import { waybillService, teamService, attachmentService, analyticsService, returnService, dwellTimeService, geofenceService } from '@/services/api'
+import AddScanForm from '@/components/AddScanForm'
 import ConfirmModal from '@/components/ConfirmModal'
 import type { Waybill, ExceptionCode, EventType, WaybillStatus, Attachment, ReturnStatus, DwellSegment, GeofenceEvent } from '@/types/waybill'
 import { EXCEPTION_LABELS, MILESTONE_LABELS, EVENT_TYPE_COLORS, RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
@@ -457,7 +458,10 @@ export default function WaybillDetailPage() {
       ))}
 
       <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 10, marginBottom: '1.5rem' }}>
-        <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Milestone Event Log</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h3 style={{ fontWeight: 600 }}>Milestone Event Log</h3>
+          <AddScanForm waybillId={id!} onAdded={() => queryClient.invalidateQueries({ queryKey: ['waybill', id] })} />
+        </div>
         {groupedEvents.length ? (
           <div style={{ position: 'relative', paddingLeft: '2rem' }}>
             {groupedEvents.map((group) => (

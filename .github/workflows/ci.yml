@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+      - run: go mod tidy
       - run: go mod download
       - run: go vet ./...
       - run: go test ./... -v -race -coverprofile=coverage.out
@@ -41,6 +42,8 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pip install pytest pytest-asyncio
       - run: python -m pytest tests/ -v --cov=app
+        env:
+          JWT_SECRET: ci-test-secret-value-at-least-32-chars
 
   test-dashboard:
     runs-on: ubuntu-latest
@@ -53,7 +56,8 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-      - run: npm ci
+          cache-dependency-path: frontend/dashboard/package-lock.json
+      - run: npm install --legacy-peer-deps
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test -- --run

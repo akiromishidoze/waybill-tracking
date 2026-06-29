@@ -172,7 +172,25 @@ services:
       - "9090:9090"
     volumes:
       - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml
       - prometheus_data:/prometheus
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@postgres:5432/waybill?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    command: --kafka.server=kafka:29092
+    ports:
+      - "9308:9308"
+    depends_on:
+      - kafka
 
   loki:
     image: grafana/loki:3.0.0

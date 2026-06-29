@@ -46,7 +46,11 @@ func Load() *Config {
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {
-		log.Println("WARNING: JWT_SECRET is set to the default placeholder. Change it in production.")
+		log.Fatalf("FATAL: JWT_SECRET is set to the default placeholder. Set a strong secret before starting.")
+	}
+
+	if len(cfg.JWTSecret) < 32 {
+		log.Fatalf("FATAL: JWT_SECRET must be at least 32 characters long.")
 	}
 
 	return cfg

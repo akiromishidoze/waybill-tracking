@@ -69,9 +69,9 @@ services:
       REDIS_URL: "redis://redis:6379/0"
       ELASTICSEARCH_URL: "http://elasticsearch:9200"
       KAFKA_BROKERS: "kafka:9092"
-      JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in the environment}"
       ANALYTICS_API_URL: "http://analytics-api:8000"
-      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-change-me-in-production}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in the environment}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,8 +92,8 @@ services:
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/waybill"
       REDIS_URL: "redis://redis:6379/0"
       KAFKA_BROKERS: "kafka:9092"
-      JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
-      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-change-me-in-production}"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in the environment}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in the environment}"
       SENDER_EMAIL: "${SENDER_EMAIL:-noreply@waybilltracking.com}"
       SENDER_PHONE: "${SENDER_PHONE:-+12025551234}"
     depends_on:

@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -13,6 +14,15 @@ class Settings(BaseSettings):
     SENDER_PHONE: str = "+12025551234"
     REPORT_EMAIL: str = "ops@waybilltracking.com"
     ALLOWED_ORIGINS: str = "http://localhost:3010"
+
+    @field_validator("JWT_SECRET")
+    @classmethod
+    def validate_jwt_secret(cls, v: str) -> str:
+        if v == "change-me-in-production":
+            raise ValueError("JWT_SECRET must be set to a strong secret before starting.")
+        if len(v) < 32:
+            raise ValueError("JWT_SECRET must be at least 32 characters long.")
+        return v
 
     class Config:
         env_file = ".env"

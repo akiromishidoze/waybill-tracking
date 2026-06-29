@@ -19,6 +19,12 @@ class DeliveryNotificationRequest(BaseModel):
     destination: str
 
 
+class EmailRequest(BaseModel):
+    to: str
+    subject: str
+    body: str
+
+
 @router.post(
     "/dispatch",
     summary="Dispatch delivery notifications",
@@ -50,3 +56,19 @@ async def dispatch_notifications(
         send_sms_notification.delay(req.recipientPhone, sms_body)
 
     return {"message": "notifications queued"}
+
+
+@router.post(
+    "/email",
+    summary="Send a generic email",
+    description="Enqueues a Celery email task. Protected by an internal API key when configured.",
+)
+async def send_email(
+    req: EmailRequest,
+    x_internal_api_key: str | None = Header(default=None, alias="X-Internal-API-Key"),
+):
+    if settings.INTERNAL_API_KEY and x_internal_api_key != settings.INTERNAL_API_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal API key")
+
+    send_email_notification.delay(req.to, req.subject, req.body)
+    return {"message": "email queued"}

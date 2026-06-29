@@ -9,7 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/config"
+	"github.com/redis/go-redis/v9"
+	"github.com/waybill-tracking/core-api/internal/password"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	"github.com/waybill-tracking/core-api/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -68,8 +72,8 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		if len(req.Password) < 5 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
+		if msg := utils.ValidatePassword(req.Password); msg != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 			return
 		}
 
@@ -103,11 +107,16 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
-func LoginHandler(jwtSecret string, db *pgxpool.Pool, auditLogger *repository.AuditLogger) gin.HandlerFunc {
+func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLogger *repository.AuditLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req loginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if utils.IsAccountLocked(c.Request.Context(), rdb, req.Email) {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "account temporarily locked due to failed login attempts, try again later"})
 			return
 		}
 
@@ -128,9 +137,14 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, auditLogger *repository.Au
 		}
 
 		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
+			utils.RecordFailedLogin(c.Request.Context(), rdb, req.Email)
+			auditLogger.Log(c.Request.Context(), user.ID, user.Name, user.Role,
+				"USER_LOGIN_FAILED", "user", user.ID, "Failed login attempt", c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
+
+		utils.ClearFailedLogin(c.Request.Context(), rdb, req.Email)
 
 		claims := jwt.MapClaims{
 			"sub":   user.ID,
@@ -237,8 +251,8 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		if len(req.NewPassword) < 5 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
+		if msg := utils.ValidatePassword(req.NewPassword); msg != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 			return
 		}
 
@@ -251,6 +265,80 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		_, err = db.Exec(c, `UPDATE users SET password=$1, updated_at=NOW() WHERE id=$2`, string(hashed), req.UserID)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "password updated"})
+	}
+}
+
+func ForgotPasswordHandler(db *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Email string `json:"email" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		var user struct {
+			ID    string
+			Email string
+		}
+		err := db.QueryRow(c, `SELECT id, email FROM users WHERE email=$1`, req.Email).Scan(&user.ID, &user.Email)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": "if the email is registered, a reset link has been sent"})
+			return
+		}
+
+		token, _, err := password.GenerateToken(c.Request.Context(), db, user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate reset token"})
+			return
+		}
+
+		password.SendResetEmail(cfg, user.Email, token)
+		c.JSON(http.StatusOK, gin.H{"message": "if the email is registered, a reset link has been sent"})
+	}
+}
+
+func ResetPasswordWithTokenHandler(db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Token       string `json:"token" binding:"required"`
+			NewPassword string `json:"newPassword" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if msg := utils.ValidatePassword(req.NewPassword); msg != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+			return
+		}
+
+		userID, err := password.ValidateToken(c.Request.Context(), db, req.Token)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired token"})
+			return
+		}
+
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			return
+		}
+
+		_, err = db.Exec(c, `UPDATE users SET password=$1, password_changed_at=NOW(), updated_at=NOW() WHERE id=$2`, string(hashed), userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update password"})
+			return
+		}
+
+		if err := password.MarkUsed(c.Request.Context(), db, req.Token); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to mark token used"})
 			return
 		}
 
@@ -345,8 +433,8 @@ func CreateUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		if len(req.Password) < 5 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
+		if msg := utils.ValidatePassword(req.Password); msg != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 			return
 		}
 

@@ -75,6 +75,7 @@ services:
       JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in the environment}"
       ANALYTICS_API_URL: "http://analytics-api:8000"
       INTERNAL_API_KEY: "${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in the environment}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3010}"
     depends_on:
       postgres:
         condition: service_healthy

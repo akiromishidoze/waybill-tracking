@@ -20,6 +20,7 @@ type Config struct {
 	SendGridKey      string
 	AnalyticsAPIURL  string
 	InternalAPIKey   string
+	FrontendURL      string
 	MigrationsDir    string
 	AllowedOrigins   []string
 }
@@ -42,6 +43,7 @@ func Load() *Config {
 		SendGridKey: getEnv("SENDGRID_KEY", ""),
 		AnalyticsAPIURL: getEnv("ANALYTICS_API_URL", "http://localhost:8000"),
 		InternalAPIKey: getEnv("INTERNAL_API_KEY", ""),
+		FrontendURL:     getEnv("FRONTEND_URL", "http://localhost:3010"),
 		AllowedOrigins: getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 

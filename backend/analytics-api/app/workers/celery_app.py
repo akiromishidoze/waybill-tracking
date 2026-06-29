@@ -26,5 +26,11 @@ celery_app.conf.update(
             "task": "app.workers.tasks.scan_for_anomalies",
             "schedule": crontab(minute="*/30"),
         },
+        "sync-carrier-tracking": {
+            "task": "app.workers.carrier_sync.sync_carrier_tracking",
+            "schedule": crontab(minute="*/15"),
+        },
     },
 )
+
+from app.workers import carrier_sync, tasks  # noqa: E402,F401

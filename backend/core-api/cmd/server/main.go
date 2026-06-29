@@ -142,6 +142,8 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		admin.Use(middleware.RoleMiddleware("ADMIN"))
 		{
 			admin.GET("/users", handlers.ListUsersHandler(db))
+			admin.POST("/users", handlers.CreateUserHandler(db))
+			admin.DELETE("/users/:id", handlers.DeleteUserHandler(db))
 			admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
 			admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
 			admin.GET("/audit-logs", auditLogHandler.List)

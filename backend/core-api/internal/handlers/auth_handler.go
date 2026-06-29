@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -333,5 +334,78 @@ func UpdateUserRoleHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "role updated"})
+	}
+}
+
+func CreateUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req registerRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if len(req.Password) < 5 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 5 characters"})
+			return
+		}
+
+		if !validRoles[req.Role] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid role"})
+			return
+		}
+
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			return
+		}
+
+		var userID string
+		err = db.QueryRow(c,
+			`INSERT INTO users (email, name, password, role, company) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+			req.Email, req.Name, string(hashed), req.Role, req.Company,
+		).Scan(&userID)
+		if err != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{
+			"id":      userID,
+			"email":   req.Email,
+			"name":    req.Name,
+			"role":    req.Role,
+			"company": req.Company,
+		})
+	}
+}
+
+func DeleteUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		adminID, _ := c.Get("userID")
+		if adminID == id {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "cannot delete yourself"})
+			return
+		}
+
+		res, err := db.Exec(c, `DELETE FROM users WHERE id=$1`, id)
+		if err != nil {
+			if strings.Contains(err.Error(), "23503") {
+				c.JSON(http.StatusConflict, gin.H{"error": "cannot delete user with associated records; reassign or remove related waybills first"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if res.RowsAffected() == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 	}
 }

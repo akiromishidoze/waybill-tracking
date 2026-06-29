@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, X, Check, Users as UsersIcon } from 'lucide-react
 import { SkeletonTableRow } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
 import ConfirmModal from '@/components/ConfirmModal'
+import { useToast } from '@/contexts/ToastContext'
 
 const ROLE_OPTIONS = ['SHIPPER', 'COURIER', 'OPS', 'ADMIN']
 const ROLE_COLORS: Record<string, string> = {
@@ -14,10 +15,11 @@ const ROLE_COLORS: Record<string, string> = {
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null)
-  const [form, setForm] = useState({ email: '', name: '', role: 'SHIPPER', company: '' })
+  const [form, setForm] = useState({ email: '', name: '', role: 'SHIPPER', company: '', password: '' })
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
@@ -26,22 +28,25 @@ export default function UsersPage() {
 
   const createUser = useMutation({
     mutationFn: () => userService.create(form as any),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm() },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm(); toast.success('User created') },
+    onError: (err: any) => toast.error(err?.response?.data?.error || 'Failed to create user'),
   })
 
   const updateUser = useMutation({
     mutationFn: () => userService.update(editingId!, form as any),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setEditingId(null); resetForm() },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setEditingId(null); resetForm(); toast.success('User updated') },
+    onError: (err: any) => toast.error(err?.response?.data?.error || 'Failed to update user'),
   })
 
   const deleteUser = useMutation({
     mutationFn: (id: string) => userService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setDeleteUserId(null); toast.success('User deleted') },
+    onError: (err: any) => { setDeleteUserId(null); toast.error(err?.response?.data?.error || 'Failed to delete user') },
   })
 
-  const resetForm = () => setForm({ email: '', name: '', role: 'SHIPPER', company: '' })
+  const resetForm = () => setForm({ email: '', name: '', role: 'SHIPPER', company: '', password: '' })
 
-  const openEdit = (u: User) => { setEditingId(u.id); setForm({ email: u.email, name: u.name, role: u.role, company: u.company || '' }) }
+  const openEdit = (u: User) => { setEditingId(u.id); setForm({ email: u.email, name: u.name, role: u.role, company: u.company || '', password: '' }) }
   const openAdd = () => { resetForm(); setEditingId(null); setShowForm(true) }
 
   return (
@@ -63,6 +68,9 @@ export default function UsersPage() {
             </select>
           </div>
           <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Company</label><input value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} /></div>
+          {!editingId && (
+            <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Password</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} /></div>
+          )}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button onClick={() => editingId ? updateUser.mutate() : createUser.mutate()} disabled={createUser.isPending || updateUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <Check size={14} /> {editingId ? 'Update' : 'Create'}

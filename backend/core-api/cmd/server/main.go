@@ -3,7 +3,11 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -165,7 +169,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
-	defer db.Close()
 
 	migrationsDir := filepath.Join("migrations")
 	if err := migrator.New(db, migrationsDir).Run(context.Background()); err != nil {
@@ -179,7 +182,6 @@ func main() {
 	rdb := redis.NewClient(rdbOpts)
 
 	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
-	defer kafkaProducer.Close()
 
 	wsHub := ws.NewHub()
 	esClient := elastic.NewClient(cfg.ElasticsearchURL)
@@ -244,6 +246,39 @@ func main() {
 
 	r.GET("/health", healthHandler.Check)
 
-	log.Printf("Core API starting on :%s", cfg.Port)
-	r.Run(":" + cfg.Port)
+	srv := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: r,
+	}
+
+	go func() {
+		log.Printf("Core API starting on :%s", cfg.Port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+	log.Println("shutdown signal received, gracefully stopping core-api...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+	}
+
+	if err := kafkaProducer.Close(); err != nil {
+		log.Printf("kafka producer close error: %v", err)
+	}
+
+	if err := rdb.Close(); err != nil {
+		log.Printf("redis close error: %v", err)
+	}
+
+	db.Close()
+	log.Println("core-api stopped")
 }

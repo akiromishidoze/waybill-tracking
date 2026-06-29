@@ -1,0 +1,153 @@
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/terraform/**"
+  pull_request:
+    paths:
+      - "infrastructure/terraform/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  # ─── AWS ─────────────────────────────────────────────────────────────────────
+  terraform-aws:
+    name: Terraform AWS
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/aws
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.x"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Write backend config
+        run: |
+          cat > backend.tfbackend <<EOF
+          bucket         = "${{ vars.TF_STATE_BUCKET_AWS }}"
+          key            = "terraform/aws/terraform.tfstate"
+          region         = "${{ vars.AWS_REGION || 'us-east-1' }}"
+          dynamodb_table = "${{ vars.TF_STATE_LOCK_TABLE || 'terraform-state-lock' }}"
+          encrypt        = true
+          EOF
+
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.tfbackend
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="subnet_ids=${{ vars.AWS_SUBNET_IDS }}" \
+            -out=tfplan \
+            -no-color 2>&1 | tee plan.txt
+        continue-on-error: true
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infrastructure/terraform/aws/plan.txt', 'utf8');
+            const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n...[truncated]' : plan;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform AWS Plan\n\`\`\`\n${truncated}\n\`\`\``
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply tfplan
+
+  # ─── GCP ─────────────────────────────────────────────────────────────────────
+  terraform-gcp:
+    name: Terraform GCP
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/gcp
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.x"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Write backend config
+        run: |
+          cat > backend.tfbackend <<EOF
+          bucket = "${{ vars.TF_STATE_BUCKET_GCP }}"
+          prefix = "terraform/gcp"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init -backend-config=backend.tfbackend
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="project_id=${{ vars.GCP_PROJECT_ID }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -out=tfplan \
+            -no-color 2>&1 | tee plan.txt
+        continue-on-error: true
+
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infrastructure/terraform/gcp/plan.txt', 'utf8');
+            const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n...[truncated]' : plan;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform GCP Plan\n\`\`\`\n${truncated}\n\`\`\``
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply tfplan

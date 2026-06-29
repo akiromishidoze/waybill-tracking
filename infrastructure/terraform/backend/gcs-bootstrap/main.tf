@@ -30,21 +30,34 @@ variable "region" {
 }
 
 resource "google_storage_bucket" "state" {
-  name          = var.bucket_name
-  project       = var.project_id
-  location      = var.region
-  storage_class = "STANDARD"
-  force_destroy = false
+  name                        = var.bucket_name
+  project                     = var.project_id
+  location                    = var.region
+  storage_class               = "STANDARD"
+  force_destroy               = false
+  uniform_bucket_level_access = true
 
   versioning {
     enabled = true
   }
 
-  encryption {
-    default_kms_key_name = null
+  public_access_prevention = "enforced"
+
+  lifecycle_rule {
+    condition {
+      num_newer_versions = 10
+    }
+    action {
+      type = "Delete"
+    }
   }
 }
 
 output "bucket_name" {
   value = google_storage_bucket.state.name
+}
+
+output "bucket_url" {
+  description = "GCS bucket URL — use as backend bucket in backend.tfbackend"
+  value       = google_storage_bucket.state.url
 }

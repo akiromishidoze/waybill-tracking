@@ -1,0 +1,25 @@
+# Terraform remote state backend config (contains bucket names / credentials)
+backend.tfbackend
+
+# Local state files (should never be committed when using remote state)
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Terraform working directories
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive variable files
+terraform.tfvars
+*.auto.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

@@ -44,6 +44,19 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "state" {
   bucket                  = aws_s3_bucket.state.id
   block_public_acls       = true
@@ -67,6 +80,16 @@ output "bucket_name" {
   value = aws_s3_bucket.state.id
 }
 
+output "bucket_arn" {
+  description = "ARN of the S3 state bucket — use in IAM policies"
+  value       = aws_s3_bucket.state.arn
+}
+
 output "dynamodb_table" {
   value = aws_dynamodb_table.lock.name
+}
+
+output "dynamodb_table_arn" {
+  description = "ARN of the DynamoDB lock table — use in IAM policies"
+  value       = aws_dynamodb_table.lock.arn
 }

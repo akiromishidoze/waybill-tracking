@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars and fill in real values (never commit terraform.tfvars).
+region      = "us-east-1"
+db_password = "CHANGE_ME_strong_password"
+subnet_ids  = ["subnet-aaaaaa", "subnet-bbbbbb", "subnet-cccccc"]

@@ -247,6 +247,9 @@ func main() {
 	})
 
 	r.GET("/health", healthHandler.Check)
+	r.GET("/docs", handlers.DocsHandler)
+	r.GET("/openapi.json", handlers.OpenAPIHandler)
+	r.GET("/openapi.yaml", handlers.OpenAPIHandler)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

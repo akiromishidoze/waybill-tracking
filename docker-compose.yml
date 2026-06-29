@@ -17,6 +17,24 @@ services:
       timeout: 5s
       retries: 5
 
+  db-backup:
+    build:
+      context: ./infrastructure/docker/postgres
+      dockerfile: Dockerfile.backup
+    environment:
+      POSTGRES_DB: "waybill"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      BACKUP_SCHEDULE: "${BACKUP_SCHEDULE:-0 2 * * *}"
+      BACKUP_RETENTION_DAYS: "${BACKUP_RETENTION_DAYS:-7}"
+    volumes:
+      - postgres_backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   redis:
     image: redis:7-alpine
     ports:
@@ -186,6 +204,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_backups:
   redis_data:
   es_data:
   prometheus_data:

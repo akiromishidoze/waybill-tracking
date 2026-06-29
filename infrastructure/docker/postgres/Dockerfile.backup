@@ -1,0 +1,19 @@
+FROM postgres:16-alpine
+
+RUN apk add --no-cache dcron && \
+    mkdir -p /backups /etc/cron.d
+
+COPY backup.sh /usr/local/bin/backup.sh
+RUN chmod +x /usr/local/bin/backup.sh
+
+ENV POSTGRES_DB=waybill \
+    POSTGRES_USER=postgres \
+    POSTGRES_HOST=postgres \
+    POSTGRES_PORT=5432 \
+    BACKUP_SCHEDULE="0 2 * * *" \
+    BACKUP_RETENTION_DAYS=7
+
+CMD echo "$BACKUP_SCHEDULE /usr/local/bin/backup.sh >> /var/log/cron.log 2>&1" > /etc/cron.d/backup && \
+    crontab /etc/cron.d/backup && \
+    touch /var/log/cron.log && \
+    crond -f -L /var/log/cron.log

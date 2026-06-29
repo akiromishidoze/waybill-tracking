@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: pip install pytest pytest-asyncio
+      - run: pip install pytest pytest-asyncio pytest-cov
       - run: python -m pytest tests/ -v --cov=app
         env:
           JWT_SECRET: ci-test-secret-value-at-least-32-chars

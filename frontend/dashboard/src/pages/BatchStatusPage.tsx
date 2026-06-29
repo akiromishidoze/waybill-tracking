@@ -32,7 +32,7 @@ export default function BatchStatusPage() {
     queryFn: () => waybillService.list({ search }).then((r) => r.data),
   })
 
-  const filtered = waybills?.filter((wb) => {
+  const filtered = waybills?.filter((wb: Waybill) => {
     if (!search) return true
     const q = search.toLowerCase()
     return wb.trackingNumber.toLowerCase().includes(q) || wb.shipperName?.toLowerCase().includes(q) || wb.recipientName?.toLowerCase().includes(q) || wb.destination?.toLowerCase().includes(q)

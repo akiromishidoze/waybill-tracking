@@ -135,7 +135,7 @@ func TestRegisterHandler_InvalidRole(t *testing.T) {
 func TestLoginHandler_InvalidJSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.POST("/auth/login", LoginHandler("secret", nil))
+	r.POST("/auth/login", LoginHandler("secret", nil, nil, nil))
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/auth/login", bytes.NewBufferString("{invalid"))
@@ -150,7 +150,7 @@ func TestLoginHandler_InvalidJSON(t *testing.T) {
 func TestLoginHandler_MissingEmail(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.POST("/auth/login", LoginHandler("secret", nil))
+	r.POST("/auth/login", LoginHandler("secret", nil, nil, nil))
 
 	body, _ := json.Marshal(map[string]string{
 		"password": "password123",
@@ -169,7 +169,7 @@ func TestLoginHandler_MissingEmail(t *testing.T) {
 func TestLoginHandler_MissingPassword(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.POST("/auth/login", LoginHandler("secret", nil))
+	r.POST("/auth/login", LoginHandler("secret", nil, nil, nil))
 
 	body, _ := json.Marshal(map[string]string{
 		"email": "test@example.com",
@@ -244,7 +244,7 @@ func TestRegisterHandler_NoContentType(t *testing.T) {
 func TestLoginHandler_NoContentType(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.POST("/auth/login", LoginHandler("secret", nil))
+	r.POST("/auth/login", LoginHandler("secret", nil, nil, nil))
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/auth/login", nil)

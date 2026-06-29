@@ -3,7 +3,8 @@ package websocket
 import (
 	"testing"
 	"time"
-	"github.com/gorilla/websocket"
+
+	gorillaws "github.com/gorilla/websocket"
 )
 
 func TestNewHub(t *testing.T) {
@@ -80,7 +81,7 @@ func TestBroadcastWithNoClients(t *testing.T) {
 
 func TestBroadcastWithNoSubscriptions(t *testing.T) {
 	h := NewHub()
-	_, s, err := websocket.DefaultDialer.Dial("ws://localhost:0", nil)
+	_, s, err := gorillaws.DefaultDialer.Dial("ws://localhost:0", nil)
 	if err == nil {
 		defer s.Close()
 	}

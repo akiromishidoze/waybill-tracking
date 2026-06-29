@@ -1,8 +1,9 @@
 import type { AxiosInstance } from 'axios'
 import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, AppSettings, Team, Attachment, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard } from '@/types/waybill'
 
-const MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
-const MOCK_TOKEN = 'mock-jwt-token-admin'
+const _MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
+const _MOCK_TOKEN = 'mock-jwt-token-admin'
+void _MOCK_USER; void _MOCK_TOKEN
 
 function uid() { return crypto.randomUUID?.() || Math.random().toString(36).slice(2, 14) }
 function ago(h: number) { return new Date(Date.now() - h * 3600000).toISOString() }
@@ -380,7 +381,7 @@ const seedCodPayments: CodPayment[] = [
   { id: 'cod-010', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', shipperName: 'Northern Traders Inc.', recipientName: 'Grace Villar', amount: 9100.00, fee: 273.00, netAmount: 8827.00, currency: 'PHP', collectedAt: ago(10), status: 'COLLECTED', carrierName: 'GoGo Xpress' },
 ]
 
-const seedECommerceDashboard: ECommerceDashboard = {
+const _seedECommerceDashboard: ECommerceDashboard = {
   platforms: [
     { id: 'ec-001', platform: 'Shopify', storeName: 'Philippine Treasures PH', connected: true, lastSync: ago(1), totalOrders: 12800, syncedOrders: 12750, webhookUrl: 'https://hooks.waybilltrack.com/shopify/treasures', storeUrl: 'https://philippine-treasures.myshopify.com' },
     { id: 'ec-002', platform: 'Lazada', storeName: 'Manila Lifestyle Store', connected: true, lastSync: ago(2), totalOrders: 9500, syncedOrders: 9400, webhookUrl: null, storeUrl: 'https://www.lazada.com.ph/shop/manila-lifestyle' },
@@ -400,6 +401,7 @@ const seedECommerceDashboard: ECommerceDashboard = {
   ],
   summary: { totalConnected: 4, totalDisconnected: 2, totalOrdersSynced: 36850, lastSyncAt: ago(1) },
 }
+void _seedECommerceDashboard
 
 const seedWhiteLabelPortal: WhiteLabelPortalData = {
   config: {

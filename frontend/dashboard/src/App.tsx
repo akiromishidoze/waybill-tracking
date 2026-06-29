@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import WaybillListPage from './pages/WaybillListPage'
+import WaybillNewPage from './pages/WaybillNewPage'
 import WaybillDetailPage from './pages/WaybillDetailPage'
 import TrackingPage from './pages/TrackingPage'
 import AnalyticsPage from './pages/AnalyticsPage'
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/waybills" element={<WaybillListPage />} />
+          <Route path="/waybills/new" element={<WaybillNewPage />} />
           <Route path="/waybills/import" element={<WaybillImportPage />} />
           <Route path="/waybills/:id" element={<WaybillDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />

@@ -29,7 +29,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 	api.GET("/features", feature.Handler())
 
 	public := api.Group("")
-	public.GET("/track/:trackingNumber", waybillHandler.Track)
+	public.GET("/track/:trackingNumber", middleware.RateLimitMiddleware(rdb, 100, 1*time.Minute), waybillHandler.Track)
 	public.GET("/exception-codes", waybillHandler.ListExceptionCodes)
 	public.POST("/ecommerce/webhook/:platformId", ecommerceWebhookHandler.ReceiveOrder)
 
@@ -90,15 +90,19 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/gps/waybills/:id/history", gpsHandler.GetHistory)
 		protected.GET("/gps/waybills/:id/latest", gpsHandler.GetLatest)
 
-		protected.GET("/analytics/stats", analyticsHandler.Stats)
-		protected.GET("/analytics/sla", analyticsHandler.SLAReport)
-		protected.GET("/analytics/carrier-performance", analyticsHandler.CarrierPerformance)
-		protected.GET("/analytics/region-performance", analyticsHandler.RegionPerformance)
-		protected.GET("/analytics/predict-eta/:waybillId", analyticsHandler.PredictETA)
-		protected.GET("/analytics/cost-per-shipment", analyticsHandler.CostPerShipment)
-		protected.GET("/analytics/demand-forecast", analyticsHandler.DemandForecast)
-		protected.GET("/analytics/carbon-footprint", analyticsHandler.CarbonFootprint)
-		protected.GET("/analytics/export", middleware.RoleMiddleware("ADMIN", "OPS"), analyticsHandler.ExportExcel)
+		analytics := protected.Group("/analytics")
+		analytics.Use(middleware.RateLimitMiddleware(rdb, 60, 1*time.Minute))
+		{
+			analytics.GET("/stats", analyticsHandler.Stats)
+			analytics.GET("/sla", analyticsHandler.SLAReport)
+			analytics.GET("/carrier-performance", analyticsHandler.CarrierPerformance)
+			analytics.GET("/region-performance", analyticsHandler.RegionPerformance)
+			analytics.GET("/predict-eta/:waybillId", analyticsHandler.PredictETA)
+			analytics.GET("/cost-per-shipment", analyticsHandler.CostPerShipment)
+			analytics.GET("/demand-forecast", analyticsHandler.DemandForecast)
+			analytics.GET("/carbon-footprint", analyticsHandler.CarbonFootprint)
+			analytics.GET("/export", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), middleware.RoleMiddleware("ADMIN", "OPS"), analyticsHandler.ExportExcel)
+		}
 
 		protected.GET("/analytics/scheduled-reports", scheduledReportHandler.List)
 		protected.POST("/analytics/scheduled-reports", scheduledReportHandler.Create)

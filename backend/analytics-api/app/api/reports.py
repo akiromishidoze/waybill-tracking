@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import datetime
+from datetime import datetime, date
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -8,11 +8,18 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import require_role
 from app.core.database import get_db
+from app.core.ratelimit import rate_limit
 import openpyxl
 
 router = APIRouter(tags=["Reports"])
 
+rate_limit_export = rate_limit(10, 60)
+
 HEADERS = ["Tracking #", "Shipper", "Recipient", "Destination", "Status", "Created", "Updated"]
+
+
+def _parse_date(value: str) -> date:
+    return datetime.strptime(value, "%Y-%m-%d").date()
 
 
 async def _fetch_waybill_rows(from_date: str, to_date: str, db: AsyncSession):
@@ -22,7 +29,7 @@ async def _fetch_waybill_rows(from_date: str, to_date: str, db: AsyncSession):
         FROM waybills
         WHERE created_at BETWEEN :from_date AND :to_date
         ORDER BY created_at DESC
-    """), {"from_date": from_date, "to_date": to_date})
+    """), {"from_date": _parse_date(from_date), "to_date": _parse_date(to_date)})
     return result.mappings().all()
 
 
@@ -44,6 +51,7 @@ async def export_report(
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
     _user: dict = Depends(require_role("ADMIN", "OPS")),
+    _rate_limit: None = Depends(rate_limit_export),
 ):
     rows = await _fetch_waybill_rows(from_date, to_date, db)
 
@@ -76,6 +84,7 @@ async def export_csv(
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
     _user: dict = Depends(require_role("ADMIN", "OPS")),
+    _rate_limit: None = Depends(rate_limit_export),
 ):
     rows = await _fetch_waybill_rows(from_date, to_date, db)
 

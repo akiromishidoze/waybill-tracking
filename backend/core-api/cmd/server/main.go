@@ -40,6 +40,8 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 	public.GET("/track/:trackingNumber", middleware.RateLimitMiddleware(rdb, 100, 1*time.Minute), waybillHandler.Track)
 	public.GET("/exception-codes", waybillHandler.ListExceptionCodes)
 	public.POST("/ecommerce/webhook/:platformId", ecommerceWebhookHandler.ReceiveOrder)
+	public.GET("/portal/:slug", middleware.RateLimitMiddleware(rdb, 60, 1*time.Minute), whiteLabelHandler.GetPublicPortal)
+	public.GET("/portal/:slug/track/:trackingNumber", middleware.RateLimitMiddleware(rdb, 60, 1*time.Minute), whiteLabelHandler.PublicTrack)
 
 	protected := api.Group("")
 	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))

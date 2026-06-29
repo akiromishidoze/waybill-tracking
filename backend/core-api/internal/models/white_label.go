@@ -4,6 +4,7 @@ import "time"
 
 type WhiteLabelConfig struct {
 	ID           string    `json:"id"`
+	Slug         string    `json:"slug"`
 	BrandName    string    `json:"brandName"`
 	LogoURL      *string   `json:"logoUrl,omitempty"`
 	CustomDomain *string   `json:"customDomain,omitempty"`
@@ -14,6 +15,37 @@ type WhiteLabelConfig struct {
 	PortalURL    string    `json:"portalUrl"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
+}
+
+// PublicPortalResponse is the unauthenticated portal landing response.
+type PublicPortalResponse struct {
+	Slug         string  `json:"slug"`
+	BrandName    string  `json:"brandName"`
+	LogoURL      *string `json:"logoUrl,omitempty"`
+	PrimaryColor string  `json:"primaryColor"`
+	SupportEmail string  `json:"supportEmail"`
+	SupportPhone string  `json:"supportPhone"`
+	PortalURL    string  `json:"portalUrl"`
+}
+
+// PublicTrackingResult is the branded tracking page response.
+type PublicTrackingResult struct {
+	Portal         PublicPortalResponse `json:"portal"`
+	TrackingNumber string               `json:"trackingNumber"`
+	Status         string               `json:"status"`
+	Origin         string               `json:"origin"`
+	Destination    string               `json:"destination"`
+	ServiceType    string               `json:"serviceType"`
+	CarrierName    string               `json:"carrierName"`
+	Events         []PublicScanEvent    `json:"events"`
+	EstimatedDelivery *time.Time        `json:"estimatedDelivery,omitempty"`
+}
+
+type PublicScanEvent struct {
+	Status    string    `json:"status"`
+	Location  string    `json:"location"`
+	Note      string    `json:"note,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type WhiteLabelPortalData struct {
@@ -39,6 +71,7 @@ type TrackingEvent struct {
 }
 
 type UpdateWhiteLabelConfigRequest struct {
+	Slug         *string `json:"slug,omitempty"`
 	BrandName    *string `json:"brandName,omitempty"`
 	LogoURL      *string `json:"logoUrl,omitempty"`
 	CustomDomain *string `json:"customDomain,omitempty"`

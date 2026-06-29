@@ -16,19 +16,20 @@ func NewWhiteLabelRepository(db *pgxpool.Pool) *WhiteLabelRepository {
 	return &WhiteLabelRepository{db: db}
 }
 
-func (r *WhiteLabelRepository) GetConfig(ctx context.Context) (*models.WhiteLabelConfig, error) {
+const selectWhiteLabelConfig = `
+	SELECT id, COALESCE(slug,''), COALESCE(brand_name,''), logo_url, custom_domain,
+	       COALESCE(primary_color,''), COALESCE(support_email,''), COALESCE(support_phone,''),
+	       enabled, COALESCE(portal_url,''), created_at, updated_at
+	FROM white_label_config`
+
+func scanWhiteLabelConfig(row interface{ Scan(...any) error }) (*models.WhiteLabelConfig, error) {
 	var c models.WhiteLabelConfig
 	var logoURL, customDomain *string
-	err := r.db.QueryRow(ctx, `
-		SELECT id, COALESCE(brand_name,''), logo_url, custom_domain,
-		       COALESCE(primary_color,''), COALESCE(support_email,''), COALESCE(support_phone,''),
-		       enabled, COALESCE(portal_url,''), created_at, updated_at
-		FROM white_label_config
-		ORDER BY created_at LIMIT 1`).Scan(
-		&c.ID, &c.BrandName, &logoURL, &customDomain, &c.PrimaryColor, &c.SupportEmail, &c.SupportPhone,
+	if err := row.Scan(
+		&c.ID, &c.Slug, &c.BrandName, &logoURL, &customDomain,
+		&c.PrimaryColor, &c.SupportEmail, &c.SupportPhone,
 		&c.Enabled, &c.PortalURL, &c.CreatedAt, &c.UpdatedAt,
-	)
-	if err != nil {
+	); err != nil {
 		return nil, err
 	}
 	c.LogoURL = logoURL
@@ -36,21 +37,31 @@ func (r *WhiteLabelRepository) GetConfig(ctx context.Context) (*models.WhiteLabe
 	return &c, nil
 }
 
+func (r *WhiteLabelRepository) GetConfig(ctx context.Context) (*models.WhiteLabelConfig, error) {
+	return scanWhiteLabelConfig(r.db.QueryRow(ctx, selectWhiteLabelConfig+` ORDER BY created_at LIMIT 1`))
+}
+
+func (r *WhiteLabelRepository) GetBySlug(ctx context.Context, slug string) (*models.WhiteLabelConfig, error) {
+	return scanWhiteLabelConfig(r.db.QueryRow(ctx, selectWhiteLabelConfig+` WHERE slug=$1 AND enabled=true`, slug))
+}
+
 func (r *WhiteLabelRepository) UpdateConfig(ctx context.Context, req models.UpdateWhiteLabelConfigRequest) (*models.WhiteLabelConfig, error) {
 	now := time.Now()
 	_, err := r.db.Exec(ctx, `
 		UPDATE white_label_config SET
-			brand_name = COALESCE(NULLIF($1, ''), brand_name),
-			logo_url = COALESCE($2, logo_url),
-			custom_domain = COALESCE($3, custom_domain),
-			primary_color = COALESCE(NULLIF($4, ''), primary_color),
-			support_email = COALESCE(NULLIF($5, ''), support_email),
-			support_phone = COALESCE(NULLIF($6, ''), support_phone),
-			enabled = COALESCE($7, enabled),
-			portal_url = COALESCE(NULLIF($8, ''), portal_url),
-			updated_at = $9
+			slug = COALESCE(NULLIF($1, ''), slug),
+			brand_name = COALESCE(NULLIF($2, ''), brand_name),
+			logo_url = COALESCE($3, logo_url),
+			custom_domain = COALESCE($4, custom_domain),
+			primary_color = COALESCE(NULLIF($5, ''), primary_color),
+			support_email = COALESCE(NULLIF($6, ''), support_email),
+			support_phone = COALESCE(NULLIF($7, ''), support_phone),
+			enabled = COALESCE($8, enabled),
+			portal_url = COALESCE(NULLIF($9, ''), portal_url),
+			updated_at = $10
 		WHERE id = (SELECT id FROM white_label_config ORDER BY created_at LIMIT 1)`,
-		req.BrandName, req.LogoURL, req.CustomDomain, req.PrimaryColor, req.SupportEmail, req.SupportPhone, req.Enabled, req.PortalURL, now,
+		req.Slug, req.BrandName, req.LogoURL, req.CustomDomain, req.PrimaryColor,
+		req.SupportEmail, req.SupportPhone, req.Enabled, req.PortalURL, now,
 	)
 	if err != nil {
 		return nil, err
@@ -117,6 +128,61 @@ func (r *WhiteLabelRepository) RecentTracking(ctx context.Context, limit int) ([
 		events = append(events, e)
 	}
 	return events, nil
+}
+
+func (r *WhiteLabelRepository) GetPublicTrackingPage(ctx context.Context, slug, trackingNumber string) (*models.PublicTrackingResult, error) {
+	cfg, err := r.GetBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	portal := models.PublicPortalResponse{
+		Slug:         cfg.Slug,
+		BrandName:    cfg.BrandName,
+		LogoURL:      cfg.LogoURL,
+		PrimaryColor: cfg.PrimaryColor,
+		SupportEmail: cfg.SupportEmail,
+		SupportPhone: cfg.SupportPhone,
+		PortalURL:    cfg.PortalURL,
+	}
+
+	var result models.PublicTrackingResult
+	var estimatedDelivery *time.Time
+	err = r.db.QueryRow(ctx, `
+		SELECT tracking_number, status, COALESCE(origin,''), COALESCE(destination,''),
+		       COALESCE(service_type,''), COALESCE(carrier_name,''), estimated_delivery
+		FROM waybills WHERE tracking_number=$1`, trackingNumber,
+	).Scan(
+		&result.TrackingNumber, &result.Status, &result.Origin, &result.Destination,
+		&result.ServiceType, &result.CarrierName, &estimatedDelivery,
+	)
+	if err != nil {
+		return nil, err
+	}
+	result.EstimatedDelivery = estimatedDelivery
+	result.Portal = portal
+
+	rows, err := r.db.Query(ctx, `
+		SELECT COALESCE(status,''), COALESCE(location,''), COALESCE(notes,''), created_at
+		FROM scans
+		WHERE waybill_id = (SELECT id FROM waybills WHERE tracking_number=$1)
+		ORDER BY created_at ASC`, trackingNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.PublicScanEvent
+		if err := rows.Scan(&e.Status, &e.Location, &e.Note, &e.CreatedAt); err != nil {
+			return nil, err
+		}
+		result.Events = append(result.Events, e)
+	}
+	if result.Events == nil {
+		result.Events = []models.PublicScanEvent{}
+	}
+	return &result, nil
 }
 
 func (r *WhiteLabelRepository) Dashboard(ctx context.Context) (*models.WhiteLabelPortalData, error) {

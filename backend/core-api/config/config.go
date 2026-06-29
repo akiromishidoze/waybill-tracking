@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -48,11 +48,13 @@ func Load() *Config {
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {
-		log.Fatalf("FATAL: JWT_SECRET is set to the default placeholder. Set a strong secret before starting.")
+		fmt.Fprintln(os.Stderr, "FATAL: JWT_SECRET is set to the default placeholder. Set a strong secret before starting.")
+		os.Exit(1)
 	}
 
 	if len(cfg.JWTSecret) < 32 {
-		log.Fatalf("FATAL: JWT_SECRET must be at least 32 characters long.")
+		fmt.Fprintln(os.Stderr, "FATAL: JWT_SECRET must be at least 32 characters long.")
+		os.Exit(1)
 	}
 
 	return cfg
@@ -62,7 +64,8 @@ func resolveJWTSecret() string {
 	if file := os.Getenv("JWT_SECRET_FILE"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
-			log.Fatalf("failed to read JWT_SECRET_FILE %s: %v", file, err)
+			fmt.Fprintf(os.Stderr, "FATAL: failed to read JWT_SECRET_FILE %s: %v\n", file, err)
+			os.Exit(1)
 		}
 		return strings.TrimSpace(string(data))
 	}

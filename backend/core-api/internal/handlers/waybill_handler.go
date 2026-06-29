@@ -15,11 +15,13 @@ import (
 	"github.com/waybill-tracking/core-api/internal/utils"
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/waybill-tracking/core-api/internal/logger"
 )
 
 type WaybillHandler struct {
@@ -119,11 +121,11 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
-		log.Printf("kafka publish error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("kafka publish error", zap.Error(err))
 	}
 
 	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
-		log.Printf("elasticsearch index error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("elasticsearch index error", zap.Error(err))
 	}
 
 	h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
@@ -248,10 +250,10 @@ func (h *WaybillHandler) ImportCSV(c *gin.Context) {
 		}
 
 		if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
-			log.Printf("kafka import publish error: %v", err)
+			logger.WithRequestID(reqID(c)).Error("kafka import publish error", zap.Error(err))
 		}
 		if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
-			log.Printf("elasticsearch import index error: %v", err)
+			logger.WithRequestID(reqID(c)).Error("elasticsearch import index error", zap.Error(err))
 		}
 		h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
 
@@ -299,7 +301,7 @@ func (h *WaybillHandler) Update(c *gin.Context) {
 	wb.CarrierTrackingNumber = req.CarrierTrackingNumber
 
 	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
-		log.Printf("elasticsearch index error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("elasticsearch index error", zap.Error(err))
 	}
 
 	h.webhooks.Dispatch(c.Request.Context(), "waybill.updated", wb.ID, wb)
@@ -371,17 +373,17 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	if err := h.kafkaProducer.PublishScanEvent(c.Request.Context(), event); err != nil {
-		log.Printf("kafka publish scan event error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("kafka publish scan event error", zap.Error(err))
 	}
 
 	if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
-		log.Printf("kafka publish status change error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("kafka publish status change error", zap.Error(err))
 	}
 
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
 
 	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
-		log.Printf("elasticsearch index error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("elasticsearch index error", zap.Error(err))
 	}
 
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
@@ -452,10 +454,10 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 	}
 
 	if err := h.kafkaProducer.PublishScanEvent(c.Request.Context(), event); err != nil {
-		log.Printf("kafka publish scan event error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("kafka publish scan event error", zap.Error(err))
 	}
 	if err := h.kafkaProducer.PublishStatusChange(c.Request.Context(), *wb); err != nil {
-		log.Printf("kafka publish status change error: %v", err)
+		logger.WithRequestID(reqID(c)).Error("kafka publish status change error", zap.Error(err))
 	}
 
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)

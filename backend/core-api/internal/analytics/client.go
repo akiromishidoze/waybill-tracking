@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/waybill-tracking/core-api/internal/logger"
+	"go.uber.org/zap"
 
 	"github.com/waybill-tracking/core-api/config"
 )
@@ -101,6 +103,6 @@ func (c *Client) TrainModels(ctx context.Context, authHeader string) error {
 		return fmt.Errorf("analytics API returned %d: %s", resp.StatusCode, string(body))
 	}
 
-	log.Printf("ML training triggered: %s", string(body))
+	logger.L().Info("ML training triggered", zap.ByteString("response", body))
 	return nil
 }

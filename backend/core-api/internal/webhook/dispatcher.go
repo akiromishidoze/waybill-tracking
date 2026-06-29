@@ -7,9 +7,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/waybill-tracking/core-api/internal/logger"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -32,7 +33,7 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event string, waybillID strin
 	hooks, err := d.repo.ListMatchingEvents(ctx, event)
 
 	if err != nil {
-		log.Printf("webhook dispatch: list hooks error: %v", err)
+		logger.L().Error("webhook dispatch: list hooks error", zap.Error(err))
 
 		return
 	}
@@ -47,7 +48,7 @@ func (d *Dispatcher) Dispatch(ctx context.Context, event string, waybillID strin
 	body, err := json.Marshal(payload)
 
 	if err != nil {
-		log.Printf("webhook dispatch: marshal error: %v", err)
+		logger.L().Error("webhook dispatch: marshal error", zap.Error(err))
 
 		return
 	}
@@ -61,7 +62,7 @@ func (d *Dispatcher) send(h models.Webhook, body []byte) {
 	req, err := http.NewRequest(http.MethodPost, h.URL, bytes.NewReader(body))
 
 	if err != nil {
-		log.Printf("webhook dispatch: request error for %s: %v", h.ID, err)
+		logger.L().Error("webhook dispatch: request error", zap.String("webhook_id", h.ID), zap.Error(err))
 
 		return
 	}
@@ -77,7 +78,7 @@ func (d *Dispatcher) send(h models.Webhook, body []byte) {
 
 	resp, err := d.client.Do(req)
 	if err != nil {
-		log.Printf("webhook dispatch: call error for %s: %v", h.ID, err)
+		logger.L().Error("webhook dispatch: call error", zap.String("webhook_id", h.ID), zap.Error(err))
 
 		return
 	}
@@ -85,6 +86,6 @@ func (d *Dispatcher) send(h models.Webhook, body []byte) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		log.Printf("webhook dispatch: non-2xx response for %s: %d", h.ID, resp.StatusCode)
+		logger.L().Warn("webhook dispatch: non-2xx response", zap.String("webhook_id", h.ID), zap.Int("status", resp.StatusCode))
 	}
 }

@@ -3,12 +3,14 @@ package migrator
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/logger"
+	"go.uber.org/zap"
 )
 
 type Migrator struct {
@@ -40,7 +42,7 @@ func (m *Migrator) Run(ctx context.Context) error {
 	sort.Strings(files)
 
 	if len(files) == 0 {
-		log.Println("migrator: no .sql files found in", m.migrationsDir)
+		logger.L().Warn("migrator: no .sql files found", zap.String("dir", m.migrationsDir))
 
 		return nil
 	}
@@ -115,6 +117,6 @@ func (m *Migrator) apply(ctx context.Context, filename string) error {
 		return err
 	}
 
-	log.Printf("migrator: applied %s", filename)
+	logger.L().Info("migrator: applied migration", zap.String("file", filename))
 	return nil
 }

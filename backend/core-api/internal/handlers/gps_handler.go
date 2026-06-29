@@ -1,9 +1,11 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/waybill-tracking/core-api/internal/logger"
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -72,7 +74,7 @@ func (h *GPSHandler) CreateLocation(c *gin.Context) {
 
 	if h.kafkaProducer != nil {
 		if err := h.kafkaProducer.PublishGPSEvent(c.Request.Context(), *loc); err != nil {
-			log.Printf("kafka publish gps event error: %v", err)
+			logger.WithRequestID(reqID(c)).Error("kafka publish gps event error", zap.Error(err))
 		}
 	}
 

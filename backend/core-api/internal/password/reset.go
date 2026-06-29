@@ -7,10 +7,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/waybill-tracking/core-api/internal/logger"
+	"go.uber.org/zap"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/waybill-tracking/core-api/config"
@@ -72,7 +74,7 @@ func SendResetEmail(cfg *config.Config, email, token string) {
 	url := strings.TrimRight(cfg.AnalyticsAPIURL, "/") + "/api/v1/notifications/email"
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 	if err != nil {
-		log.Printf("[password reset] failed to build email request: %v", err)
+		logger.L().Error("password reset: failed to build email request", zap.Error(err))
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -82,8 +84,8 @@ func SendResetEmail(cfg *config.Config, email, token string) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp.StatusCode >= 300 {
-		log.Printf("[password reset] failed to queue email for %s: %v (status %d)", email, err, resp.StatusCode)
+		logger.L().Error("password reset: failed to queue email", zap.String("email", email), zap.Error(err), zap.Int("status", resp.StatusCode))
 		return
 	}
-	log.Printf("[password reset] email queued for %s", email)
+	logger.L().Info("password reset: email queued", zap.String("email", email))
 }

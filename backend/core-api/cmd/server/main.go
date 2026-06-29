@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,12 +18,14 @@ import (
 	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/handlers"
 	kafkaprod "github.com/waybill-tracking/core-api/internal/kafka"
+	"github.com/waybill-tracking/core-api/internal/logger"
 	"github.com/waybill-tracking/core-api/internal/middleware"
 	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/notifications"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	"github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
+	"go.uber.org/zap"
 )
 
 func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler, carrierHandler *handlers.CarrierHandler, webhookHandler *handlers.WebhookHandler, settingsHandler *handlers.SettingsHandler, analyticsHandler *handlers.AnalyticsHandler, ecommerceWebhookHandler *handlers.ECommerceWebhookHandler, erpHandler *handlers.ErpHandler, scheduledReportHandler *handlers.ScheduledReportHandler, dwellAlertHandler *handlers.DwellAlertHandler, escalationHandler *handlers.EscalationHandler, geofenceEventHandler *handlers.GeofenceEventHandler, autoCommunicationHandler *handlers.AutoCommunicationHandler, iotSensorHandler *handlers.IoTSensorHandler) {
@@ -166,19 +167,22 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 func main() {
 	cfg := config.Load()
 
+	log := logger.L()
+	defer logger.Sync()
+
 	db, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("failed to connect to db: %v", err)
+		log.Fatal("failed to connect to db", zap.Error(err))
 	}
 
 	migrationsDir := filepath.Join("migrations")
 	if err := migrator.New(db, migrationsDir).Run(context.Background()); err != nil {
-		log.Fatalf("migration failed: %v", err)
+		log.Fatal("migration failed", zap.Error(err))
 	}
 
 	rdbOpts, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
-		log.Fatalf("failed to parse redis url: %v", err)
+		log.Fatal("failed to parse redis url", zap.Error(err))
 	}
 	rdb := redis.NewClient(rdbOpts)
 
@@ -233,8 +237,10 @@ func main() {
 
 	feature.RegisterAll(feature.DefaultFlags)
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
 
+	r.Use(middleware.RequestLogger())
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
@@ -257,9 +263,9 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("Core API starting on :%s", cfg.Port)
+		log.Info("Core API starting", zap.String("port", cfg.Port))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("HTTP server error: %v", err)
+			log.Fatal("HTTP server error", zap.Error(err))
 		}
 	}()
 
@@ -267,23 +273,23 @@ func main() {
 	defer stop()
 
 	<-ctx.Done()
-	log.Println("shutdown signal received, gracefully stopping core-api...")
+	log.Info("shutdown signal received, gracefully stopping core-api")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Printf("HTTP server shutdown error: %v", err)
+		log.Error("HTTP server shutdown error", zap.Error(err))
 	}
 
 	if err := kafkaProducer.Close(); err != nil {
-		log.Printf("kafka producer close error: %v", err)
+		log.Error("kafka producer close error", zap.Error(err))
 	}
 
 	if err := rdb.Close(); err != nil {
-		log.Printf("redis close error: %v", err)
+		log.Error("redis close error", zap.Error(err))
 	}
 
 	db.Close()
-	log.Println("core-api stopped")
+	log.Info("core-api stopped")
 }

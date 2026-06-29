@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/waybill-tracking/core-api/internal/logger"
 	"github.com/waybill-tracking/core-api/internal/models"
+	"go.uber.org/zap"
 )
 
 const waybillIndex = "waybills"
@@ -23,7 +24,7 @@ func NewClient(url string) *Client {
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		log.Fatalf("failed to create elasticsearch client: %v", err)
+		logger.L().Fatal("failed to create elasticsearch client", zap.Error(err))
 	}
 	return &Client{es: es}
 }
@@ -47,7 +48,7 @@ func (c *Client) IndexWaybill(ctx context.Context, wb *models.Waybill) error {
 		return fmt.Errorf("es index error: %s", res.String())
 	}
 
-	log.Printf("indexed waybill %s in elasticsearch", wb.ID)
+	logger.L().Debug("indexed waybill in elasticsearch", zap.String("waybill_id", wb.ID))
 	return nil
 }
 

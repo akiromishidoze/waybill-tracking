@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/waybill-tracking/core-api/internal/logger"
+	"go.uber.org/zap"
 
 	"github.com/waybill-tracking/core-api/internal/models"
 )
@@ -51,14 +53,14 @@ func (d *Dispatcher) DispatchDeliveryNotification(ctx context.Context, wb *model
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("notification dispatcher marshal error: %v", err)
+		logger.L().Error("notification dispatcher: marshal error", zap.Error(err))
 		return
 	}
 
 	url := fmt.Sprintf("%s/api/v1/notifications/dispatch", d.analyticsURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		log.Printf("notification dispatcher request error: %v", err)
+		logger.L().Error("notification dispatcher: build request error", zap.Error(err))
 		return
 	}
 
@@ -69,12 +71,12 @@ func (d *Dispatcher) DispatchDeliveryNotification(ctx context.Context, wb *model
 
 	resp, err := d.client.Do(req)
 	if err != nil {
-		log.Printf("notification dispatcher call error: %v", err)
+		logger.L().Error("notification dispatcher: call error", zap.Error(err))
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 300 {
-		log.Printf("notification dispatcher returned status %d", resp.StatusCode)
+		logger.L().Warn("notification dispatcher: non-2xx response", zap.Int("status", resp.StatusCode))
 	}
 }

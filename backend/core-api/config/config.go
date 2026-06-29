@@ -27,6 +27,7 @@ type Config struct {
 
 func Load() *Config {
 	jwtSecret := resolveJWTSecret()
+	ginMode := getEnv("GIN_MODE", "debug")
 
 	cfg := &Config{
 		Port: getEnv("PORT", "8080"),
@@ -43,8 +44,8 @@ func Load() *Config {
 		SendGridKey: getEnv("SENDGRID_KEY", ""),
 		AnalyticsAPIURL: getEnv("ANALYTICS_API_URL", "http://localhost:8000"),
 		InternalAPIKey: getEnv("INTERNAL_API_KEY", ""),
-		FrontendURL:     getEnv("FRONTEND_URL", "http://localhost:3010"),
-		AllowedOrigins: getEnvSlice("ALLOWED_ORIGINS", "http://localhost:3010"),
+		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3010"),
+		AllowedOrigins: getEnvSliceTrimmed("ALLOWED_ORIGINS", "http://localhost:3010"),
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {
@@ -55,6 +56,18 @@ func Load() *Config {
 	if len(cfg.JWTSecret) < 32 {
 		fmt.Fprintln(os.Stderr, "FATAL: JWT_SECRET must be at least 32 characters long.")
 		os.Exit(1)
+	}
+
+	if ginMode == "release" {
+		for _, o := range cfg.AllowedOrigins {
+			if o == "*" {
+				fmt.Fprintln(os.Stderr, "FATAL: ALLOWED_ORIGINS contains '*' which is forbidden in production (GIN_MODE=release). Set explicit trusted origins.")
+				os.Exit(1)
+			}
+			if strings.HasPrefix(o, "http://localhost") {
+				fmt.Fprintf(os.Stderr, "WARNING: ALLOWED_ORIGINS contains a localhost origin (%s) in production mode.\n", o)
+			}
+		}
 	}
 
 	return cfg
@@ -79,10 +92,17 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func getEnvSlice(key, fallback string) []string {
+func getEnvSliceTrimmed(key, fallback string) []string {
 	v := os.Getenv(key)
 	if v == "" {
 		return []string{fallback}
 	}
-	return strings.Split(v, ",")
+	parts := strings.Split(v, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if t := strings.TrimSpace(p); t != "" {
+			result = append(result, t)
+		}
+	}
+	return result
 }

@@ -32,7 +32,7 @@ func Load() *Config {
 		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
 		RedisURL: getEnv("REDIS_URL", "redis://localhost:6379/0"),
 		ElasticsearchURL: getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
-		KafkaBrokers: getEnv("KAFKA_BROKERS", "localhost:9092"),
+		KafkaBrokers: getEnv("KAFKA_BROKERS", "kafka:29092"),
 		KafkaTopic: getEnv("KAFKA_TOPIC", "waybill-events"),
 		JWTSecret: jwtSecret,
 		JWTSecretOld: getEnv("JWT_SECRET_OLD", ""),

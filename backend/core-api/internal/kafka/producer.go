@@ -13,8 +13,9 @@ type Producer struct {
 
 func NewProducer(brokers, defaultTopic string) *Producer {
 	w := &kafka.Writer{
-		Addr:     kafka.TCP(brokers),
-		Balancer: &kafka.LeastBytes{},
+		Addr:                   kafka.TCP(brokers),
+		Balancer:               &kafka.LeastBytes{},
+		AllowAutoTopicCreation: true,
 	}
 
 	return &Producer{writer: w}

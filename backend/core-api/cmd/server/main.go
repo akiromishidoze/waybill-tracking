@@ -97,7 +97,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/analytics/cost-per-shipment", analyticsHandler.CostPerShipment)
 		protected.GET("/analytics/demand-forecast", analyticsHandler.DemandForecast)
 		protected.GET("/analytics/carbon-footprint", analyticsHandler.CarbonFootprint)
-		protected.GET("/analytics/export", analyticsHandler.ExportExcel)
+		protected.GET("/analytics/export", middleware.RoleMiddleware("ADMIN", "OPS"), analyticsHandler.ExportExcel)
 
 		protected.GET("/analytics/scheduled-reports", scheduledReportHandler.List)
 		protected.POST("/analytics/scheduled-reports", scheduledReportHandler.Create)

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.auth import require_role
 from app.core.database import get_db
 import openpyxl
 
@@ -42,6 +43,7 @@ async def export_report(
     from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
+    _user: dict = Depends(require_role("ADMIN", "OPS")),
 ):
     rows = await _fetch_waybill_rows(from_date, to_date, db)
 
@@ -73,6 +75,7 @@ async def export_csv(
     from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
+    _user: dict = Depends(require_role("ADMIN", "OPS")),
 ):
     rows = await _fetch_waybill_rows(from_date, to_date, db)
 

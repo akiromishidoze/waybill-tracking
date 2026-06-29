@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.services.analytics_service import AnalyticsService
 from app.models.analytics import DashboardStats, SLAReportRow, AnomalyDetection, PredictiveETA
@@ -13,7 +14,7 @@ router = APIRouter(tags=["Analytics"])
     summary="Dashboard statistics",
     description="Returns aggregate KPIs for the dashboard: active shipments, delivered today, in-transit count, pending pickups, total volume, SLA compliance rate, exception rate, and average transit time.",
 )
-async def get_stats(db: AsyncSession = Depends(get_db)):
+async def get_stats(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user)):
     svc = AnalyticsService(db)
     return await svc.get_dashboard_stats()
 
@@ -28,6 +29,7 @@ async def get_sla(
     from_date: str = Query(default="2024-01-01", description="Start date (YYYY-MM-DD)"),
     to_date: str = Query(default="2024-12-31", description="End date (YYYY-MM-DD)"),
     db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
 ):
     svc = AnalyticsService(db)
     return await svc.get_sla_report(from_date, to_date)
@@ -39,7 +41,7 @@ async def get_sla(
     summary="Detect anomalies",
     description="Scans for shipments stuck in non-terminal statuses for more than 3 days and returns anomaly records.",
 )
-async def get_anomalies(db: AsyncSession = Depends(get_db)):
+async def get_anomalies(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user)):
     svc = AnalyticsService(db)
     return await svc.detect_anomalies()
 
@@ -51,7 +53,7 @@ async def get_anomalies(db: AsyncSession = Depends(get_db)):
     description="Predicts the estimated time of arrival for a waybill based on historical average transit time between the origin and destination.",
     responses={404: {"description": "Waybill not found"}},
 )
-async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db)):
+async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user)):
     svc = AnalyticsService(db)
     result = await svc.predict_eta(waybill_id)
     if not result:

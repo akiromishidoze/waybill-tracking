@@ -30,7 +30,11 @@ celery_app.conf.update(
             "task": "app.workers.carrier_sync.sync_carrier_tracking",
             "schedule": crontab(minute="*/15"),
         },
+        "sync-ecommerce-orders": {
+            "task": "app.workers.ecommerce_sync.sync_ecommerce_orders",
+            "schedule": crontab(minute="*/30"),
+        },
     },
 )
 
-from app.workers import carrier_sync, tasks  # noqa: E402,F401
+from app.workers import carrier_sync, ecommerce_sync, tasks  # noqa: E402,F401

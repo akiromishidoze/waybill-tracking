@@ -1,6 +1,6 @@
 module github.com/waybill-tracking/core-api
 
-go 1.25
+go 1.22
 
 require (
 	github.com/elastic/go-elasticsearch/v8 v8.14.0

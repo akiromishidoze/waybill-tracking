@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/csv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
@@ -357,6 +359,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 		ExceptionDetail: req.ExceptionDetail,
 		ResolvedAt:      req.ResolvedAt,
 		EventType:       eventType,
+		Timestamp:       time.Now(),
 	}
 
 	wb.Status = req.Status
@@ -438,6 +441,7 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 		ExceptionDetail: req.ExceptionDetail,
 		ResolvedAt:      req.ResolvedAt,
 		EventType:       eventType,
+		Timestamp:       time.Now(),
 	}
 
 	wb.Status = req.Status
@@ -532,6 +536,7 @@ func (h *WaybillHandler) BatchUpdateStatus(c *gin.Context) {
 			Location:  req.Location,
 			Remark:    req.Remark,
 			EventType: models.EventScan,
+			Timestamp: time.Now(),
 		}
 		wb.Status = req.Status
 		if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {

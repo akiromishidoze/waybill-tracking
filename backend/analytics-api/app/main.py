@@ -1,9 +1,15 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api import analytics, reports, health, notifications
 from app.core.config import settings
+from app.core.database import async_session
+from app.services.ml_service import get_ml_service
+
+logger = logging.getLogger(__name__)
 
 origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()]
 
@@ -32,3 +38,18 @@ app.include_router(reports.router, prefix="/api/reports")
 app.include_router(notifications.router, prefix="/api/notifications")
 
 Instrumentator().instrument(app).expose(app)
+
+
+@app.on_event("startup")
+async def startup_train_ml():
+    try:
+        ml = get_ml_service()
+        ml._load_if_needed()
+        if ml.is_trained:
+            logger.info("ML model loaded from disk")
+            return
+        async with async_session() as db:
+            result = await ml.train(db)
+            logger.info("ML startup training result: %s", result)
+    except Exception as e:
+        logger.warning("ML startup training failed: %s", e)

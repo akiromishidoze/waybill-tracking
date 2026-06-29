@@ -118,6 +118,8 @@ services:
       INTERNAL_API_KEY: "${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in the environment}"
       SENDER_EMAIL: "${SENDER_EMAIL:-noreply@waybilltracking.com}"
       SENDER_PHONE: "${SENDER_PHONE:-+12025551234}"
+    volumes:
+      - analytics_models:/app/app/models_data
     depends_on:
       postgres:
         condition: service_healthy
@@ -205,6 +207,7 @@ services:
 volumes:
   postgres_data:
   postgres_backups:
+  analytics_models:
   redis_data:
   es_data:
   prometheus_data:

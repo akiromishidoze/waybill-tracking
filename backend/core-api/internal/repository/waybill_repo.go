@@ -250,9 +250,17 @@ func (r *WaybillRepository) UpdateStatus(ctx context.Context, wb *models.Waybill
 
 	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(ctx, `UPDATE waybills SET status=$1, updated_at=$2 WHERE id=$3`,
-		wb.Status, time.Now(), wb.ID); err != nil {
-		return err
+	statusSQL := string(wb.Status)
+	if statusSQL == "DELIVERED" {
+		if _, err := tx.Exec(ctx, `UPDATE waybills SET status=$1, updated_at=$2, actual_delivery=NOW() WHERE id=$3`,
+			wb.Status, time.Now(), wb.ID); err != nil {
+			return err
+		}
+	} else {
+		if _, err := tx.Exec(ctx, `UPDATE waybills SET status=$1, updated_at=$2 WHERE id=$3`,
+			wb.Status, time.Now(), wb.ID); err != nil {
+			return err
+		}
 	}
 
 	event.Timestamp = time.Now()

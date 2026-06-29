@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
+	"github.com/waybill-tracking/core-api/internal/analytics"
 	"github.com/waybill-tracking/core-api/internal/elastic"
 	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/handlers"
@@ -211,7 +212,8 @@ func main() {
 	carrierHandler := handlers.NewCarrierHandler(carrierRepo)
 	webhookHandler := handlers.NewWebhookHandler(webhookRepo)
 	settingsHandler := handlers.NewSettingsHandler(db)
-	analyticsHandler := handlers.NewAnalyticsHandler(db)
+	analyticsAPIClient := analytics.NewClient(cfg)
+	analyticsHandler := handlers.NewAnalyticsHandler(db, analyticsAPIClient)
 	ecommerceWebhookHandler := handlers.NewECommerceWebhookHandler(waybillRepo, ecommerceRepo, db)
 	erpRepo := repository.NewErpRepository(db)
 	erpHandler := handlers.NewErpHandler(erpRepo)

@@ -40,4 +40,5 @@ class PredictiveETA(BaseModel):
     trackingNumber: str
     predictedDelivery: Optional[str] = None
     confidence: float
+    estimatedHours: float
     basedOn: str

@@ -61,6 +61,6 @@ var DefaultFlags = []Flag{
 	{Key: "EXPORT_CSV", Default: true},
 	{Key: "COURIER_ASSIGNMENTS", Default: true},
 	{Key: "NOTIFICATIONS", Default: true},
-	{Key: "ETA_PREDICTION", Default: false},
+	{Key: "ETA_PREDICTION", Default: true},
 	{Key: "BETA_DASHBOARD", Default: false},
 }

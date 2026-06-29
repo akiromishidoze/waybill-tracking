@@ -8,14 +8,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/analytics"
+	"github.com/waybill-tracking/core-api/internal/feature"
 )
 
 type AnalyticsHandler struct {
-	db *pgxpool.Pool
+	db           *pgxpool.Pool
+	analyticsAPI *analytics.Client
 }
 
-func NewAnalyticsHandler(db *pgxpool.Pool) *AnalyticsHandler {
-	return &AnalyticsHandler{db: db}
+func NewAnalyticsHandler(db *pgxpool.Pool, analyticsAPI *analytics.Client) *AnalyticsHandler {
+	return &AnalyticsHandler{db: db, analyticsAPI: analyticsAPI}
 }
 
 func (h *AnalyticsHandler) Stats(c *gin.Context) {
@@ -199,7 +202,32 @@ func (h *AnalyticsHandler) PredictETA(c *gin.Context) {
 		return
 	}
 
-	eta := time.Now().Add(48 * time.Hour)
+	if feature.IsEnabled("ETA_PREDICTION") && h.analyticsAPI != nil {
+		result, err := h.analyticsAPI.PredictETA(ctx, waybillID, c.GetHeader("Authorization"))
+		if err == nil && result != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"waybillId":       result.WaybillID,
+				"trackingNumber":  result.TrackingNumber,
+				"origin":          origin,
+				"destination":     destination,
+				"currentStatus":   status,
+				"predictedEta":    result.PredictedDelivery,
+				"confidenceScore": result.Confidence,
+				"estimatedHours":  result.EstimatedHours,
+				"model":           result.BasedOn,
+			})
+			return
+		}
+	}
+
+	avgHours := 48.0
+	_ = h.db.QueryRow(ctx, `
+		SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (actual_delivery - created_at)) / 3600), 48)
+		FROM waybills
+		WHERE status = 'DELIVERED' AND origin = $1 AND destination = $2`,
+		origin, destination).Scan(&avgHours)
+
+	eta := time.Now().Add(time.Duration(avgHours) * time.Hour)
 	confidence := 78.5
 
 	c.JSON(http.StatusOK, gin.H{
@@ -210,9 +238,10 @@ func (h *AnalyticsHandler) PredictETA(c *gin.Context) {
 		"currentStatus":   status,
 		"predictedEta":    eta.Format(time.RFC3339),
 		"confidenceScore": confidence,
-		"model":           "transit-time-v1",
+		"estimatedHours":  avgHours,
+		"model":           "historical-average",
 		"factors": gin.H{
-			"historicalAvgHours": 48,
+			"historicalAvgHours": avgHours,
 			"currentDelay":       0,
 			"weatherImpact":      "LOW",
 			"carrierReliability": 0.92,

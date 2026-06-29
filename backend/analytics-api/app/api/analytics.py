@@ -54,7 +54,7 @@ async def get_anomalies(db: AsyncSession = Depends(get_db), user: dict = Depends
     "/predict-eta/{waybill_id}",
     response_model=PredictiveETA,
     summary="Predict delivery ETA",
-    description="Predicts the estimated time of arrival for a waybill based on historical average transit time between the origin and destination.",
+    description="Predicts the estimated time of arrival for a waybill using a trained RandomForest model when available, otherwise falls back to historical average transit time.",
     responses={404: {"description": "Waybill not found"}},
 )
 async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user), _rate_limit: None = Depends(rate_limit_analytics)):
@@ -63,4 +63,18 @@ async def predict_eta(waybill_id: str, db: AsyncSession = Depends(get_db), user:
     if not result:
         from fastapi.responses import JSONResponse
         return JSONResponse(status_code=404, content={"error": "Waybill not found"})
+    return result
+
+
+@router.post(
+    "/train",
+    summary="Train ML models",
+    description="Trains and persists the ETA prediction and anomaly detection models using historical delivery data. Protected by admin role.",
+)
+async def train_models(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user)):
+    if user.get("role") != "ADMIN":
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=403, content={"error": "Admin access required"})
+    svc = AnalyticsService(db)
+    result = await svc.ml.train(db)
     return result

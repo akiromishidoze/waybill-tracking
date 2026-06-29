@@ -3,10 +3,13 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.services.ml_service import get_ml_service
+
 
 class AnalyticsService:
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.ml = get_ml_service()
 
     async def get_dashboard_stats(self) -> dict[str, Any]:
         result = await self.db.execute(text("""
@@ -87,6 +90,10 @@ class AnalyticsService:
         ]
 
     async def predict_eta(self, waybill_id: str) -> dict | None:
+        ml_result = await self.ml.predict_eta(self.db, waybill_id)
+        if ml_result:
+            return ml_result
+
         result = await self.db.execute(text("""
             SELECT
                 tracking_number, origin, destination, status, created_at,

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "..", "models_data")
+MODEL_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "models_data"))
 ETA_MODEL_PATH = os.path.join(MODEL_DIR, "eta_model.pkl")
 ANOMALY_MODEL_PATH = os.path.join(MODEL_DIR, "anomaly_model.pkl")
 ENCODERS_PATH = os.path.join(MODEL_DIR, "encoders.pkl")

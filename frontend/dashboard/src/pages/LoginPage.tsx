@@ -53,7 +53,7 @@ export default function LoginPage() {
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
         {import.meta.env.DEV ? (
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-            Dev hint: Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>admin</strong>
+            Dev hint: Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>teccadmin00</strong>
           </p>
         ) : (
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>

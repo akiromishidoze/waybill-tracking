@@ -28,7 +28,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler, carrierHandler *handlers.CarrierHandler, webhookHandler *handlers.WebhookHandler, settingsHandler *handlers.SettingsHandler, analyticsHandler *handlers.AnalyticsHandler, ecommerceWebhookHandler *handlers.ECommerceWebhookHandler, erpHandler *handlers.ErpHandler, scheduledReportHandler *handlers.ScheduledReportHandler, dwellAlertHandler *handlers.DwellAlertHandler, escalationHandler *handlers.EscalationHandler, geofenceEventHandler *handlers.GeofenceEventHandler, autoCommunicationHandler *handlers.AutoCommunicationHandler, iotSensorHandler *handlers.IoTSensorHandler, webhookDeliveryHandler *handlers.WebhookDeliveryHandler, returnHandler *handlers.ReturnHandler) {
+func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool.Pool, rdb *redis.Client, waybillHandler *handlers.WaybillHandler, teamHandler *handlers.TeamHandler, ecommerceHandler *handlers.ECommerceHandler, whiteLabelHandler *handlers.WhiteLabelHandler, gpsHandler *handlers.GPSHandler, attachmentHandler *handlers.AttachmentHandler, auditLogHandler *handlers.AuditLogHandler, auditLogger *repository.AuditLogger, driverHandler *handlers.DriverHandler, carrierHandler *handlers.CarrierHandler, webhookHandler *handlers.WebhookHandler, settingsHandler *handlers.SettingsHandler, analyticsHandler *handlers.AnalyticsHandler, ecommerceWebhookHandler *handlers.ECommerceWebhookHandler, erpHandler *handlers.ErpHandler, scheduledReportHandler *handlers.ScheduledReportHandler, dwellAlertHandler *handlers.DwellAlertHandler, escalationHandler *handlers.EscalationHandler, geofenceEventHandler *handlers.GeofenceEventHandler, autoCommunicationHandler *handlers.AutoCommunicationHandler, iotSensorHandler *handlers.IoTSensorHandler, webhookDeliveryHandler *handlers.WebhookDeliveryHandler, returnHandler *handlers.ReturnHandler, customsHandler *handlers.CustomsHandler, codHandler *handlers.CODHandler) {
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, rdb, auditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -63,6 +63,12 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.POST("/waybills/:id/initiate-return", returnHandler.InitiateReturn)
 		protected.PATCH("/waybills/:id/return-status", returnHandler.UpdateStatus)
 		protected.GET("/returns", returnHandler.List)
+		protected.GET("/customs-shipments", customsHandler.List)
+		protected.PATCH("/customs-shipments/:id", customsHandler.UpdateStatus)
+		protected.GET("/cod-payments", codHandler.List)
+		protected.POST("/cod-payments/:id/settle", codHandler.Settle)
+		protected.POST("/cod-payments/:id/dispute", codHandler.Dispute)
+		protected.POST("/cod-payments/:id/refund", codHandler.Refund)
 		protected.PATCH("/waybills/:id/assign-team", teamHandler.AssignToWaybill)
 		protected.DELETE("/waybills/:id", middleware.RoleMiddleware("OPS", "ADMIN"), waybillHandler.Delete)
 
@@ -244,6 +250,10 @@ func main() {
 	iotSensorHandler := handlers.NewIoTSensorHandler(iotSensorRepo)
 	returnRepo := repository.NewReturnRepository(db)
 	returnHandler := handlers.NewReturnHandler(returnRepo)
+	customsRepo := repository.NewCustomsRepository(db)
+	customsHandler := handlers.NewCustomsHandler(customsRepo)
+	codRepo := repository.NewCODRepository(db)
+	codHandler := handlers.NewCODHandler(codRepo)
 	healthHandler := handlers.NewHealthHandler(db, rdb, cfg.KafkaBrokers, esClient)
 
 	feature.RegisterAll(feature.DefaultFlags)
@@ -256,8 +266,8 @@ func main() {
 	r.Use(middleware.CORSMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Gzip())
 
-	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler, scheduledReportHandler, dwellAlertHandler, escalationHandler, geofenceEventHandler, autoCommunicationHandler, iotSensorHandler, webhookDeliveryHandler, returnHandler)
-	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler, scheduledReportHandler, dwellAlertHandler, escalationHandler, geofenceEventHandler, autoCommunicationHandler, iotSensorHandler, webhookDeliveryHandler, returnHandler)
+	registerCoreAPIRoutes(r.Group("/api"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler, scheduledReportHandler, dwellAlertHandler, escalationHandler, geofenceEventHandler, autoCommunicationHandler, iotSensorHandler, webhookDeliveryHandler, returnHandler, customsHandler, codHandler)
+	registerCoreAPIRoutes(r.Group("/api/v1"), cfg, db, rdb, waybillHandler, teamHandler, ecommerceHandler, whiteLabelHandler, gpsHandler, attachmentHandler, auditLogHandler, auditLogger, driverHandler, carrierHandler, webhookHandler, settingsHandler, analyticsHandler, ecommerceWebhookHandler, erpHandler, scheduledReportHandler, dwellAlertHandler, escalationHandler, geofenceEventHandler, autoCommunicationHandler, iotSensorHandler, webhookDeliveryHandler, returnHandler, customsHandler, codHandler)
 
 	r.GET("/ws", func(c *gin.Context) {
 		wsHandler.HandleWebSocket(c.Writer, c.Request)

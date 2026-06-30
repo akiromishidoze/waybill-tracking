@@ -34,7 +34,11 @@ celery_app.conf.update(
             "task": "app.workers.ecommerce_sync.sync_ecommerce_orders",
             "schedule": crontab(minute="*/30"),
         },
+        "evaluate-auto-communication-rules": {
+            "task": "app.workers.auto_comm.evaluate_auto_communication_rules",
+            "schedule": crontab(minute="*/5"),
+        },
     },
 )
 
-from app.workers import carrier_sync, ecommerce_sync, tasks  # noqa: E402,F401
+from app.workers import carrier_sync, ecommerce_sync, tasks, auto_comm  # noqa: E402,F401

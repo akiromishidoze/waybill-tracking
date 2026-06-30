@@ -91,6 +91,10 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.POST("/auto-communications", autoCommunicationHandler.Create)
 		protected.POST("/auto-communications/:id/sent", autoCommunicationHandler.MarkSent)
 		protected.POST("/auto-communications/:id/failed", autoCommunicationHandler.MarkFailed)
+		protected.GET("/auto-communications/rules", autoCommunicationHandler.ListRules)
+		protected.POST("/auto-communications/rules", autoCommunicationHandler.CreateRule)
+		protected.PATCH("/auto-communications/rules/:id", autoCommunicationHandler.UpdateRule)
+		protected.DELETE("/auto-communications/rules/:id", autoCommunicationHandler.DeleteRule)
 
 		protected.GET("/iot-sensors", iotSensorHandler.ListSensors)
 		protected.POST("/iot-sensors", iotSensorHandler.CreateSensor)

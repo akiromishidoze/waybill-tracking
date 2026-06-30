@@ -322,13 +322,13 @@ export const customsService = {
 }
 
 export const autoCommunicationService = {
-  listRules: () => api.get<AutoCommunicationRule[]>('/auto-communications'),
+  listRules: () => api.get<AutoCommunicationRule[]>('/auto-communications/rules'),
   createRule: (data: Partial<AutoCommunicationRule>) =>
-    api.post<AutoCommunicationRule>('/auto-communications', data),
+    api.post<AutoCommunicationRule>('/auto-communications/rules', data),
   updateRule: (id: string, data: Partial<AutoCommunicationRule>) =>
-    api.patch<AutoCommunicationRule>(`/auto-communications/${id}`, data),
-  deleteRule: (id: string) => api.delete(`/auto-communications/${id}`),
-  listLogs: () => api.get<AutoCommunicationLog[]>('/auto-communications/logs'),
+    api.patch<AutoCommunicationRule>(`/auto-communications/rules/${id}`, data),
+  deleteRule: (id: string) => api.delete(`/auto-communications/rules/${id}`),
+  listLogs: () => api.get<AutoCommunicationLog[]>('/auto-communications'),
 }
 
 export default api

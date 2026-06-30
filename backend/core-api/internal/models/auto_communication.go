@@ -15,3 +15,16 @@ type AutoCommunication struct {
 	ErrorMessage   *string    `json:"errorMessage,omitempty"`
 	CreatedAt      time.Time  `json:"createdAt"`
 }
+
+type AutoCommunicationRule struct {
+	ID              string    `json:"id"`
+	Trigger         string    `json:"trigger"`
+	Channel         string    `json:"channel"`
+	Subject         string    `json:"subject"`
+	Template        string    `json:"template"`
+	SendToShipper   bool      `json:"sendToShipper"`
+	SendToRecipient bool      `json:"sendToRecipient"`
+	IsActive        bool      `json:"isActive"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
+}

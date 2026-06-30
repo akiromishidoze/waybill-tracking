@@ -11,6 +11,7 @@ type CustomsDocument struct {
 	Status         string     `json:"status"`
 	FileName       string     `json:"fileName"`
 	FileSize       int        `json:"fileSize"`
+	FileURL        *string    `json:"fileUrl"`
 	Notes          *string    `json:"notes"`
 	SubmittedAt    *time.Time `json:"submittedAt"`
 	ApprovedAt     *time.Time `json:"approvedAt"`

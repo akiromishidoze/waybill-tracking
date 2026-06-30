@@ -315,9 +315,8 @@ export const customsService = {
   updateStatus: (id: string, data: { customsStatus: string; notes?: string }) =>
     api.patch<CustomsShipment>(`/customs-shipments/${id}`, data),
   uploadDocument: (waybillId: string, formData: FormData) =>
-    api.post<CustomsDocument>(`/customs-documents`, formData, {
+    api.post<CustomsDocument>(`/customs-shipments/${waybillId}/documents`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      params: { waybillId },
     }),
   deleteDocument: (id: string) => api.delete(`/customs-documents/${id}`),
 }

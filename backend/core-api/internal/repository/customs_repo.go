@@ -55,7 +55,7 @@ func (r *CustomsRepository) ListShipments(ctx context.Context) ([]models.Customs
 
 func (r *CustomsRepository) listDocuments(ctx context.Context, waybillID, trackingNumber string) ([]models.CustomsDocument, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, waybill_id, doc_type, title, status, file_name, file_size,
+		SELECT id, waybill_id, doc_type, title, status, file_name, file_size, file_url,
 		       notes, submitted_at, approved_at, created_at
 		FROM customs_documents WHERE waybill_id = $1 ORDER BY created_at DESC`, waybillID)
 	if err != nil {
@@ -68,7 +68,7 @@ func (r *CustomsRepository) listDocuments(ctx context.Context, waybillID, tracki
 		var d models.CustomsDocument
 		if err := rows.Scan(
 			&d.ID, &d.WaybillID, &d.DocType, &d.Title, &d.Status,
-			&d.FileName, &d.FileSize, &d.Notes, &d.SubmittedAt, &d.ApprovedAt, &d.CreatedAt,
+			&d.FileName, &d.FileSize, &d.FileURL, &d.Notes, &d.SubmittedAt, &d.ApprovedAt, &d.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -124,4 +124,26 @@ func (r *CustomsRepository) UpdateStatus(ctx context.Context, waybillID string, 
 		}
 	}
 	return nil, nil
+}
+
+func (r *CustomsRepository) CreateDocument(ctx context.Context, waybillID, docType, title, fileName string, fileSize int, fileURL string) (*models.CustomsDocument, error) {
+	var d models.CustomsDocument
+	err := r.db.QueryRow(ctx, `
+		INSERT INTO customs_documents (waybill_id, doc_type, title, status, file_name, file_size, file_url, submitted_at, created_at)
+		VALUES ($1, $2, $3, 'SUBMITTED', $4, $5, $6, NOW(), NOW())
+		RETURNING id, waybill_id, doc_type, title, status, file_name, file_size, file_url, notes, submitted_at, approved_at, created_at`,
+		waybillID, docType, title, fileName, fileSize, fileURL,
+	).Scan(
+		&d.ID, &d.WaybillID, &d.DocType, &d.Title, &d.Status,
+		&d.FileName, &d.FileSize, &d.FileURL, &d.Notes, &d.SubmittedAt, &d.ApprovedAt, &d.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *CustomsRepository) DeleteDocument(ctx context.Context, id string) error {
+	_, err := r.db.Exec(ctx, "DELETE FROM customs_documents WHERE id = $1", id)
+	return err
 }

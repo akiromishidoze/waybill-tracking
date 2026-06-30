@@ -23,6 +23,7 @@ import (
 	"github.com/waybill-tracking/core-api/internal/migrator"
 	"github.com/waybill-tracking/core-api/internal/notifications"
 	"github.com/waybill-tracking/core-api/internal/repository"
+	"github.com/waybill-tracking/core-api/internal/storage"
 	"github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 	"go.uber.org/zap"
@@ -65,6 +66,8 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.GET("/returns", returnHandler.List)
 		protected.GET("/customs-shipments", customsHandler.List)
 		protected.PATCH("/customs-shipments/:id", customsHandler.UpdateStatus)
+		protected.POST("/customs-shipments/:id/documents", customsHandler.UploadDocument)
+		protected.DELETE("/customs-documents/:docId", customsHandler.DeleteDocument)
 		protected.GET("/cod-payments", codHandler.List)
 		protected.POST("/cod-payments/:id/settle", codHandler.Settle)
 		protected.POST("/cod-payments/:id/dispute", codHandler.Dispute)
@@ -257,7 +260,8 @@ func main() {
 	returnRepo := repository.NewReturnRepository(db)
 	returnHandler := handlers.NewReturnHandler(returnRepo)
 	customsRepo := repository.NewCustomsRepository(db)
-	customsHandler := handlers.NewCustomsHandler(customsRepo)
+	fileStorage := storage.NewFileStorage("./uploads", "/uploads")
+	customsHandler := handlers.NewCustomsHandler(customsRepo, fileStorage)
 	codRepo := repository.NewCODRepository(db)
 	codHandler := handlers.NewCODHandler(codRepo)
 	biRepo := repository.NewBiIntegrationRepository(db)

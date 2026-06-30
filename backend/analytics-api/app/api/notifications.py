@@ -17,6 +17,8 @@ class DeliveryNotificationRequest(BaseModel):
     recipientPhone: str
     status: str
     destination: str
+    eventType: str | None = None
+    remark: str | None = None
 
 
 class EmailRequest(BaseModel):
@@ -45,9 +47,32 @@ async def dispatch_notifications(
     row = result.mappings().first()
     shipper_email = row["email"] if row else None
 
-    subject = f"Waybill {req.trackingNumber} delivered"
-    body = f"<p>Hi,</p><p>Waybill <strong>{req.trackingNumber}</strong> has been delivered to {req.recipientName} in {req.destination}.</p>"
-    sms_body = f"Waybill {req.trackingNumber} delivered to {req.recipientName} in {req.destination}."
+    # Generate appropriate message based on event type
+    if req.eventType == "DELIVERY":
+        subject = f"Waybill {req.trackingNumber} delivered"
+        body = f"<p>Hi,</p><p>Waybill <strong>{req.trackingNumber}</strong> has been delivered to {req.recipientName} in {req.destination}.</p>"
+        sms_body = f"Waybill {req.trackingNumber} delivered to {req.recipientName} in {req.destination}."
+    elif req.eventType == "ATTEMPT":
+        subject = f"Delivery attempt for {req.trackingNumber}"
+        body = f"<p>Hi,</p><p>A delivery attempt was made for waybill <strong>{req.trackingNumber}</strong> to {req.recipientName} in {req.destination}.</p>"
+        if req.remark:
+            body += f"<p>Reason: {req.remark}</p>"
+        sms_body = f"Delivery attempt for {req.trackingNumber} to {req.recipientName} in {req.destination}."
+        if req.remark:
+            sms_body += f" Reason: {req.remark}"
+    elif req.eventType == "RETURN":
+        subject = f"Return initiated for {req.trackingNumber}"
+        body = f"<p>Hi,</p><p>Waybill <strong>{req.trackingNumber}</strong> has been marked for return.</p>"
+        if req.remark:
+            body += f"<p>Reason: {req.remark}</p>"
+        sms_body = f"Return initiated for {req.trackingNumber}."
+        if req.remark:
+            sms_body += f" Reason: {req.remark}"
+    else:
+        # Default: status change notification
+        subject = f"Waybill {req.trackingNumber} status update"
+        body = f"<p>Hi,</p><p>Waybill <strong>{req.trackingNumber}</strong> status is now {req.status}.</p>"
+        sms_body = f"Waybill {req.trackingNumber} status: {req.status}."
 
     if shipper_email:
         send_email_notification.delay(shipper_email, subject, body)

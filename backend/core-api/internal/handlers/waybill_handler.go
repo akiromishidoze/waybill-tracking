@@ -467,6 +467,18 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 
+	// Dispatch notifications for significant scan events
+	if feature.IsEnabled("NOTIFICATIONS") {
+		switch eventType {
+		case "DELIVERY", "ATTEMPT", "RETURN":
+			remark := ""
+			if req.Remark != nil {
+				remark = *req.Remark
+			}
+			h.notifications.DispatchScanNotification(c.Request.Context(), wb, string(eventType), remark)
+		}
+	}
+
 	userID, _ := c.Get("userID")
 	userName, _ := c.Get("userName")
 	userIDStr, _ := userID.(string)

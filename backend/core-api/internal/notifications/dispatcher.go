@@ -27,6 +27,8 @@ type deliveryPayload struct {
 	RecipientPhone string `json:"recipientPhone"`
 	Status         string `json:"status"`
 	Destination    string `json:"destination"`
+	EventType      string `json:"eventType,omitempty"`
+	Remark         string `json:"remark,omitempty"`
 }
 
 func NewDispatcher(analyticsURL, apiKey string) *Dispatcher {
@@ -78,5 +80,51 @@ func (d *Dispatcher) DispatchDeliveryNotification(ctx context.Context, wb *model
 
 	if resp.StatusCode >= 300 {
 		logger.L().Warn("notification dispatcher: non-2xx response", zap.Int("status", resp.StatusCode))
+	}
+}
+
+func (d *Dispatcher) DispatchScanNotification(ctx context.Context, wb *models.Waybill, eventType, remark string) {
+	if d.analyticsURL == "" {
+		return
+	}
+
+	payload := deliveryPayload{
+		TrackingNumber: wb.TrackingNumber,
+		ShipperID:      wb.ShipperID,
+		RecipientName:  wb.RecipientName,
+		RecipientPhone: wb.RecipientPhone,
+		Status:         string(wb.Status),
+		Destination:    wb.Destination,
+		EventType:      eventType,
+		Remark:         remark,
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		logger.L().Error("notification dispatcher: scan marshal error", zap.Error(err))
+		return
+	}
+
+	url := fmt.Sprintf("%s/api/v1/notifications/dispatch", d.analyticsURL)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		logger.L().Error("notification dispatcher: scan build request error", zap.Error(err))
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if d.apiKey != "" {
+		req.Header.Set("X-Internal-API-Key", d.apiKey)
+	}
+
+	resp, err := d.client.Do(req)
+	if err != nil {
+		logger.L().Error("notification dispatcher: scan call error", zap.Error(err))
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		logger.L().Warn("notification dispatcher: scan non-2xx response", zap.Int("status", resp.StatusCode))
 	}
 }

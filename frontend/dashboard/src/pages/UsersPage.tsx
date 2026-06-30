@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/api'
 import type { User } from '@/types/waybill'
+import { userSchema, validate, type FieldErrors } from '@/utils/validation'
 import { Plus, Pencil, Trash2, X, Check, Users as UsersIcon } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
@@ -20,6 +21,7 @@ export default function UsersPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null)
   const [form, setForm] = useState({ email: '', name: '', role: 'SHIPPER', company: '', password: '' })
+  const [formErrors, setFormErrors] = useState<FieldErrors>({})
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
@@ -28,9 +30,16 @@ export default function UsersPage() {
 
   const createUser = useMutation({
     mutationFn: () => userService.create(form as any),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm(); toast.success('User created') },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm(); setFormErrors({}); toast.success('User created') },
     onError: (err: any) => toast.error(err?.response?.data?.error || 'Failed to create user'),
   })
+
+  const handleCreate = () => {
+    const { errors } = validate(userSchema, form)
+    setFormErrors(errors)
+    if (Object.keys(errors).length > 0) return
+    createUser.mutate()
+  }
 
   const updateUser = useMutation({
     mutationFn: () => userService.update(editingId!, form as any),
@@ -69,10 +78,20 @@ export default function UsersPage() {
           </div>
           <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Company</label><input value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} /></div>
           {!editingId && (
-            <div><label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Password</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} /></div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Password</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={e => { setForm({ ...form, password: e.target.value }); setFormErrors(p => ({ ...p, password: undefined })) }}
+                style={{ padding: '0.5rem', border: `1px solid ${formErrors.password ? 'var(--color-danger)' : 'var(--color-border-input)'}`, borderRadius: 6, fontSize: '0.875rem', width: 160 }}
+              />
+              {formErrors.password && <p style={{ margin: '0.25rem 0 0', fontSize: '0.65rem', color: 'var(--color-danger)' }}>{formErrors.password}</p>}
+              {!formErrors.password && <p style={{ margin: '0.25rem 0 0', fontSize: '0.6rem', color: 'var(--color-text-muted)' }}>8+ chars, uppercase, lowercase, digit</p>}
+            </div>
           )}
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => editingId ? updateUser.mutate() : createUser.mutate()} disabled={createUser.isPending || updateUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
+            <button onClick={() => editingId ? updateUser.mutate() : handleCreate()} disabled={createUser.isPending || updateUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>
               <Check size={14} /> {editingId ? 'Update' : 'Create'}
             </button>
             <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>

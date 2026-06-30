@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { settingsService, userService, teamService, escalationRuleService } from '@/services/api'
+import { userSchema, validate, type FieldErrors } from '@/utils/validation'
 import { UserPlus, Save, Plus, Trash2, Check, X, Shield, AlertTriangle } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
 
@@ -12,6 +13,7 @@ export default function SettingsPage() {
 
   const [createUserForm, setCreateUserForm] = useState({ email: '', name: '', password: '', role: 'SHIPPER', company: '' })
   const [createUserMsg, setCreateUserMsg] = useState('')
+  const [createUserErrors, setCreateUserErrors] = useState<FieldErrors>({})
 
   const [settingsForm, setSettingsForm] = useState<any>(null)
   const [savedMsg, setSavedMsg] = useState('')
@@ -28,9 +30,17 @@ export default function SettingsPage() {
 
   const createUser = useMutation({
     mutationFn: () => userService.create(createUserForm as any),
-    onSuccess: (r) => { setCreateUserMsg(`User ${r.data.name} created successfully`); setCreateUserForm({ email: '', name: '', password: '', role: 'SHIPPER', company: '' }); queryClient.invalidateQueries({ queryKey: ['users'] }) },
+    onSuccess: (r) => { setCreateUserMsg(`User ${r.data.name} created successfully`); setCreateUserForm({ email: '', name: '', password: '', role: 'SHIPPER', company: '' }); setCreateUserErrors({}); queryClient.invalidateQueries({ queryKey: ['users'] }) },
     onError: (e: any) => setCreateUserMsg(e.response?.data?.error || 'Failed to create user'),
   })
+
+  const handleCreateUser = () => {
+    setCreateUserMsg('')
+    const { errors } = validate(userSchema, createUserForm)
+    setCreateUserErrors(errors)
+    if (Object.keys(errors).length > 0) return
+    createUser.mutate()
+  }
 
   const saveSettings = useMutation({
     mutationFn: () => settingsService.update(settingsForm),
@@ -89,7 +99,15 @@ export default function SettingsPage() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Password *</label>
-              <input type="text" value={createUserForm.password} onChange={e => setCreateUserForm({ ...createUserForm, password: e.target.value })} placeholder="e.g. securePass123" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 180 }} />
+              <input
+                type="text"
+                value={createUserForm.password}
+                onChange={e => { setCreateUserForm({ ...createUserForm, password: e.target.value }); setCreateUserErrors(p => ({ ...p, password: undefined })) }}
+                placeholder="e.g. SecurePass123"
+                style={{ padding: '0.5rem', border: `1px solid ${createUserErrors.password ? 'var(--color-danger)' : 'var(--color-border-input)'}`, borderRadius: 6, fontSize: '0.875rem', width: 180 }}
+              />
+              {createUserErrors.password && <p style={{ margin: '0.25rem 0 0', fontSize: '0.7rem', color: 'var(--color-danger)' }}>{createUserErrors.password}</p>}
+              {!createUserErrors.password && <p style={{ margin: '0.25rem 0 0', fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>8+ chars, uppercase, lowercase, digit</p>}
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Role</label>
@@ -104,7 +122,7 @@ export default function SettingsPage() {
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Company</label>
               <input type="text" value={createUserForm.company} onChange={e => setCreateUserForm({ ...createUserForm, company: e.target.value })} placeholder="Optional" style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', width: 160 }} />
             </div>
-            <button onClick={() => createUser.mutate()} disabled={!createUserForm.email || !createUserForm.name || !createUserForm.password || createUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
+            <button onClick={handleCreateUser} disabled={!createUserForm.email || !createUserForm.name || !createUserForm.password || createUser.isPending} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem 1rem', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}>
               <UserPlus size={14} /> Create User
             </button>
           </div>

@@ -2,8 +2,6 @@ import asyncio
 import hashlib
 import logging
 import uuid
-from datetime import datetime
-from typing import Any
 
 from sqlalchemy import text
 
@@ -12,6 +10,18 @@ from app.integrations.ecommerce import get_adapter
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
+
+
+def _normalise_platform(row: dict) -> dict:
+    """Return a platform dict with both snake_case and camelCase keys so all
+    adapters can find the fields they need regardless of naming convention."""
+    return {
+        **row,
+        "apiKey": row.get("api_key", ""),
+        "apiSecret": row.get("api_secret", ""),
+        "storeUrl": row.get("store_url", ""),
+        "apiEndpoint": row.get("store_url", ""),
+    }
 
 
 @celery_app.task
@@ -23,7 +33,7 @@ def sync_ecommerce_orders():
             platforms_result = await session.execute(
                 text("SELECT id, platform, store_name, store_url, api_key, api_secret, connected, last_sync, synced_orders FROM ecommerce_platforms WHERE connected = TRUE")
             )
-            platforms = platforms_result.mappings().all()
+            platforms = [dict(r) for r in platforms_result.mappings().all()]
 
             if not platforms:
                 logger.info("No connected e-commerce platforms")
@@ -37,8 +47,8 @@ def sync_ecommerce_orders():
                 logger.error("No ADMIN user found to assign as shipper for e-commerce orders")
                 return
 
-            for platform in platforms:
-                platform_dict = dict(platform)
+            for raw_platform in platforms:
+                platform_dict = _normalise_platform(raw_platform)
                 platform_id = platform_dict["id"]
                 platform_name = platform_dict["platform"]
                 store_name = platform_dict["store_name"]
@@ -46,44 +56,65 @@ def sync_ecommerce_orders():
 
                 logger.info("Syncing platform: %s (%s)", platform_name, store_name)
 
-                adapter = get_adapter(platform_dict)
-                orders = []
                 try:
-                    orders = adapter.fetch_orders(since=last_sync)
-                except Exception as e:
-                    logger.error("Failed to fetch orders from %s: %s", platform_name, e)
-                    await _log_sync(session, platform_id, platform_name, store_name, 0, 1)
-                    continue
+                    await _sync_platform(
+                        session, platform_dict, platform_id,
+                        platform_name, store_name, last_sync, shipper_id,
+                    )
+                    await session.commit()
+                    logger.info("Committed sync for platform: %s", platform_name)
+                except Exception as exc:
+                    await session.rollback()
+                    logger.error("Sync failed for platform %s: %s", platform_name, exc)
 
-                synced_count = 0
-                error_count = 0
-                for order in orders:
-                    try:
-                        await _create_waybill_from_order(session, order, shipper_id, store_name)
-                        synced_count += 1
-                    except Exception as e:
-                        logger.error("Failed to create waybill for order %s: %s", order.order_id, e)
-                        error_count += 1
-
-                await session.execute(
-                    text("""
-                        UPDATE ecommerce_platforms
-                        SET synced_orders = synced_orders + :synced,
-                            last_sync = NOW(),
-                            updated_at = NOW()
-                        WHERE id = :id
-                    """),
-                    {"synced": synced_count, "id": platform_id},
-                )
-
-                await _log_sync(session, platform_id, platform_name, store_name, synced_count, error_count)
-                await session.commit()
-
+    loop = asyncio.new_event_loop()
     try:
-        asyncio.run(_run())
+        loop.run_until_complete(_run())
         logger.info("E-commerce order sync completed")
     except Exception as e:
         logger.error("E-commerce order sync failed: %s", e)
+    finally:
+        loop.close()
+
+
+async def _sync_platform(
+    session, platform_dict: dict, platform_id: str,
+    platform_name: str, store_name: str, last_sync, shipper_id: str,
+) -> None:
+    adapter = get_adapter(platform_dict)
+    orders = []
+    try:
+        orders = adapter.fetch_orders(since=last_sync)
+    except Exception as e:
+        logger.error("Failed to fetch orders from %s: %s", platform_name, e)
+        await _log_sync(session, platform_id, platform_name, store_name, 0, 1)
+        return
+
+    synced_count = 0
+    error_count = 0
+    for order in orders:
+        try:
+            await _create_waybill_from_order(session, order, shipper_id, store_name)
+            synced_count += 1
+        except Exception as e:
+            logger.error("Failed to create waybill for order %s: %s", order.order_id, e)
+            error_count += 1
+
+    await session.execute(
+        text("""
+            UPDATE ecommerce_platforms
+            SET synced_orders = synced_orders + :synced,
+                last_sync = NOW(),
+                updated_at = NOW()
+            WHERE id = :id
+        """),
+        {"synced": synced_count, "id": platform_id},
+    )
+    await _log_sync(session, platform_id, platform_name, store_name, synced_count, error_count)
+    logger.info(
+        "Platform %s synced: %d orders, %d errors",
+        platform_name, synced_count, error_count,
+    )
 
 
 async def _create_waybill_from_order(session, order, shipper_id: str, store_name: str):

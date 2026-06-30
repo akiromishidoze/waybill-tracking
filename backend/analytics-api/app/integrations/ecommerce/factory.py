@@ -2,11 +2,17 @@ from typing import Any
 
 from app.integrations.ecommerce.base import ECommerceAdapter
 from app.integrations.ecommerce.generic import GenericJsonECommerceAdapter
+from app.integrations.ecommerce.lazada import LazadaAdapter
 from app.integrations.ecommerce.mock import MockECommerceAdapter
+from app.integrations.ecommerce.shopee import ShopeeAdapter
+from app.integrations.ecommerce.shopify import ShopifyAdapter
 
 
 BUILTIN_ADAPTERS: list[type[ECommerceAdapter]] = [
     MockECommerceAdapter,
+    ShopifyAdapter,
+    LazadaAdapter,
+    ShopeeAdapter,
     GenericJsonECommerceAdapter,
 ]
 

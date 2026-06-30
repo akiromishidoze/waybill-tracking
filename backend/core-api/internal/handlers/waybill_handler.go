@@ -99,19 +99,23 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	shipperName, _ := userName.(string)
 
 	wb := &models.Waybill{
-		ID:               uuid.New().String(),
-		TrackingNumber:   generateTrackingNumber(),
-		ShipperID:        userID.(string),
-		ShipperName:      shipperName,
-		Status:           models.StatusCreated,
-		RecipientName:    req.RecipientName,
-		RecipientAddress: req.RecipientAddress,
-		RecipientPhone:   req.RecipientPhone,
-		Origin:           req.Origin,
-		Destination:      req.Destination,
-		Weight:           req.Weight,
-		Dimensions:       req.Dimensions,
-		ServiceType:      req.ServiceType,
+		ID:                 uuid.New().String(),
+		TrackingNumber:     generateTrackingNumber(),
+		ShipperID:          userID.(string),
+		ShipperName:        shipperName,
+		Status:             models.StatusCreated,
+		RecipientName:      req.RecipientName,
+		RecipientAddress:   req.RecipientAddress,
+		RecipientPhone:     req.RecipientPhone,
+		Origin:             req.Origin,
+		Destination:        req.Destination,
+		Weight:             req.Weight,
+		Dimensions:         req.Dimensions,
+		ServiceType:        req.ServiceType,
+		IsCOD:              req.IsCOD,
+		CODAmount:          req.CODAmount,
+		OriginCountry:      req.OriginCountry,
+		DestinationCountry: req.DestinationCountry,
 	}
 
 	if err := h.repo.Create(c.Request.Context(), wb); err != nil {

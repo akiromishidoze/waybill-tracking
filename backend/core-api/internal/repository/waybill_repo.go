@@ -49,6 +49,7 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
 		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
 		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.is_cod, w.cod_amount, w.origin_country, w.destination_country,
 		       w.created_at, w.updated_at
 		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id%s ORDER BY w.created_at DESC LIMIT %d OFFSET %d`,
 		whereClause, limit, offset)
@@ -70,7 +71,9 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-			&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
+			&wb.TeamID, &wb.TeamName,
+			&wb.IsCOD, &wb.CODAmount, &wb.OriginCountry, &wb.DestinationCountry,
+			&wb.CreatedAt, &wb.UpdatedAt,
 		)
 
 		if err != nil {
@@ -90,6 +93,7 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 		       w.origin, w.destination, w.weight, w.dimensions, w.service_type,
 		       w.status, w.estimated_delivery, w.actual_delivery,
 		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.is_cod, w.cod_amount, w.origin_country, w.destination_country,
 		       w.created_at, w.updated_at
 		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id
 		JOIN scan_events e ON e.waybill_id = w.id
@@ -111,7 +115,9 @@ func (r *WaybillRepository) ListByCourier(ctx context.Context, courierID string)
 			&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 			&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 			&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-			&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
+			&wb.TeamID, &wb.TeamName,
+			&wb.IsCOD, &wb.CODAmount, &wb.OriginCountry, &wb.DestinationCountry,
+			&wb.CreatedAt, &wb.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -129,6 +135,7 @@ func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Way
 		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
 		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
 		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.is_cod, w.cod_amount, w.origin_country, w.destination_country,
 		       w.created_at, w.updated_at
 		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id WHERE w.id = $1`, id).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
@@ -136,7 +143,9 @@ func (r *WaybillRepository) GetByID(ctx context.Context, id string) (*models.Way
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-		&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
+		&wb.TeamID, &wb.TeamName,
+		&wb.IsCOD, &wb.CODAmount, &wb.OriginCountry, &wb.DestinationCountry,
+		&wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -168,6 +177,7 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
 		       w.dimensions, w.service_type, w.status, w.estimated_delivery, w.actual_delivery,
 		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
+		       w.is_cod, w.cod_amount, w.origin_country, w.destination_country,
 		       w.created_at, w.updated_at
 		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id WHERE w.tracking_number = $1`, tn).Scan(
 		&wb.ID, &wb.TrackingNumber, &wb.ShipperID, &wb.ShipperName,
@@ -175,7 +185,9 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 		&wb.Origin, &wb.Destination, &wb.Weight, &wb.Dimensions,
 		&wb.ServiceType, &wb.Status, &wb.EstimatedDelivery,
 		&wb.ActualDelivery, &wb.CarrierName, &wb.CarrierTrackingNumber,
-		&wb.TeamID, &wb.TeamName, &wb.CreatedAt, &wb.UpdatedAt,
+		&wb.TeamID, &wb.TeamName,
+		&wb.IsCOD, &wb.CODAmount, &wb.OriginCountry, &wb.DestinationCountry,
+		&wb.CreatedAt, &wb.UpdatedAt,
 	)
 
 	if err != nil {
@@ -192,15 +204,25 @@ func (r *WaybillRepository) GetByTrackingNumber(ctx context.Context, tn string) 
 }
 
 func (r *WaybillRepository) Create(ctx context.Context, wb *models.Waybill) error {
+	if wb.OriginCountry == "" {
+		wb.OriginCountry = "PH"
+	}
+	if wb.DestinationCountry == "" {
+		wb.DestinationCountry = "PH"
+	}
 	_, err := r.db.Exec(ctx, `
 		INSERT INTO waybills (id, tracking_number, shipper_id, shipper_name,
 			recipient_name, recipient_address, recipient_phone, origin, destination,
-			weight, dimensions, service_type, status, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+			weight, dimensions, service_type, status,
+			is_cod, cod_amount, origin_country, destination_country,
+			created_at, updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
 		wb.ID, wb.TrackingNumber, wb.ShipperID, wb.ShipperName,
 		wb.RecipientName, wb.RecipientAddress, wb.RecipientPhone,
 		wb.Origin, wb.Destination, wb.Weight, wb.Dimensions,
-		wb.ServiceType, wb.Status, time.Now(), time.Now(),
+		wb.ServiceType, wb.Status,
+		wb.IsCOD, wb.CODAmount, wb.OriginCountry, wb.DestinationCountry,
+		time.Now(), time.Now(),
 	)
 
 	return err

@@ -2,6 +2,8 @@ version: "3.9"
 
 services:
   core-api:
+    build:
+      target: dev
     volumes:
       - ./backend/core-api:/app
     command: air -c .air.toml

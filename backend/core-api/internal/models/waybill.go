@@ -69,6 +69,10 @@ type Waybill struct {
 	CarrierTrackingNumber *string       `json:"carrierTrackingNumber,omitempty"`
 	TeamID                *string       `json:"teamId,omitempty"`
 	TeamName              string        `json:"teamName,omitempty"`
+	IsCOD                 bool          `json:"isCOD"`
+	CODAmount             float64       `json:"codAmount"`
+	OriginCountry         string        `json:"originCountry"`
+	DestinationCountry    string        `json:"destinationCountry"`
 	CreatedAt             time.Time     `json:"createdAt"`
 	UpdatedAt             time.Time     `json:"updatedAt"`
 	Events                []ScanEvent   `json:"events,omitempty"`
@@ -99,14 +103,18 @@ type User struct {
 }
 
 type CreateWaybillRequest struct {
-	RecipientName    string  `json:"recipientName" binding:"required"`
-	RecipientAddress string  `json:"recipientAddress" binding:"required"`
-	RecipientPhone   string  `json:"recipientPhone" binding:"required"`
-	Origin           string  `json:"origin" binding:"required"`
-	Destination      string  `json:"destination" binding:"required"`
-	Weight           float64 `json:"weight" binding:"required"`
-	Dimensions       string  `json:"dimensions"`
-	ServiceType      string  `json:"serviceType"`
+	RecipientName      string  `json:"recipientName" binding:"required"`
+	RecipientAddress   string  `json:"recipientAddress" binding:"required"`
+	RecipientPhone     string  `json:"recipientPhone" binding:"required"`
+	Origin             string  `json:"origin" binding:"required"`
+	Destination        string  `json:"destination" binding:"required"`
+	Weight             float64 `json:"weight" binding:"required"`
+	Dimensions         string  `json:"dimensions"`
+	ServiceType        string  `json:"serviceType"`
+	IsCOD              bool    `json:"isCOD"`
+	CODAmount          float64 `json:"codAmount"`
+	OriginCountry      string  `json:"originCountry"`
+	DestinationCountry string  `json:"destinationCountry"`
 }
 
 type ImportWaybillRow struct {

@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService, dwellTimeService } from '@/services/api'
 import type { Waybill } from '@/types/waybill'
@@ -24,12 +24,13 @@ const statusColors: Record<string, string> = {
 const PAGE_SIZE = 25
 
 export default function WaybillListPage() {
-  const [search, setSearch] = useState('')
-  const [page, setPage] = useState(1)
-  const [carrierFilter, setCarrierFilter] = useState('')
-  const [breachFilter, setBreachFilter] = useState<'all' | 'breached' | 'ontime'>('all')
-  const [returnFilter, setReturnFilter] = useState<'all' | 'hasReturn' | 'noReturn'>('all')
-  const [teamFilter, setTeamFilter] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const search = searchParams.get('search') || ''
+  const page = parseInt(searchParams.get('page') || '1', 10)
+  const carrierFilter = searchParams.get('carrier') || ''
+  const breachFilter = (searchParams.get('sla') as 'all' | 'breached' | 'ontime') || 'all'
+  const returnFilter = (searchParams.get('return') as 'all' | 'hasReturn' | 'noReturn') || 'all'
+  const teamFilter = searchParams.get('team') || ''
   const { data: rawData, isLoading } = useQuery({
     queryKey: ['waybills', search, page],
     queryFn: () => waybillService.list({ search, page, limit: PAGE_SIZE }).then((r) => r.data),
@@ -72,17 +73,16 @@ export default function WaybillListPage() {
   const totalPages = Math.max(1, Math.ceil((filtered?.length ?? total) / PAGE_SIZE))
   const displayed = filtered?.slice(0, PAGE_SIZE) ?? []
 
-  function resetPage() { setPage(1) }
-
   const dweltWaybills = new Set(
     (dwellAlerts || []).filter(a => !a.acknowledged).map(a => a.waybillId)
   )
 
-  function handleSearch(v: string) { setSearch(v); resetPage() }
-  function handleCarrier(v: string) { setCarrierFilter(v); resetPage() }
-  function handleBreach(v: string) { setBreachFilter(v as any); resetPage() }
-  function handleReturn(v: string) { setReturnFilter(v as any); resetPage() }
-  function handleTeam(v: string) { setTeamFilter(v); resetPage() }
+  function handleSearch(v: string) { setSearchParams(prev => { prev.set('search', v); prev.set('page', '1'); return prev }) }
+  function handleCarrier(v: string) { setSearchParams(prev => { prev.set('carrier', v); prev.set('page', '1'); return prev }) }
+  function handleBreach(v: string) { setSearchParams(prev => { prev.set('sla', v); prev.set('page', '1'); return prev }) }
+  function handleReturn(v: string) { setSearchParams(prev => { prev.set('return', v); prev.set('page', '1'); return prev }) }
+  function handleTeam(v: string) { setSearchParams(prev => { prev.set('team', v); prev.set('page', '1'); return prev }) }
+  function handlePageChange(newPage: number) { setSearchParams(prev => { prev.set('page', newPage.toString()); return prev }) }
 
   return (
     <PageContainer
@@ -221,7 +221,7 @@ export default function WaybillListPage() {
           </tbody>
         </table>
       </div>
-      <Pagination page={page} totalPages={totalPages} total={filtered?.length ?? total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+      <Pagination page={page} totalPages={totalPages} total={filtered?.length ?? total} pageSize={PAGE_SIZE} onPageChange={handlePageChange} />
     </PageContainer>
   )
 }

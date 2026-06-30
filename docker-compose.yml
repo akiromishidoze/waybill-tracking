@@ -134,6 +134,7 @@ services:
     environment:
       DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/waybill"
       REDIS_URL: "redis://redis:6379/0"
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in the environment}"
       SENDGRID_KEY: "${SENDGRID_KEY:-}"
       TWILIO_SID: "${TWILIO_SID:-}"
       TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN:-}"

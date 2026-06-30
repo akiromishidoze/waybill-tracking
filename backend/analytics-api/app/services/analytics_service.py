@@ -283,6 +283,129 @@ class AnalyticsService:
             "monthlyTrend": monthly_trend,
         }
 
+    async def get_demand_forecast(self) -> dict:
+        lane_res = await self.db.execute(text("""
+            SELECT
+                origin,
+                destination,
+                COUNT(*) AS current_volume
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '30 days'
+            GROUP BY origin, destination
+            ORDER BY current_volume DESC
+            LIMIT 15
+        """))
+        lanes_raw = lane_res.mappings().all()
+
+        prev_lane_res = await self.db.execute(text("""
+            SELECT
+                origin,
+                destination,
+                COUNT(*) AS prev_volume
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '60 days'
+              AND created_at < NOW() - INTERVAL '30 days'
+            GROUP BY origin, destination
+        """))
+        prev_map = {
+            (r["origin"], r["destination"]): int(r["prev_volume"])
+            for r in prev_lane_res.mappings().all()
+        }
+
+        by_lane = []
+        for r in lanes_raw:
+            cur = int(r["current_volume"])
+            prev = prev_map.get((r["origin"], r["destination"]), cur)
+            growth = ((cur - prev) / prev * 100) if prev else 0.0
+            forecasted = round(cur * (1 + growth / 100))
+            by_lane.append({
+                "lane": f"{r['origin']} → {r['destination']}",
+                "origin": r["origin"],
+                "destination": r["destination"],
+                "currentVolume": cur,
+                "forecastedVolume": forecasted,
+                "growth": round(growth, 2),
+                "confidence": round(min(0.95, 0.60 + cur / 500), 2),
+            })
+
+        region_res = await self.db.execute(text("""
+            SELECT
+                destination AS region,
+                COUNT(*) AS current_volume
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '30 days'
+            GROUP BY destination
+            ORDER BY current_volume DESC
+            LIMIT 10
+        """))
+        prev_region_res = await self.db.execute(text("""
+            SELECT
+                destination AS region,
+                COUNT(*) AS prev_volume
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '60 days'
+              AND created_at < NOW() - INTERVAL '30 days'
+            GROUP BY destination
+        """))
+        prev_region_map = {
+            r["region"]: int(r["prev_volume"])
+            for r in prev_region_res.mappings().all()
+        }
+        by_region = []
+        for r in region_res.mappings().all():
+            cur = int(r["current_volume"])
+            prev = prev_region_map.get(r["region"], cur)
+            growth = ((cur - prev) / prev * 100) if prev else 0.0
+            by_region.append({
+                "region": r["region"],
+                "currentVolume": cur,
+                "forecastedVolume": round(cur * (1 + growth / 100)),
+                "growth": round(growth, 2),
+            })
+
+        monthly_res = await self.db.execute(text("""
+            SELECT
+                TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS month,
+                COUNT(*) AS volume
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '12 months'
+            GROUP BY month
+            ORDER BY month ASC
+        """))
+        monthly_rows = monthly_res.mappings().all()
+        avg_vol = (
+            sum(int(r["volume"]) for r in monthly_rows) / len(monthly_rows)
+            if monthly_rows else 1
+        )
+        capacity = round(avg_vol * 1.25)
+        monthly_forecast = [
+            {
+                "month": r["month"],
+                "volume": int(r["volume"]),
+                "capacity": capacity,
+            }
+            for r in monthly_rows
+        ]
+
+        total_current = sum(r["currentVolume"] for r in by_region) if by_region else 0
+        total_forecast = sum(r["forecastedVolume"] for r in by_region) if by_region else 0
+        total_capacity = round(total_current * 1.25)
+        utilization = (total_current / total_capacity * 100) if total_capacity else 0
+        growth_vals = [r["growth"] for r in by_region if r["growth"] != 0]
+        next_month_growth = round(sum(growth_vals) / len(growth_vals), 2) if growth_vals else 0.0
+
+        return {
+            "summary": {
+                "totalForecast": total_forecast,
+                "totalCapacity": total_capacity,
+                "utilizationRate": round(utilization, 2),
+                "nextMonthGrowth": next_month_growth,
+            },
+            "byLane": by_lane,
+            "byRegion": by_region,
+            "monthlyForecast": monthly_forecast,
+        }
+
     async def predict_eta(self, waybill_id: str) -> dict | None:
         ml_result = await self.ml.predict_eta(self.db, waybill_id)
         if ml_result:

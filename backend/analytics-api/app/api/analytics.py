@@ -4,7 +4,7 @@ from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.core.ratelimit import rate_limit
 from app.services.analytics_service import AnalyticsService
-from app.models.analytics import DashboardStats, SLAReportRow, AnomalyDetection, PredictiveETA, CostAnalytics, CarbonFootprint
+from app.models.analytics import DashboardStats, SLAReportRow, AnomalyDetection, PredictiveETA, CostAnalytics, CarbonFootprint, DemandForecast
 
 router = APIRouter(tags=["Analytics"])
 
@@ -100,3 +100,14 @@ async def get_cost_analytics(db: AsyncSession = Depends(get_db), user: dict = De
 async def get_carbon_footprint(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user), _rate_limit: None = Depends(rate_limit_analytics)):
     svc = AnalyticsService(db)
     return await svc.get_carbon_footprint()
+
+
+@router.get(
+    "/demand-forecast",
+    response_model=DemandForecast,
+    summary="Demand forecasting",
+    description="Returns shipment volume forecasts by lane, region, and month. Growth is calculated by comparing the current 30-day window against the prior 30-day period. Capacity is estimated at 125% of the average monthly volume.",
+)
+async def get_demand_forecast(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user), _rate_limit: None = Depends(rate_limit_analytics)):
+    svc = AnalyticsService(db)
+    return await svc.get_demand_forecast()

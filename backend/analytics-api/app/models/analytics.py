@@ -126,3 +126,40 @@ class CarbonFootprint(BaseModel):
     byCarrier: List[CarbonByCarrier]
     byRegion: List[CarbonByRegion]
     monthlyTrend: List[CarbonMonthlyTrend]
+
+
+class DemandForecastLane(BaseModel):
+    lane: str
+    origin: str
+    destination: str
+    currentVolume: int
+    forecastedVolume: int
+    growth: float
+    confidence: float
+
+
+class DemandForecastRegion(BaseModel):
+    region: str
+    currentVolume: int
+    forecastedVolume: int
+    growth: float
+
+
+class DemandForecastMonth(BaseModel):
+    month: str
+    volume: int
+    capacity: int
+
+
+class DemandForecastSummary(BaseModel):
+    totalForecast: int
+    totalCapacity: int
+    utilizationRate: float
+    nextMonthGrowth: float
+
+
+class DemandForecast(BaseModel):
+    summary: DemandForecastSummary
+    byLane: List[DemandForecastLane]
+    byRegion: List[DemandForecastRegion]
+    monthlyForecast: List[DemandForecastMonth]

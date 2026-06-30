@@ -89,6 +89,200 @@ class AnalyticsService:
             for r in rows
         ]
 
+    async def get_cost_analytics(self) -> dict:
+        summary_res = await self.db.execute(text("""
+            SELECT
+                COUNT(*) AS total_shipments,
+                COALESCE(SUM(weight * 85), 0) AS total_cost,
+                COALESCE(SUM(weight * 120), 0) AS total_revenue
+            FROM waybills
+        """))
+        s = summary_res.mappings().first()
+        total_cost = float(s["total_cost"] or 0)
+        total_revenue = float(s["total_revenue"] or 0)
+        total_shipments = int(s["total_shipments"] or 0)
+        avg_cost = total_cost / total_shipments if total_shipments else 0
+        avg_rev = total_revenue / total_shipments if total_shipments else 0
+        margin = ((total_revenue - total_cost) / total_revenue * 100) if total_revenue else 0
+
+        carrier_res = await self.db.execute(text("""
+            SELECT
+                COALESCE(carrier_name, 'Unknown') AS carrier_name,
+                COUNT(*) AS shipment_count,
+                COALESCE(SUM(weight * 85), 0) AS total_cost,
+                COALESCE(SUM(weight * 120), 0) AS total_revenue
+            FROM waybills
+            GROUP BY carrier_name
+            ORDER BY total_cost DESC
+            LIMIT 10
+        """))
+        by_carrier = [
+            {
+                "carrierId": r["carrier_name"],
+                "carrierName": r["carrier_name"],
+                "totalCost": float(r["total_cost"]),
+                "totalRevenue": float(r["total_revenue"]),
+                "shipmentCount": int(r["shipment_count"]),
+                "avgCost": float(r["total_cost"]) / int(r["shipment_count"]) if r["shipment_count"] else 0,
+            }
+            for r in carrier_res.mappings().all()
+        ]
+
+        region_res = await self.db.execute(text("""
+            SELECT
+                destination AS region,
+                COUNT(*) AS shipment_count,
+                COALESCE(SUM(weight * 85), 0) AS total_cost,
+                COALESCE(SUM(weight * 120), 0) AS total_revenue
+            FROM waybills
+            GROUP BY destination
+            ORDER BY total_cost DESC
+            LIMIT 10
+        """))
+        by_region = [
+            {
+                "region": r["region"],
+                "totalCost": float(r["total_cost"]),
+                "totalRevenue": float(r["total_revenue"]),
+                "shipmentCount": int(r["shipment_count"]),
+            }
+            for r in region_res.mappings().all()
+        ]
+
+        status_res = await self.db.execute(text("""
+            SELECT status, COUNT(*) AS shipment_count, COALESCE(SUM(weight * 85), 0) AS total_cost
+            FROM waybills GROUP BY status ORDER BY total_cost DESC
+        """))
+        by_status = [
+            {"status": r["status"], "totalCost": float(r["total_cost"]), "shipmentCount": int(r["shipment_count"])}
+            for r in status_res.mappings().all()
+        ]
+
+        monthly_res = await self.db.execute(text("""
+            SELECT
+                TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS month,
+                COUNT(*) AS count,
+                COALESCE(SUM(weight * 85), 0) AS cost,
+                COALESCE(SUM(weight * 120), 0) AS revenue
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '12 months'
+            GROUP BY DATE_TRUNC('month', created_at)
+            ORDER BY month
+        """))
+        monthly_trend = [
+            {"month": r["month"], "cost": float(r["cost"]), "revenue": float(r["revenue"]), "count": int(r["count"])}
+            for r in monthly_res.mappings().all()
+        ]
+
+        return {
+            "summary": {
+                "totalCost": total_cost,
+                "totalRevenue": total_revenue,
+                "totalShipments": total_shipments,
+                "avgCostPerShipment": avg_cost,
+                "avgRevenuePerShipment": avg_rev,
+                "profitMargin": margin,
+            },
+            "byCarrier": by_carrier,
+            "byRegion": by_region,
+            "byStatus": by_status,
+            "monthlyTrend": monthly_trend,
+        }
+
+    async def get_carbon_footprint(self) -> dict:
+        EMISSION_FACTOR = 0.21
+
+        summary_res = await self.db.execute(text("""
+            SELECT
+                COUNT(*) AS total_shipments,
+                COALESCE(SUM(weight * :ef), 0) AS total_emissions,
+                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('month', NOW()) - INTERVAL '1 month'
+                    AND created_at < DATE_TRUNC('month', NOW()) THEN weight * :ef ELSE 0 END), 0) AS last_month,
+                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('month', NOW()) THEN weight * :ef ELSE 0 END), 0) AS this_month
+            FROM waybills
+        """), {"ef": EMISSION_FACTOR})
+        s = summary_res.mappings().first()
+        total = float(s["total_emissions"] or 0)
+        total_shipments = int(s["total_shipments"] or 0)
+        avg_per = total / total_shipments if total_shipments else 0
+        last_month = float(s["last_month"] or 0)
+        this_month = float(s["this_month"] or 0)
+        vs_last = ((this_month - last_month) / last_month * 100) if last_month else 0
+
+        carrier_res = await self.db.execute(text("""
+            SELECT
+                COALESCE(carrier_name, 'Unknown') AS carrier_name,
+                COUNT(*) AS shipment_count,
+                COALESCE(SUM(weight * :ef), 0) AS total_emissions
+            FROM waybills
+            GROUP BY carrier_name
+            ORDER BY total_emissions DESC
+            LIMIT 10
+        """), {"ef": EMISSION_FACTOR})
+        by_carrier = []
+        for r in carrier_res.mappings().all():
+            cnt = int(r["shipment_count"])
+            em = float(r["total_emissions"])
+            avg = em / cnt if cnt else 0
+            efficiency = "A" if avg < 5 else ("B" if avg < 10 else ("C" if avg < 20 else "D"))
+            by_carrier.append({
+                "carrierId": r["carrier_name"],
+                "carrierName": r["carrier_name"],
+                "totalEmissions": em,
+                "shipmentCount": cnt,
+                "avgPerShipment": avg,
+                "efficiency": efficiency,
+            })
+
+        region_res = await self.db.execute(text("""
+            SELECT
+                destination AS region,
+                COUNT(*) AS shipment_count,
+                COALESCE(SUM(weight * :ef), 0) AS total_emissions
+            FROM waybills
+            GROUP BY destination
+            ORDER BY total_emissions DESC
+            LIMIT 10
+        """), {"ef": EMISSION_FACTOR})
+        by_region = [
+            {
+                "region": r["region"],
+                "totalEmissions": float(r["total_emissions"]),
+                "shipmentCount": int(r["shipment_count"]),
+                "avgPerShipment": float(r["total_emissions"]) / int(r["shipment_count"]) if r["shipment_count"] else 0,
+            }
+            for r in region_res.mappings().all()
+        ]
+
+        monthly_res = await self.db.execute(text("""
+            SELECT
+                TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') AS month,
+                COUNT(*) AS shipments,
+                COALESCE(SUM(weight * :ef), 0) AS emissions
+            FROM waybills
+            WHERE created_at >= NOW() - INTERVAL '12 months'
+            GROUP BY DATE_TRUNC('month', created_at)
+            ORDER BY month
+        """), {"ef": EMISSION_FACTOR})
+        monthly_trend = [
+            {"month": r["month"], "emissions": float(r["emissions"]), "shipments": int(r["shipments"])}
+            for r in monthly_res.mappings().all()
+        ]
+
+        return {
+            "summary": {
+                "totalEmissions": total,
+                "avgPerShipment": avg_per,
+                "totalShipments": total_shipments,
+                "offsetCredits": round(total * 0.05, 2),
+                "netEmissions": round(total * 0.95, 2),
+                "vsLastMonth": round(vs_last, 2),
+            },
+            "byCarrier": by_carrier,
+            "byRegion": by_region,
+            "monthlyTrend": monthly_trend,
+        }
+
     async def predict_eta(self, waybill_id: str) -> dict | None:
         ml_result = await self.ml.predict_eta(self.db, waybill_id)
         if ml_result:

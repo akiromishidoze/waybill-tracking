@@ -4,7 +4,7 @@ from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.core.ratelimit import rate_limit
 from app.services.analytics_service import AnalyticsService
-from app.models.analytics import DashboardStats, SLAReportRow, AnomalyDetection, PredictiveETA
+from app.models.analytics import DashboardStats, SLAReportRow, AnomalyDetection, PredictiveETA, CostAnalytics, CarbonFootprint
 
 router = APIRouter(tags=["Analytics"])
 
@@ -78,3 +78,25 @@ async def train_models(db: AsyncSession = Depends(get_db), user: dict = Depends(
     svc = AnalyticsService(db)
     result = await svc.ml.train(db)
     return result
+
+
+@router.get(
+    "/cost-per-shipment",
+    response_model=CostAnalytics,
+    summary="Cost per shipment analytics",
+    description="Returns cost and revenue breakdown by carrier, region, status, and monthly trend. Costs are estimated using weight-based heuristics (cost = weight × 85, revenue = weight × 120).",
+)
+async def get_cost_analytics(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user), _rate_limit: None = Depends(rate_limit_analytics)):
+    svc = AnalyticsService(db)
+    return await svc.get_cost_analytics()
+
+
+@router.get(
+    "/carbon-footprint",
+    response_model=CarbonFootprint,
+    summary="Carbon footprint analytics",
+    description="Returns CO₂ emission estimates by carrier, region, and monthly trend. Emissions are calculated using a factor of 0.21 kg CO₂ per kg of shipment weight.",
+)
+async def get_carbon_footprint(db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user), _rate_limit: None = Depends(rate_limit_analytics)):
+    svc = AnalyticsService(db)
+    return await svc.get_carbon_footprint()

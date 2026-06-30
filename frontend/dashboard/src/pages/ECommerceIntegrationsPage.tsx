@@ -4,7 +4,7 @@ import { eCommerceService } from '@/services/api'
 import type { ECommercePlatform } from '@/types/waybill'
 import {
   ShoppingCart, RefreshCw, CheckCircle, XCircle, Link2,
-  Globe, Package, AlertTriangle, Plus, X,
+  Globe, Package, AlertTriangle, Plus, X, Pencil, Trash2,
 } from 'lucide-react'
 import BackButton from '@/components/BackButton'
 
@@ -30,6 +30,8 @@ const PLATFORM_OPTIONS = ['Shopify', 'Lazada', 'Shopee', 'Amazon', 'WooCommerce'
 export default function ECommerceIntegrationsPage() {
   const queryClient = useQueryClient()
   const [showAdd, setShowAdd] = useState(false)
+  const [editingPlatform, setEditingPlatform] = useState<ECommercePlatform | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [form, setForm] = useState<Partial<ECommercePlatform>>({
     platform: '',
     storeName: '',
@@ -56,6 +58,27 @@ export default function ECommerceIntegrationsPage() {
     },
   })
 
+  const updatePlatform = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ECommercePlatform> }) =>
+      eCommerceService.updatePlatform(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ecommerce'] })
+      setEditingPlatform(null)
+      setFormError('')
+    },
+    onError: (err: any) => {
+      setFormError(err?.response?.data?.error || 'Failed to update platform.')
+    },
+  })
+
+  const deletePlatform = useMutation({
+    mutationFn: (id: string) => eCommerceService.deletePlatform(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ecommerce'] })
+      setDeleteConfirm(null)
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setFormError('')
@@ -64,6 +87,13 @@ export default function ECommerceIntegrationsPage() {
       return
     }
     createPlatform.mutate(form)
+  }
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormError('')
+    if (!editingPlatform) return
+    updatePlatform.mutate({ id: editingPlatform.id, data: editingPlatform })
   }
 
   if (isLoading) {
@@ -121,7 +151,7 @@ export default function ECommerceIntegrationsPage() {
           const color = PLATFORM_COLORS[p.platform] || 'var(--status-gray)'
           return (
             <div key={p.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                   <div style={{ width: 36, height: 36, borderRadius: 8, background: color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ShoppingCart size={18} color={color} />
@@ -131,13 +161,23 @@ export default function ECommerceIntegrationsPage() {
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{p.platform}</div>
                   </div>
                 </div>
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.6875rem', fontWeight: 600,
-                  background: p.connected ? 'var(--status-green)20' : 'var(--color-bg)',
-                  color: p.connected ? 'var(--status-green)' : 'var(--color-text-muted)',
-                }}>
-                  {p.connected ? <><CheckCircle size={12} /> Connected</> : <><XCircle size={12} /> Disconnected</>}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.6875rem', fontWeight: 600,
+                    background: p.connected ? 'var(--status-green)20' : 'var(--color-bg)',
+                    color: p.connected ? 'var(--status-green)' : 'var(--color-text-muted)',
+                  }}>
+                    {p.connected ? <><CheckCircle size={12} /> Connected</> : <><XCircle size={12} /> Disconnected</>}
+                  </span>
+                  <button onClick={() => { setEditingPlatform(p); setFormError('') }}
+                    style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem', border: '1px solid var(--color-border)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
+                    <Pencil size={12} />
+                  </button>
+                  <button onClick={() => setDeleteConfirm(p.id)}
+                    style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem', border: '1px solid var(--badge-red-border,#fca5a5)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8125rem', marginBottom: '0.75rem' }}>
                 <div>
@@ -208,6 +248,60 @@ export default function ECommerceIntegrationsPage() {
           </table>
         </div>
       </div>
+
+      {deleteConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', maxWidth: 400, width: '100%', margin: '1rem' }}>
+            <h3 style={{ fontWeight: 600, marginBottom: '0.75rem' }}>Remove platform?</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>This will disconnect the platform and remove all sync history. This action cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteConfirm(null)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => deletePlatform.mutate(deleteConfirm)} disabled={deletePlatform.isPending}
+                style={{ padding: '0.5rem 1rem', border: 'none', borderRadius: 8, background: '#dc2626', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {deletePlatform.isPending ? 'Removing...' : 'Remove'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingPlatform && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', width: '100%', maxWidth: 480, boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Edit Platform</h2>
+              <button onClick={() => setEditingPlatform(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleEditSubmit}>
+              {(['storeName', 'storeUrl', 'webhookUrl'] as const).map(field => (
+                <div key={field} style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>
+                    {field === 'storeName' ? 'Store Name' : field === 'storeUrl' ? 'Store URL' : 'Webhook URL'}
+                  </label>
+                  <input type="text" value={(editingPlatform as any)[field] || ''}
+                    onChange={e => setEditingPlatform(prev => prev ? { ...prev, [field]: e.target.value } : prev)}
+                    style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
+                </div>
+              ))}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={editingPlatform.connected}
+                    onChange={e => setEditingPlatform(prev => prev ? { ...prev, connected: e.target.checked } : prev)} />
+                  Connected
+                </label>
+              </div>
+              {formError && <p style={{ color: 'var(--badge-red-text)', fontSize: '0.8125rem', marginBottom: '1rem' }}>{formError}</p>}
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setEditingPlatform(null)} style={{ padding: '0.625rem 1.25rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+                <button type="submit" disabled={updatePlatform.isPending}
+                  style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                  {updatePlatform.isPending ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showAdd && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>

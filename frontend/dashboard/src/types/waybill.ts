@@ -370,6 +370,7 @@ export interface CustomsDocument {
   status: 'PENDING' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
   fileName: string
   fileSize: number
+  fileUrl?: string
   notes?: string
   submittedAt?: string
   approvedAt?: string
@@ -641,4 +642,27 @@ export interface WaybillGPSView {
   heading?: number
   recordedAt: string
   slaBreached: boolean
+}
+
+export interface AutoCommunicationRule {
+  id: string
+  trigger: string
+  channel: 'EMAIL' | 'SMS'
+  subject: string
+  template: string
+  sendToShipper: boolean
+  sendToRecipient: boolean
+  isActive: boolean
+  createdAt: string
+}
+
+export interface AutoCommunicationLog {
+  id: string
+  ruleId: string
+  trackingNumber: string
+  channel: string
+  recipient: string
+  subject: string
+  sentAt: string
+  status: 'SENT' | 'FAILED'
 }

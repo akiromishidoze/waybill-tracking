@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { driverService } from '@/services/api'
-
-import { Package, ScanLine, CheckCircle, XCircle, Truck, Clock, MapPin, User, Phone, Navigation, Camera, PenLine } from 'lucide-react'
+import type { DriverAssignment } from '@/types/waybill'
+import { Package, ScanLine, CheckCircle, XCircle, Truck, Clock, MapPin, User, Phone, Navigation, Camera, PenLine, Plus, Trash2, X } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
+
+const BLANK_ASSIGNMENT = { trackingNumber: '', driverName: '', origin: '', destination: '', recipientName: '', recipientPhone: '', recipientAddress: '', notes: '' }
 
 const STATUS_FLOW: Record<string, string[]> = {
   ASSIGNED: ['PICKED_UP'],
@@ -35,6 +37,9 @@ export default function DriverAppPage() {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
   const [showScanModal, setShowScanModal] = useState<string | null>(null)
   const [scanForm, setScanForm] = useState({ scanType: 'ARRIVAL', location: '', remark: '' })
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createForm, setCreateForm] = useState(BLANK_ASSIGNMENT)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: assignments, isLoading: loadingAssignments } = useQuery({
     queryKey: ['driver-assignments', selectedDriver],
@@ -63,6 +68,23 @@ export default function DriverAppPage() {
     },
   })
 
+  const createAssignment = useMutation({
+    mutationFn: (data: Partial<DriverAssignment>) => driverService.createAssignment(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['driver-assignments'] })
+      setShowCreateModal(false)
+      setCreateForm(BLANK_ASSIGNMENT)
+    },
+  })
+
+  const deleteAssignment = useMutation({
+    mutationFn: (id: string) => driverService.deleteAssignment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['driver-assignments'] })
+      setDeleteId(null)
+    },
+  })
+
   const drivers = assignments?.reduce<string[]>((acc, a) => {
     if (!acc.includes(a.driverName)) acc.push(a.driverName)
     return acc
@@ -85,7 +107,7 @@ export default function DriverAppPage() {
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Driver App Integration</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Last-mile delivery management & scan tracking</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <select
             value={selectedDriver || ''}
             onChange={e => setSelectedDriver(e.target.value || null)}
@@ -97,6 +119,10 @@ export default function DriverAppPage() {
           <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
             {activeAssignments.length} active / {filteredAssignment?.length || 0} total
           </span>
+          <button onClick={() => setShowCreateModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+            <Plus size={14} /> New Assignment
+          </button>
         </div>
       </div>
 
@@ -131,7 +157,7 @@ export default function DriverAppPage() {
                         {a.driverName} &middot; Assigned {new Date(a.assignedAt).toLocaleDateString()}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                    <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
                       {nextStatus(a.status) && (() => {
                         const ns = nextStatus(a.status) as string
                         return (
@@ -150,6 +176,10 @@ export default function DriverAppPage() {
                         style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500 }}
                       >
                         <Camera size={12} /> Scan
+                      </button>
+                      <button onClick={() => setDeleteId(a.id)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem' }}>
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
@@ -257,6 +287,68 @@ export default function DriverAppPage() {
           )}
         </div>
       </div>
+
+      {showCreateModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', width: '100%', maxWidth: 520, boxShadow: 'var(--shadow-lg)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontWeight: 600, fontSize: '1.125rem', margin: 0 }}>New Assignment</h3>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}><X size={20} /></button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem', marginBottom: '0.875rem' }}>
+              {([
+                { key: 'trackingNumber', label: 'Tracking Number', placeholder: 'e.g. LBC-2024-1234' },
+                { key: 'driverName', label: 'Driver Name', placeholder: 'Full name' },
+                { key: 'origin', label: 'Origin', placeholder: 'Pickup address' },
+                { key: 'destination', label: 'Destination', placeholder: 'Delivery address' },
+                { key: 'recipientName', label: 'Recipient Name', placeholder: 'Full name' },
+                { key: 'recipientPhone', label: 'Recipient Phone', placeholder: '+63 9XX XXX XXXX' },
+              ] as { key: keyof typeof createForm; label: string; placeholder: string }[]).map(({ key, label, placeholder }) => (
+                <div key={key}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>{label}</label>
+                  <input value={createForm[key]} onChange={e => setCreateForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
+                    style={{ width: '100%', padding: '0.5rem 0.625rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
+                </div>
+              ))}
+            </div>
+            <div style={{ marginBottom: '0.875rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Recipient Address</label>
+              <input value={createForm.recipientAddress} onChange={e => setCreateForm(f => ({ ...f, recipientAddress: e.target.value }))} placeholder="Full delivery address"
+                style={{ width: '100%', padding: '0.5rem 0.625rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
+            </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Notes</label>
+              <input value={createForm.notes} onChange={e => setCreateForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional delivery notes"
+                style={{ width: '100%', padding: '0.5rem 0.625rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowCreateModal(false)} style={{ padding: '0.625rem 1.25rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button
+                onClick={() => createAssignment.mutate({ ...createForm, status: 'ASSIGNED', assignedAt: new Date().toISOString() })}
+                disabled={createAssignment.isPending || !createForm.trackingNumber || !createForm.driverName}
+                style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {createAssignment.isPending ? 'Creating...' : 'Create Assignment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', maxWidth: 380, width: '100%' }}>
+            <h3 style={{ fontWeight: 600, margin: '0 0 0.75rem' }}>Delete Assignment?</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>This assignment will be permanently deleted. This action cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteId(null)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => deleteAssignment.mutate(deleteId)} disabled={deleteAssignment.isPending}
+                style={{ padding: '0.5rem 1rem', border: 'none', borderRadius: 8, background: '#dc2626', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {deleteAssignment.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showScanModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>

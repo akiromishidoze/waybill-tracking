@@ -1,29 +1,9 @@
 import { useState } from 'react'
-import { Bell, Mail, MessageSquare, Plus, Check, X, Clock, Truck, AlertTriangle, Package } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { autoCommunicationService } from '@/services/api'
+import type { AutoCommunicationRule } from '@/types/waybill'
+import { Bell, Mail, MessageSquare, Plus, Check, X, Clock, Truck, AlertTriangle, Package, Trash2 } from 'lucide-react'
 import BackButton from '@/components/BackButton'
-
-interface CommsRule {
-  id: string
-  trigger: string
-  channel: 'EMAIL' | 'SMS'
-  subject: string
-  template: string
-  sendToShipper: boolean
-  sendToRecipient: boolean
-  isActive: boolean
-  createdAt: string
-}
-
-type CommsLog = {
-  id: string
-  ruleId: string
-  trackingNumber: string
-  channel: string
-  recipient: string
-  subject: string
-  sentAt: string
-  status: 'SENT' | 'FAILED'
-}
 
 const TRIGGER_LABELS: Record<string, string> = {
   STATUS_CHANGE: 'Status Change',
@@ -34,47 +14,60 @@ const TRIGGER_LABELS: Record<string, string> = {
   RETURN_INITIATED: 'Return Initiated',
 }
 
-const initialRules: CommsRule[] = [
-  { id: 'comms-001', trigger: 'OUT_FOR_DELIVERY', channel: 'SMS', subject: 'Your package is out for delivery', template: 'Hi {recipient}, your package {tracking} is out for delivery today. ETA: {eta}', sendToShipper: false, sendToRecipient: true, isActive: true, createdAt: new Date().toISOString() },
-  { id: 'comms-002', trigger: 'DELIVERED', channel: 'SMS', subject: 'Package delivered', template: 'Hi {recipient}, your package {tracking} has been delivered. Thank you!', sendToShipper: true, sendToRecipient: true, isActive: true, createdAt: new Date().toISOString() },
-  { id: 'comms-003', trigger: 'SLA_BREACHED', channel: 'EMAIL', subject: 'SLA Breach Notice: {tracking}', template: 'The shipment {tracking} from {origin} to {destination} has exceeded its estimated delivery time.', sendToShipper: true, sendToRecipient: false, isActive: true, createdAt: new Date().toISOString() },
-  { id: 'comms-004', trigger: 'EXCEPTION_RAISED', channel: 'EMAIL', subject: 'Delivery Exception: {tracking}', template: 'An exception has been raised for shipment {tracking}. Details: {exception}. Our team is working on it.', sendToShipper: true, sendToRecipient: true, isActive: false, createdAt: new Date().toISOString() },
-  { id: 'comms-005', trigger: 'RETURN_INITIATED', channel: 'EMAIL', subject: 'Return initiated for {tracking}', template: 'A return has been initiated for {tracking}. Carrier: {carrier}. Reason: {reason}', sendToShipper: true, sendToRecipient: false, isActive: true, createdAt: new Date().toISOString() },
-]
-
-const seedLogs: CommsLog[] = [
-  { id: 'log-001', ruleId: 'comms-001', trackingNumber: 'LBC-2024-1001', channel: 'SMS', recipient: '+63 917 555 1212', subject: 'Your package is out for delivery', sentAt: new Date(Date.now() - 28800000).toISOString(), status: 'SENT' },
-  { id: 'log-002', ruleId: 'comms-002', trackingNumber: 'LBC-2024-1001', channel: 'SMS', recipient: '+63 917 555 1212', subject: 'Package delivered', sentAt: new Date(Date.now() - 14400000).toISOString(), status: 'SENT' },
-  { id: 'log-003', ruleId: 'comms-003', trackingNumber: 'LBC-2024-1002', channel: 'EMAIL', recipient: 'shipper@example.com', subject: 'SLA Breach Notice: LBC-2024-1002', sentAt: new Date(Date.now() - 7200000).toISOString(), status: 'SENT' },
-  { id: 'log-004', ruleId: 'comms-002', trackingNumber: 'GOGO-2024-5009', channel: 'SMS', recipient: '+63 918 111 2233', subject: 'Package delivered', sentAt: new Date(Date.now() - 86400000).toISOString(), status: 'SENT' },
-  { id: 'log-005', ruleId: 'comms-001', trackingNumber: 'DHL-PH-45127', channel: 'SMS', recipient: '+63 921 777 8899', subject: 'Your package is out for delivery', sentAt: new Date(Date.now() - 3600000).toISOString(), status: 'FAILED' },
-]
-
 const CHANNEL_ICONS = { EMAIL: Mail, SMS: MessageSquare }
+const BLANK_FORM = { trigger: 'STATUS_CHANGE', channel: 'EMAIL' as 'EMAIL' | 'SMS', subject: '', template: '', sendToShipper: true, sendToRecipient: true }
 
 export default function AutoCommunicationsPage() {
-  const [rules, setRules] = useState<CommsRule[]>(initialRules)
-  const [logs] = useState<CommsLog[]>(seedLogs)
+  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'rules' | 'log'>('rules')
   const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({ trigger: 'STATUS_CHANGE', channel: 'EMAIL' as 'EMAIL' | 'SMS', subject: '', template: '', sendToShipper: true, sendToRecipient: true })
+  const [editingRule, setEditingRule] = useState<AutoCommunicationRule | null>(null)
+  const [form, setForm] = useState(BLANK_FORM)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const resetForm = () => setForm({ trigger: 'STATUS_CHANGE', channel: 'EMAIL', subject: '', template: '', sendToShipper: true, sendToRecipient: true })
+  const { data: rules = [] } = useQuery({
+    queryKey: ['auto-comm-rules'],
+    queryFn: () => autoCommunicationService.listRules().then(r => {
+      const d = r.data
+      return Array.isArray(d) ? d : (d as any)?.items ?? (d as any)?.data ?? []
+    }),
+  })
 
-  const saveRule = () => {
-    if (editingId) {
-      setRules(prev => prev.map(r => r.id === editingId ? { ...r, ...form } : r))
-      setEditingId(null)
-    } else {
-      setRules(prev => [...prev, { id: 'comms-' + Date.now(), ...form, isActive: true, createdAt: new Date().toISOString() }])
-    }
-    setShowForm(false)
-    resetForm()
+  const { data: logs = [] } = useQuery({
+    queryKey: ['auto-comm-logs'],
+    queryFn: () => autoCommunicationService.listLogs().then(r => {
+      const d = r.data
+      return Array.isArray(d) ? d : (d as any)?.items ?? (d as any)?.data ?? []
+    }),
+  })
+
+  const createRule = useMutation({
+    mutationFn: (d: Partial<AutoCommunicationRule>) => autoCommunicationService.createRule(d),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auto-comm-rules'] }); setShowForm(false); setForm(BLANK_FORM) },
+  })
+
+  const updateRule = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<AutoCommunicationRule> }) => autoCommunicationService.updateRule(id, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auto-comm-rules'] }); setEditingRule(null); setShowForm(false); setForm(BLANK_FORM) },
+  })
+
+  const deleteRule = useMutation({
+    mutationFn: (id: string) => autoCommunicationService.deleteRule(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['auto-comm-rules'] }); setDeleteId(null) },
+  })
+
+  const toggleActive = (rule: AutoCommunicationRule) => {
+    updateRule.mutate({ id: rule.id, data: { isActive: !rule.isActive } })
   }
 
-  const toggleActive = (id: string) => {
-    setRules(prev => prev.map(r => r.id === id ? { ...r, isActive: !r.isActive } : r))
+  const resetForm = () => setForm(BLANK_FORM)
+
+  const saveRule = () => {
+    if (editingRule) {
+      updateRule.mutate({ id: editingRule.id, data: form })
+    } else {
+      createRule.mutate({ ...form, isActive: true })
+    }
   }
 
   const tabStyle = (tab: typeof activeTab) => ({
@@ -90,10 +83,10 @@ export default function AutoCommunicationsPage() {
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Automated Customer Communications</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-            {rules.filter(r => r.isActive).length} active notification rules
+            {(rules as AutoCommunicationRule[]).filter(r => r.isActive).length} active notification rules
           </p>
         </div>
-        <button onClick={() => { setEditingId(null); resetForm(); setShowForm(true) }}
+        <button onClick={() => { setEditingRule(null); resetForm(); setShowForm(true) }}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.25rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}>
           <Plus size={16} /> New Rule
         </button>
@@ -106,7 +99,7 @@ export default function AutoCommunicationsPage() {
 
       {showForm && (
         <div style={{ background: 'var(--color-surface)', padding: '1.5rem', borderRadius: 12, marginBottom: '1.5rem', border: '1px solid var(--color-border)' }}>
-          <h4 style={{ fontWeight: 600, margin: '0 0 1rem' }}>{editingId ? 'Edit Rule' : 'New Notification Rule'}</h4>
+          <h4 style={{ fontWeight: 600, margin: '0 0 1rem' }}>{editingRule ? 'Edit Rule' : 'New Notification Rule'}</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Trigger Event</label>
@@ -145,11 +138,11 @@ export default function AutoCommunicationsPage() {
             </label>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={saveRule} disabled={!form.subject || !form.template}
+            <button onClick={saveRule} disabled={!form.subject || !form.template || createRule.isPending || updateRule.isPending}
               style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}>
-              <Check size={14} /> {editingId ? 'Update' : 'Create'} Rule
+              <Check size={14} /> {editingRule ? 'Update' : 'Create'} Rule
             </button>
-            <button onClick={() => { setShowForm(false); setEditingId(null); resetForm() }}
+            <button onClick={() => { setShowForm(false); setEditingRule(null); resetForm() }}
               style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
               <X size={14} /> Cancel
             </button>
@@ -159,8 +152,8 @@ export default function AutoCommunicationsPage() {
 
       {activeTab === 'rules' && (
         <div style={{ display: 'grid', gap: '1rem' }}>
-          {rules.map(rule => {
-            const ChanIcon = CHANNEL_ICONS[rule.channel]
+          {(rules as AutoCommunicationRule[]).map((rule: AutoCommunicationRule) => {
+            const ChanIcon = CHANNEL_ICONS[rule.channel as keyof typeof CHANNEL_ICONS]
             const TriggerIcon = rule.trigger === 'DELIVERED' ? Package : rule.trigger === 'SLA_BREACHED' ? AlertTriangle : rule.trigger === 'OUT_FOR_DELIVERY' ? Truck : Bell
             return (
               <div key={rule.id} style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.25rem', border: '1px solid var(--color-border)', opacity: rule.isActive ? 1 : 0.5 }}>
@@ -186,13 +179,17 @@ export default function AutoCommunicationsPage() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', marginLeft: '1rem' }}>
-                    <button onClick={() => toggleActive(rule.id)}
+                    <button onClick={() => toggleActive(rule)}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-muted)' }}>
                       {rule.isActive ? 'Deactivate' : 'Activate'}
                     </button>
-                    <button onClick={() => { setForm({ trigger: rule.trigger, channel: rule.channel, subject: rule.subject, template: rule.template, sendToShipper: rule.sendToShipper, sendToRecipient: rule.sendToRecipient }); setEditingId(rule.id); setShowForm(true) }}
+                    <button onClick={() => { setForm({ trigger: rule.trigger, channel: rule.channel, subject: rule.subject, template: rule.template, sendToShipper: rule.sendToShipper, sendToRecipient: rule.sendToRecipient }); setEditingRule(rule); setShowForm(true) }}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'transparent', color: 'var(--color-primary)' }}>
                       Edit
+                    </button>
+                    <button onClick={() => setDeleteId(rule.id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: 'none', background: '#dc2626', color: '#fff' }}>
+                      <Trash2 size={12} /> Delete
                     </button>
                   </div>
                 </div>
@@ -216,7 +213,7 @@ export default function AutoCommunicationsPage() {
               </tr>
             </thead>
             <tbody>
-              {logs.map(log => (
+              {(logs as any[]).map((log: any) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.875rem 1.25rem', fontWeight: 500, color: 'var(--color-primary)' }}>{log.trackingNumber}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>
@@ -236,6 +233,21 @@ export default function AutoCommunicationsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {deleteId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', maxWidth: 400, width: '100%' }}>
+            <h3 style={{ fontWeight: 600, margin: '0 0 0.75rem' }}>Delete Rule?</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>This notification rule will be permanently deleted.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteId(null)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => deleteRule.mutate(deleteId)} disabled={deleteRule.isPending}
+                style={{ padding: '0.5rem 1rem', border: 'none', borderRadius: 8, background: '#dc2626', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {deleteRule.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

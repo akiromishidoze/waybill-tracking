@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -236,9 +236,16 @@ export const driverService = {
   listAssignments: () => api.get<DriverAssignment[]>('/driver-assignments'),
   getAssignment: (id: string) =>
     api.get<DriverAssignment>(`/driver-assignments/${id}`),
+  createAssignment: (data: Partial<DriverAssignment>) =>
+    api.post<DriverAssignment>('/driver-assignments', data),
+  updateAssignment: (id: string, data: Partial<DriverAssignment>) =>
+    api.patch<DriverAssignment>(`/driver-assignments/${id}`, data),
+  deleteAssignment: (id: string) => api.delete(`/driver-assignments/${id}`),
   updateStatus: (id: string, data: any) =>
     api.post<DriverAssignment>(`/driver-assignments/${id}/status`, data),
   listScans: () => api.get<DriverScanEvent[]>('/driver-scans'),
+  createScan: (data: Partial<DriverScanEvent>) =>
+    api.post<DriverScanEvent>('/driver-scans', data),
 }
 
 export const regionService = {
@@ -301,6 +308,28 @@ export const erpIntegrationService = {
     api.post<{ success: boolean; message: string }>(`/erp-integrations/${id}/test`),
   sync: (id: string) =>
     api.post<{ success: boolean; message: string }>(`/erp-integrations/${id}/sync`),
+}
+
+export const customsService = {
+  listShipments: () => api.get<CustomsShipment[]>('/customs-shipments'),
+  updateStatus: (id: string, data: { customsStatus: string; notes?: string }) =>
+    api.patch<CustomsShipment>(`/customs-shipments/${id}`, data),
+  uploadDocument: (waybillId: string, formData: FormData) =>
+    api.post<CustomsDocument>(`/customs-documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      params: { waybillId },
+    }),
+  deleteDocument: (id: string) => api.delete(`/customs-documents/${id}`),
+}
+
+export const autoCommunicationService = {
+  listRules: () => api.get<AutoCommunicationRule[]>('/auto-communications'),
+  createRule: (data: Partial<AutoCommunicationRule>) =>
+    api.post<AutoCommunicationRule>('/auto-communications', data),
+  updateRule: (id: string, data: Partial<AutoCommunicationRule>) =>
+    api.patch<AutoCommunicationRule>(`/auto-communications/${id}`, data),
+  deleteRule: (id: string) => api.delete(`/auto-communications/${id}`),
+  listLogs: () => api.get<AutoCommunicationLog[]>('/auto-communications/logs'),
 }
 
 export default api

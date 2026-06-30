@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import api from '@/services/api'
+import { useState, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { customsService } from '@/services/api'
 import type { CustomsShipment, CustomsDocument } from '@/types/waybill'
-import { FileText, Globe, CheckCircle, XCircle, Clock, Upload, Download, Search } from 'lucide-react'
+import { FileText, Globe, CheckCircle, XCircle, Clock, Upload, Download, Search, Pencil, Trash2, X } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 import { formatFileSize } from '@/utils/format'
@@ -33,15 +33,52 @@ const DOC_STATUS_CONFIG: Record<string, { label: string; bg: string; color: stri
   REJECTED: { label: 'Rejected', bg: 'var(--badge-red-bg)', color: 'var(--badge-red-text)' },
 }
 
+const CUSTOMS_STATUSES = ['NOT_REQUIRED','DOCUMENTS_PENDING','DOCUMENTS_SUBMITTED','CLEARANCE_IN_PROGRESS','CLEARED','HELD']
+
 export default function CustomsCompliancePage() {
+  const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingStatus, setEditingStatus] = useState<{ id: string; status: string; notes: string } | null>(null)
+  const [uploadingFor, setUploadingFor] = useState<string | null>(null)
+  const [deleteDocId, setDeleteDocId] = useState<string | null>(null)
 
   const { data: shipments, isLoading } = useQuery({
     queryKey: ['customs-shipments'],
-    queryFn: () => api.get<CustomsShipment[]>('/customs-shipments').then((r: { data: CustomsShipment[] }) => r.data),
+    queryFn: () => customsService.listShipments().then(r => r.data),
   })
+
+  const updateStatus = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { customsStatus: string; notes?: string } }) =>
+      customsService.updateStatus(id, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['customs-shipments'] }); setEditingStatus(null) },
+  })
+
+  const uploadDoc = useMutation({
+    mutationFn: ({ waybillId, file }: { waybillId: string; file: File }) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('title', file.name)
+      fd.append('docType', 'OTHER')
+      return customsService.uploadDocument(waybillId, fd)
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['customs-shipments'] }); setUploadingFor(null) },
+  })
+
+  const deleteDoc = useMutation({
+    mutationFn: (id: string) => customsService.deleteDocument(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['customs-shipments'] }); setDeleteDocId(null) },
+  })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && uploadingFor) {
+      uploadDoc.mutate({ waybillId: uploadingFor, file })
+    }
+    e.target.value = ''
+  }
 
   const international = (shipments || []).filter(
     (s: CustomsShipment) => s.originCountry !== s.destinationCountry
@@ -119,12 +156,16 @@ export default function CustomsCompliancePage() {
                         </div>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center', marginLeft: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center', marginLeft: '1rem', flexWrap: 'wrap' }}>
                       {pendingDocs > 0 && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.625rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, background: 'var(--badge-amber-bg)', color: 'var(--badge-amber-text)' }}>
                           <Clock size={12} /> {pendingDocs} pending
                         </span>
                       )}
+                      <button onClick={() => setEditingStatus({ id: s.id, status: s.customsStatus, notes: '' })}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-muted)' }}>
+                        <Pencil size={12} /> Status
+                      </button>
                       <button onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
                         style={{ padding: '0.375rem 0.75rem', borderRadius: 6, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-secondary)' }}>
                         {expandedId === s.id ? 'Hide Docs' : `${s.documents.length} Documents`}
@@ -158,24 +199,79 @@ export default function CustomsCompliancePage() {
                                 {doc.status === 'APPROVED' ? <CheckCircle size={10} /> : doc.status === 'REJECTED' ? <XCircle size={10} /> : <Clock size={10} />}
                                 {dcfg.label}
                               </span>
-                              <button style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-secondary)' }}>
-                                <Download size={12} /> Download
-                              </button>
+                              <div style={{ display: 'flex', gap: '0.375rem' }}>
+                                <a href={doc.fileUrl || '#'} target="_blank" rel="noopener noreferrer"
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: '1px solid var(--color-border-input)', background: 'transparent', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
+                                  <Download size={12} /> Download
+                                </a>
+                                <button onClick={() => setDeleteDocId(doc.id)}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.625rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', border: 'none', background: '#dc2626', color: '#fff' }}>
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
                             </div>
                           )
                         })
                       )}
-                      {['DOCUMENTS_PENDING', 'DOCUMENTS_SUBMITTED'].includes(s.customsStatus) && (
-                        <button style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer', border: '1px dashed #2563eb', background: 'var(--color-primary-soft)', color: 'var(--color-primary)', justifyContent: 'center', width: '100%' }}>
-                          <Upload size={14} /> Upload Document
-                        </button>
-                      )}
+                      <button onClick={() => { setUploadingFor(s.id); fileInputRef.current?.click() }}
+                        disabled={uploadDoc.isPending}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 1rem', borderRadius: 6, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer', border: '1px dashed #2563eb', background: 'var(--color-primary-soft)', color: 'var(--color-primary)', justifyContent: 'center', width: '100%' }}>
+                        <Upload size={14} /> {uploadDoc.isPending && uploadingFor === s.id ? 'Uploading...' : 'Upload Document'}
+                      </button>
                     </div>
                   </div>
                 )}
               </div>
             )
           })}
+        </div>
+      )}
+      <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileChange} />
+
+      {editingStatus && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', maxWidth: 420, width: '100%', boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontWeight: 600, margin: 0 }}>Update Customs Status</h3>
+              <button onClick={() => setEditingStatus(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}><X size={20} /></button>
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Customs Status</label>
+              <select value={editingStatus.status} onChange={e => setEditingStatus(prev => prev ? { ...prev, status: e.target.value } : prev)}
+                style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }}>
+                {CUSTOMS_STATUSES.map(s => <option key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Notes (optional)</label>
+              <textarea value={editingStatus.notes} onChange={e => setEditingStatus(prev => prev ? { ...prev, notes: e.target.value } : prev)}
+                rows={3} placeholder="Add notes about this status update..."
+                style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)', resize: 'vertical', fontFamily: 'inherit' }} />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setEditingStatus(null)} style={{ padding: '0.625rem 1.25rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => updateStatus.mutate({ id: editingStatus.id, data: { customsStatus: editingStatus.status, notes: editingStatus.notes || undefined } })} disabled={updateStatus.isPending}
+                style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: 8, background: '#2563eb', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {updateStatus.isPending ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteDocId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '1.5rem', maxWidth: 380, width: '100%' }}>
+            <h3 style={{ fontWeight: 600, margin: '0 0 0.75rem' }}>Delete Document?</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem' }}>This document will be permanently deleted and cannot be recovered.</p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteDocId(null)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--color-border)', borderRadius: 8, background: 'var(--color-surface)', cursor: 'pointer', fontSize: '0.875rem' }}>Cancel</button>
+              <button onClick={() => deleteDoc.mutate(deleteDocId)} disabled={deleteDoc.isPending}
+                style={{ padding: '0.5rem 1rem', border: 'none', borderRadius: 8, background: '#dc2626', color: '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}>
+                {deleteDoc.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

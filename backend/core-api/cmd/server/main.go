@@ -86,6 +86,10 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 
 		protected.GET("/geofence-events", geofenceEventHandler.List)
 		protected.POST("/geofence-events", geofenceEventHandler.Create)
+		protected.GET("/geofence-zones", geofenceEventHandler.ListZones)
+		protected.POST("/geofence-zones", geofenceEventHandler.CreateZone)
+		protected.PATCH("/geofence-zones/:id", geofenceEventHandler.UpdateZone)
+		protected.DELETE("/geofence-zones/:id", geofenceEventHandler.DeleteZone)
 
 		protected.GET("/auto-communications", autoCommunicationHandler.List)
 		protected.POST("/auto-communications", autoCommunicationHandler.Create)

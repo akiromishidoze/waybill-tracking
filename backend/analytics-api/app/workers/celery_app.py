@@ -42,7 +42,11 @@ celery_app.conf.update(
             "task": "app.workers.iot_thresholds.check_iot_sensor_thresholds",
             "schedule": crontab(minute="*/2"),
         },
+        "monitor-geofence-zones": {
+            "task": "app.workers.geofence_monitor.monitor_geofence_zones",
+            "schedule": crontab(minute="*/1"),
+        },
     },
 )
 
-from app.workers import carrier_sync, ecommerce_sync, tasks, auto_comm, iot_thresholds  # noqa: E402,F401
+from app.workers import carrier_sync, ecommerce_sync, tasks, auto_comm, iot_thresholds, geofence_monitor  # noqa: E402,F401

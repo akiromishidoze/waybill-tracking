@@ -13,3 +13,17 @@ type GeofenceEvent struct {
 	Longitude      float64   `json:"longitude"`
 	RecordedAt     time.Time `json:"recordedAt"`
 }
+
+type GeofenceZone struct {
+	ID            string     `json:"id"`
+	ZoneID        string     `json:"zoneId"`
+	Name          string     `json:"name"`
+	ZoneType      string     `json:"zoneType"`
+	CenterLat     *float64   `json:"centerLat,omitempty"`
+	CenterLon     *float64   `json:"centerLon,omitempty"`
+	RadiusMeters  *float64   `json:"radiusMeters,omitempty"`
+	PolygonCoords *string   `json:"polygonCoords,omitempty"`
+	IsActive      bool       `json:"isActive"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     time.Time  `json:"updatedAt"`
+}

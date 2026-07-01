@@ -118,7 +118,7 @@ func (c *Client) SearchWaybills(ctx context.Context, query string, page, limit i
 	}`, query, from, limit)
 	
 	res, err := c.es.Search(
-		waybillIndex,
+		c.es.Search.WithIndex(waybillIndex),
 		c.es.Search.WithBody(bytes.NewReader([]byte(searchBody))),
 		c.es.Search.WithContext(ctx),
 	)

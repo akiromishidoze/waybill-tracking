@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"flag"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -236,6 +238,9 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 }
 
 func main() {
+	rollbackFlag := flag.String("rollback", "", "Roll back N migrations (e.g. --rollback=1) or 'all'")
+	flag.Parse()
+
 	cfg := config.Load()
 
 	log := logger.L()
@@ -247,6 +252,24 @@ func main() {
 	}
 
 	migrationsDir := filepath.Join("migrations")
+
+	if *rollbackFlag != "" {
+		steps := 1
+		if *rollbackFlag == "all" {
+			steps = 0
+		} else {
+			if n, err := strconv.Atoi(*rollbackFlag); err == nil && n > 0 {
+				steps = n
+			}
+		}
+		if err := migrator.New(db, migrationsDir).Rollback(context.Background(), steps); err != nil {
+			log.Fatal("rollback failed", zap.Error(err))
+		}
+		log.Info("rollback completed", zap.Int("steps", steps))
+		db.Close()
+		return
+	}
+
 	if err := migrator.New(db, migrationsDir).Run(context.Background()); err != nil {
 		log.Fatal("migration failed", zap.Error(err))
 	}

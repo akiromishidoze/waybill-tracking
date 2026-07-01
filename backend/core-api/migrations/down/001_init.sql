@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS scan_events;
+DROP TABLE IF EXISTS waybills;
+DROP TABLE IF EXISTS users;

@@ -1,0 +1,2 @@
+ALTER TABLE waybills DROP COLUMN IF EXISTS team_id;
+DROP TABLE IF EXISTS teams;

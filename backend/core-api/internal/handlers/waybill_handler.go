@@ -44,12 +44,14 @@ func (h *WaybillHandler) List(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 
 	var waybills []models.Waybill
-	var total int64
+	var total int
 	var err error
 
 	// Use Elasticsearch for search queries, PostgreSQL for regular listing
 	if search != "" {
-		waybills, total, err = h.esClient.SearchWaybills(c.Request.Context(), search, page, limit)
+		var esTotal int64
+		waybills, esTotal, err = h.esClient.SearchWaybills(c.Request.Context(), search, page, limit)
+		total = int(esTotal)
 		// If Elasticsearch fails or returns no results, fall back to PostgreSQL
 		if err != nil || len(waybills) == 0 {
 			logger.WithRequestID(reqID(c)).Warn("elasticsearch search failed or empty, falling back to postgres", zap.Error(err))

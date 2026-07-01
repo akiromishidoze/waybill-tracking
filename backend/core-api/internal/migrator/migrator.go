@@ -89,6 +89,81 @@ func (m *Migrator) appliedSet(ctx context.Context) map[string]bool {
 	return set
 }
 
+func (m *Migrator) Rollback(ctx context.Context, steps int) error {
+	if err := m.ensureTable(ctx); err != nil {
+		return fmt.Errorf("ensure schema_migrations table: %w", err)
+	}
+
+	applied := m.appliedList(ctx)
+	if len(applied) == 0 {
+		logger.L().Info("migrator: no applied migrations to roll back")
+		return nil
+	}
+
+	sort.Sort(sort.Reverse(sort.StringSlice(applied)))
+
+	if steps <= 0 || steps > len(applied) {
+		steps = len(applied)
+	}
+
+	for i := 0; i < steps; i++ {
+		filename := applied[i]
+		if err := m.rollbackFile(ctx, filename); err != nil {
+			return fmt.Errorf("rollback %s: %w", filename, err)
+		}
+	}
+
+	return nil
+}
+
+func (m *Migrator) rollbackFile(ctx context.Context, filename string) error {
+	downDir := filepath.Join(m.migrationsDir, "down")
+	downPath := filepath.Join(downDir, filename)
+
+	content, err := os.ReadFile(downPath)
+	if err != nil {
+		return fmt.Errorf("down migration file not found: %s", downPath)
+	}
+
+	tx, err := m.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, string(content)); err != nil {
+		return fmt.Errorf("exec down %s: %w", filename, err)
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM schema_migrations WHERE version = $1`, filename); err != nil {
+		return fmt.Errorf("remove record %s: %w", filename, err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	logger.L().Info("migrator: rolled back migration", zap.String("file", filename))
+	return nil
+}
+
+func (m *Migrator) appliedList(ctx context.Context) []string {
+	rows, err := m.db.Query(ctx, `SELECT version FROM schema_migrations ORDER BY version`)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var list []string
+	for rows.Next() {
+		var v string
+		if err := rows.Scan(&v); err == nil {
+			list = append(list, v)
+		}
+	}
+	return list
+}
+
 func (m *Migrator) apply(ctx context.Context, filename string) error {
 	path := filepath.Join(m.migrationsDir, filename)
 	content, err := os.ReadFile(path)

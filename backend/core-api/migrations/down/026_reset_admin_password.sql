@@ -1,0 +1,1 @@
+-- No-op: password reset is not reversible

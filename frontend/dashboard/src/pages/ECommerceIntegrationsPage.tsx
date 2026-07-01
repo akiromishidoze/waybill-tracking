@@ -146,35 +146,35 @@ export default function ECommerceIntegrationsPage() {
       </div>
 
       {/* Platform Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
         {platforms.map(p => {
           const color = PLATFORM_COLORS[p.platform] || 'var(--status-gray)'
           return (
-            <div key={p.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div key={p.id} style={{ flex: '1 1 320px', maxWidth: '100%', minWidth: 0, background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', minWidth: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <ShoppingCart size={18} color={color} />
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{p.storeName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{p.platform}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.9375rem', lineHeight: 1.3 }}>{p.storeName}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.3 }}>{p.platform}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                   <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.6875rem', fontWeight: 600,
+                    display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', borderRadius: 6, fontSize: '0.6875rem', fontWeight: 600, height: 28, boxSizing: 'border-box',
                     background: p.connected ? 'var(--status-green)20' : 'var(--color-bg)',
                     color: p.connected ? 'var(--status-green)' : 'var(--color-text-muted)',
                   }}>
                     {p.connected ? <><CheckCircle size={12} /> Connected</> : <><XCircle size={12} /> Disconnected</>}
                   </span>
                   <button onClick={() => { setEditingPlatform(p); setFormError('') }}
-                    style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem', border: '1px solid var(--color-border)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, padding: 0, border: '1px solid var(--color-border)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
                     <Pencil size={12} />
                   </button>
                   <button onClick={() => setDeleteConfirm(p.id)}
-                    style={{ display: 'flex', alignItems: 'center', padding: '0.25rem 0.5rem', border: '1px solid var(--badge-red-border,#fca5a5)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, padding: 0, border: '1px solid var(--badge-red-border,#fca5a5)', borderRadius: 6, background: 'transparent', cursor: 'pointer', color: 'var(--badge-red-text)' }}>
                     <Trash2 size={12} />
                   </button>
                 </div>

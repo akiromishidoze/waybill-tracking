@@ -18,9 +18,13 @@ type Client struct {
 	es *elasticsearch.Client
 }
 
-func NewClient(url string) *Client {
+func NewClient(url, username, password string) *Client {
 	cfg := elasticsearch.Config{
 		Addresses: []string{url},
+	}
+	if username != "" {
+		cfg.Username = username
+		cfg.Password = password
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {

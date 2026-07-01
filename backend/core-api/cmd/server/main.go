@@ -283,7 +283,7 @@ func main() {
 	kafkaProducer := kafkaprod.NewProducer(cfg.KafkaBrokers, cfg.KafkaTopic)
 
 	wsHub := ws.NewHub()
-	esClient := elastic.NewClient(cfg.ElasticsearchURL)
+	esClient := elastic.NewClient(cfg.ElasticsearchURL, cfg.ElasticsearchUsername, cfg.ElasticsearchPassword)
 	
 	// Initialize Elasticsearch index
 	if err := esClient.CreateIndex(context.Background()); err != nil {

@@ -10,7 +10,9 @@ type Config struct {
 	Port             string
 	DatabaseURL      string
 	RedisURL         string
-	ElasticsearchURL string
+	ElasticsearchURL      string
+	ElasticsearchUsername string
+	ElasticsearchPassword string
 	KafkaBrokers     string
 	KafkaTopic       string
 	JWTSecret        string
@@ -34,6 +36,8 @@ func Load() *Config {
 		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
 		RedisURL: getEnv("REDIS_URL", "redis://localhost:6379/0"),
 		ElasticsearchURL: getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
+		ElasticsearchUsername: getEnv("ELASTICSEARCH_USERNAME", ""),
+		ElasticsearchPassword: getEnv("ELASTICSEARCH_PASSWORD", ""),
 		KafkaBrokers: getEnv("KAFKA_BROKERS", "kafka:29092"),
 		KafkaTopic: getEnv("KAFKA_TOPIC", "waybill-events"),
 		JWTSecret: jwtSecret,

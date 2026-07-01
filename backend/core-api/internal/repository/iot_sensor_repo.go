@@ -88,3 +88,76 @@ func (r *IoTSensorRepository) UpdateLastReading(ctx context.Context, sensorID st
 	_, err := r.db.Exec(ctx, `UPDATE iot_sensors SET last_reading_at = NOW() WHERE sensor_id = $1`, sensorID)
 	return err
 }
+
+func (r *IoTSensorRepository) ListThresholds(ctx context.Context, sensorID *string) ([]models.IoTSensorThreshold, error) {
+	var rows pgx.Rows
+	var err error
+
+	if sensorID != nil {
+		rows, err = r.db.Query(ctx, `
+			SELECT id, sensor_id, reading_type, min_value, max_value, severity, action_type, is_active, created_at, updated_at
+			FROM iot_sensor_thresholds WHERE sensor_id = $1 ORDER BY created_at DESC`, *sensorID)
+	} else {
+		rows, err = r.db.Query(ctx, `
+			SELECT id, sensor_id, reading_type, min_value, max_value, severity, action_type, is_active, created_at, updated_at
+			FROM iot_sensor_thresholds ORDER BY created_at DESC`)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []models.IoTSensorThreshold{}
+	for rows.Next() {
+		var t models.IoTSensorThreshold
+		if err := rows.Scan(&t.ID, &t.SensorID, &t.ReadingType, &t.MinValue, &t.MaxValue, &t.Severity, &t.ActionType, &t.IsActive, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, t)
+	}
+	return result, nil
+}
+
+func (r *IoTSensorRepository) CreateThreshold(ctx context.Context, t *models.IoTSensorThreshold) error {
+	return r.db.QueryRow(ctx, `
+		INSERT INTO iot_sensor_thresholds (sensor_id, reading_type, min_value, max_value, severity, action_type, is_active, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+		RETURNING id, created_at, updated_at`,
+		t.SensorID, t.ReadingType, t.MinValue, t.MaxValue, t.Severity, t.ActionType, t.IsActive,
+	).Scan(&t.ID, &t.CreatedAt, &t.UpdatedAt)
+}
+
+func (r *IoTSensorRepository) UpdateThreshold(ctx context.Context, id string, t *models.IoTSensorThreshold) error {
+	_, err := r.db.Exec(ctx, `
+		UPDATE iot_sensor_thresholds
+		SET sensor_id = $1, reading_type = $2, min_value = $3, max_value = $4, severity = $5, action_type = $6, is_active = $7, updated_at = NOW()
+		WHERE id = $8`,
+		t.SensorID, t.ReadingType, t.MinValue, t.MaxValue, t.Severity, t.ActionType, t.IsActive, id)
+	return err
+}
+
+func (r *IoTSensorRepository) DeleteThreshold(ctx context.Context, id string) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM iot_sensor_thresholds WHERE id = $1`, id)
+	return err
+}
+
+func (r *IoTSensorRepository) GetActiveThresholds(ctx context.Context) ([]models.IoTSensorThreshold, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT id, sensor_id, reading_type, min_value, max_value, severity, action_type, is_active, created_at, updated_at
+		FROM iot_sensor_thresholds WHERE is_active = true`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []models.IoTSensorThreshold{}
+	for rows.Next() {
+		var t models.IoTSensorThreshold
+		if err := rows.Scan(&t.ID, &t.SensorID, &t.ReadingType, &t.MinValue, &t.MaxValue, &t.Severity, &t.ActionType, &t.IsActive, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, t)
+	}
+	return result, nil
+}

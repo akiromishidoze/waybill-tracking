@@ -100,6 +100,10 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, cfg *config.Config, db *pgxpool
 		protected.POST("/iot-sensors", iotSensorHandler.CreateSensor)
 		protected.GET("/iot-sensors/readings", iotSensorHandler.ListReadings)
 		protected.POST("/iot-sensors/readings", iotSensorHandler.CreateReading)
+		protected.GET("/iot-sensors/thresholds", iotSensorHandler.ListThresholds)
+		protected.POST("/iot-sensors/thresholds", iotSensorHandler.CreateThreshold)
+		protected.PATCH("/iot-sensors/thresholds/:id", iotSensorHandler.UpdateThreshold)
+		protected.DELETE("/iot-sensors/thresholds/:id", iotSensorHandler.DeleteThreshold)
 
 		protected.GET("/integrations/ecommerce", ecommerceHandler.Dashboard)
 		protected.GET("/integrations/ecommerce/platforms", ecommerceHandler.ListPlatforms)

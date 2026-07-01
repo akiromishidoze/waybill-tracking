@@ -92,3 +92,56 @@ func (h *IoTSensorHandler) CreateReading(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, reading)
 }
+
+func (h *IoTSensorHandler) ListThresholds(c *gin.Context) {
+	sensorID := c.Query("sensorId")
+	var sensorIDPtr *string
+	if sensorID != "" {
+		sensorIDPtr = &sensorID
+	}
+
+	items, err := h.repo.ListThresholds(c.Request.Context(), sensorIDPtr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, items)
+}
+
+func (h *IoTSensorHandler) CreateThreshold(c *gin.Context) {
+	var req models.IoTSensorThreshold
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.repo.CreateThreshold(c.Request.Context(), &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, req)
+}
+
+func (h *IoTSensorHandler) UpdateThreshold(c *gin.Context) {
+	id := c.Param("id")
+	var req models.IoTSensorThreshold
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.repo.UpdateThreshold(c.Request.Context(), id, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
+}
+
+func (h *IoTSensorHandler) DeleteThreshold(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.repo.DeleteThreshold(c.Request.Context(), id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}

@@ -33,3 +33,16 @@ type CreateReadingRequest struct {
 	Value       float64 `json:"value" binding:"required"`
 	Unit        *string `json:"unit"`
 }
+
+type IoTSensorThreshold struct {
+	ID          string     `json:"id"`
+	SensorID    string     `json:"sensorId"`
+	ReadingType string     `json:"readingType"`
+	MinValue    *float64   `json:"minValue,omitempty"`
+	MaxValue    *float64   `json:"maxValue,omitempty"`
+	Severity    string     `json:"severity"`
+	ActionType  string     `json:"actionType"`
+	IsActive    bool       `json:"isActive"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
+}

@@ -42,6 +42,7 @@ import IotSensorPage from './pages/IotSensorPage'
 import GPSSimulatorPage from './pages/GPSSimulatorPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
@@ -50,6 +51,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <ToastProvider>
+    <ErrorBoundary>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/track/:trackingNumber" element={<TrackingPage />} />
@@ -102,6 +104,7 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </ErrorBoundary>
     </ToastProvider>
     </ThemeProvider>
   )

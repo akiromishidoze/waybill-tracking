@@ -224,6 +224,12 @@ func main() {
 
 	wsHub := ws.NewHub()
 	esClient := elastic.NewClient(cfg.ElasticsearchURL)
+	
+	// Initialize Elasticsearch index
+	if err := esClient.CreateIndex(context.Background()); err != nil {
+		log.Warn("failed to create elasticsearch index", zap.Error(err))
+	}
+	
 	webhookRepo := repository.NewWebhookRepository(db)
 	webhookDeliveryRepo := repository.NewWebhookDeliveryRepository(db)
 	webhookDispatcher := webhook.NewDispatcher(webhookRepo, webhookDeliveryRepo)

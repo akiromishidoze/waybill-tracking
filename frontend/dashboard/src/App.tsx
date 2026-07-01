@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -10,7 +11,6 @@ import UsersPage from './pages/UsersPage'
 import AuditLogPage from './pages/AuditLogPage'
 import CarriersPage from './pages/CarriersPage'
 import AggregatedTrackingPage from './pages/AggregatedTrackingPage'
-import SettingsPage from './pages/SettingsPage'
 import BatchStatusPage from './pages/BatchStatusPage'
 import WebhooksPage from './pages/WebhooksPage'
 import CarrierPerformancePage from './pages/CarrierPerformancePage'
@@ -20,23 +20,14 @@ import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
 import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
 import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
 import RoadmapIntegrationsPage from './pages/RoadmapIntegrationsPage'
-import EscalationsPage from './pages/EscalationsPage'
 import DwellAlertsPage from './pages/DwellAlertsPage'
 import GeofenceEventsPage from './pages/GeofenceEventsPage'
-import ScheduledReportsPage from './pages/ScheduledReportsPage'
 import RegionPerformancePage from './pages/RegionPerformancePage'
 import ErpIntegrationsPage from './pages/ErpIntegrationsPage'
-import DriverAppPage from './pages/DriverAppPage'
-import DynamicReroutingPage from './pages/DynamicReroutingPage'
-import AutoCommunicationsPage from './pages/AutoCommunicationsPage'
-import CustomsCompliancePage from './pages/CustomsCompliancePage'
 import CODPage from './pages/CODPage'
-import BiIntegrationsPage from './pages/BiIntegrationsPage'
 import CostAnalyticsPage from './pages/CostAnalyticsPage'
 import DemandForecastingPage from './pages/DemandForecastingPage'
 import CarbonFootprintPage from './pages/CarbonFootprintPage'
-import ECommerceIntegrationsPage from './pages/ECommerceIntegrationsPage'
-import WhiteLabelPortalPage from './pages/WhiteLabelPortalPage'
 import WaybillImportPage from './pages/WaybillImportPage'
 import IotSensorPage from './pages/IotSensorPage'
 import GPSSimulatorPage from './pages/GPSSimulatorPage'
@@ -47,11 +38,29 @@ import UnauthorizedPage from './pages/UnauthorizedPage'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const ScheduledReportsPage = lazy(() => import('./pages/ScheduledReportsPage'))
+const DriverAppPage = lazy(() => import('./pages/DriverAppPage'))
+const ECommerceIntegrationsPage = lazy(() => import('./pages/ECommerceIntegrationsPage'))
+const CustomsCompliancePage = lazy(() => import('./pages/CustomsCompliancePage'))
+const EscalationsPage = lazy(() => import('./pages/EscalationsPage'))
+const BiIntegrationsPage = lazy(() => import('./pages/BiIntegrationsPage'))
+const AutoCommunicationsPage = lazy(() => import('./pages/AutoCommunicationsPage'))
+const DynamicReroutingPage = lazy(() => import('./pages/DynamicReroutingPage'))
+const WhiteLabelPortalPage = lazy(() => import('./pages/WhiteLabelPortalPage'))
+
+const PageLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-muted)' }}>
+    Loading page...
+  </div>
+)
+
 export default function App() {
   return (
     <ThemeProvider>
     <ToastProvider>
     <ErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/track/:trackingNumber" element={<TrackingPage />} />
@@ -68,7 +77,7 @@ export default function App() {
           <Route path="/tracking/aggregated" element={<AggregatedTrackingPage />} />
           <Route path="/batch-status" element={<BatchStatusPage />} />
           <Route path="/carrier-performance" element={<CarrierPerformancePage />} />
-          
+
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
             <Route path="/users" element={<UsersPage />} />
             <Route path="/audit-logs" element={<AuditLogPage />} />
@@ -104,6 +113,7 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </Suspense>
     </ErrorBoundary>
     </ToastProvider>
     </ThemeProvider>

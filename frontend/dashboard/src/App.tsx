@@ -35,6 +35,7 @@ import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import NotFoundPage from './pages/NotFoundPage'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="/roadmap/integrations" element={<RoadmapIntegrationsPage />} />
         </Route>
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </Suspense>
     </ErrorBoundary>

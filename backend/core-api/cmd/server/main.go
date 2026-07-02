@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
@@ -237,6 +238,29 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 	}
 }
 
+func seedAdmin(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log *zap.Logger) {
+	if cfg.AdminPassword == "" {
+		log.Warn("ADMIN_PASSWORD not set, skipping admin seed")
+		return
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(cfg.AdminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal("failed to hash admin password", zap.Error(err))
+	}
+
+	_, err = db.Exec(ctx, `
+		INSERT INTO users (email, name, password, role)
+		VALUES ($1, $2, $3, 'ADMIN')
+		ON CONFLICT (email) DO UPDATE SET password = $3, name = $2, updated_at = NOW()
+	`, cfg.AdminEmail, cfg.AdminName, string(hashed))
+	if err != nil {
+		log.Fatal("failed to seed admin user", zap.Error(err))
+	}
+
+	log.Info("admin user seeded", zap.String("email", cfg.AdminEmail))
+}
+
 func main() {
 	rollbackFlag := flag.String("rollback", "", "Roll back N migrations (e.g. --rollback=1) or 'all'")
 	flag.Parse()
@@ -273,6 +297,8 @@ func main() {
 	if err := migrator.New(db, migrationsDir).Run(context.Background()); err != nil {
 		log.Fatal("migration failed", zap.Error(err))
 	}
+
+	seedAdmin(context.Background(), db, cfg, log)
 
 	rdbOpts, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {

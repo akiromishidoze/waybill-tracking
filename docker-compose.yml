@@ -94,6 +94,8 @@ services:
       ELASTICSEARCH_USERNAME: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTIC_PASSWORD:-elastic_pass}"
       KAFKA_BROKERS: "kafka:29092"
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@waybilltrack.com}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-teccadmin00}"
       JWT_SECRET: "${JWT_SECRET:?JWT_SECRET must be set in the environment}"
       ANALYTICS_API_URL: "http://analytics-api:8000"
       INTERNAL_API_KEY: "${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in the environment}"

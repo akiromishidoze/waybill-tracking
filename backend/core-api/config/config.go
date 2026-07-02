@@ -25,6 +25,9 @@ type Config struct {
 	FrontendURL      string
 	MigrationsDir    string
 	AllowedOrigins   []string
+	AdminEmail       string
+	AdminPassword    string
+	AdminName        string
 }
 
 func Load() *Config {
@@ -50,6 +53,9 @@ func Load() *Config {
 		InternalAPIKey: getEnv("INTERNAL_API_KEY", ""),
 		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3010"),
 		AllowedOrigins: getEnvSliceTrimmed("ALLOWED_ORIGINS", "http://localhost:3010"),
+		AdminEmail: getEnv("ADMIN_EMAIL", "admin@waybilltrack.com"),
+		AdminPassword: getEnv("ADMIN_PASSWORD", "teccadmin00"),
+		AdminName: getEnv("ADMIN_NAME", "Admin"),
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {

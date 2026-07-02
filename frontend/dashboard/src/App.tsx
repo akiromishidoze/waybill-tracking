@@ -86,7 +86,9 @@ export default function App() {
             <Route path="/webhooks" element={<WebhooksPage />} />
           </Route>
           <Route path="/map" element={<MapViewPage />} />
-          <Route path="/gps-simulator" element={<GPSSimulatorPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'OPS']} />}>
+            <Route path="/gps-simulator" element={<GPSSimulatorPage />} />
+          </Route>
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/escalations" element={<EscalationsPage />} />
           <Route path="/driver-app" element={<DriverAppPage />} />

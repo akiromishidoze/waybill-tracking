@@ -159,7 +159,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 		protected.GET("/integrations/white-label", deps.WhiteLabelHandler.GetPortal)
 		protected.PATCH("/integrations/white-label", deps.WhiteLabelHandler.UpdateConfig)
 
-		protected.POST("/gps/location", deps.GPSHandler.CreateLocation)
+		protected.POST("/gps/location", middleware.RoleMiddleware("ADMIN", "OPS"), deps.GPSHandler.CreateLocation)
 		protected.GET("/gps/waybills", deps.GPSHandler.ListCurrent)
 		protected.GET("/gps/waybills/:id/history", deps.GPSHandler.GetHistory)
 		protected.GET("/gps/waybills/:id/latest", deps.GPSHandler.GetLatest)

@@ -6,19 +6,53 @@ interface PaginationProps {
   total: number
   pageSize: number
   onPageChange: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
+  pageSizeOptions?: number[]
 }
 
-export default function Pagination({ page, totalPages, total, pageSize, onPageChange }: PaginationProps) {
-  if (totalPages <= 1) return null
+export default function Pagination({
+  page,
+  totalPages,
+  total,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  pageSizeOptions = [20, 50, 100, 200],
+}: PaginationProps) {
+  if (totalPages <= 1 && !onPageSizeChange) return null
 
   const from = (page - 1) * pageSize + 1
   const to = Math.min(page * pageSize, total)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 0', fontSize: '0.875rem' }}>
-      <span style={{ color: 'var(--color-text-muted)' }}>
-        {from}–{to} of {total}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ color: 'var(--color-text-muted)' }}>
+          {from}–{to} of {total}
+        </span>
+        {onPageSizeChange && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem' }}>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              style={{
+                padding: '0.375rem 0.5rem',
+                borderRadius: 6,
+                border: '1px solid var(--color-border-input)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+              }}
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
       <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
         <button
           disabled={page <= 1}

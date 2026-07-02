@@ -21,19 +21,21 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'var(--status-gray)',
 }
 
-const PAGE_SIZE = 25
+const DEFAULT_PAGE_SIZE = 20
+const PAGE_SIZE_OPTIONS = [20, 50, 100, 200]
 
 export default function WaybillListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') || ''
   const page = parseInt(searchParams.get('page') || '1', 10)
+  const pageSize = parseInt(searchParams.get('pageSize') || String(DEFAULT_PAGE_SIZE), 10)
   const carrierFilter = searchParams.get('carrier') || ''
   const breachFilter = (searchParams.get('sla') as 'all' | 'breached' | 'ontime') || 'all'
   const returnFilter = (searchParams.get('return') as 'all' | 'hasReturn' | 'noReturn') || 'all'
   const teamFilter = searchParams.get('team') || ''
   const { data: rawData, isLoading } = useQuery({
-    queryKey: ['waybills', search, page],
-    queryFn: () => waybillService.list({ search, page, limit: PAGE_SIZE }).then((r) => r.data),
+    queryKey: ['waybills', search, page, pageSize],
+    queryFn: () => waybillService.list({ search, page, limit: pageSize }).then((r) => r.data),
   })
 
   const { data: dwellAlerts } = useQuery({
@@ -70,8 +72,8 @@ export default function WaybillListPage() {
     return true
   })
 
-  const totalPages = Math.max(1, Math.ceil((filtered?.length ?? total) / PAGE_SIZE))
-  const displayed = filtered?.slice(0, PAGE_SIZE) ?? []
+  const totalPages = Math.max(1, Math.ceil((filtered?.length ?? total) / pageSize))
+  const displayed = filtered?.slice((page - 1) * pageSize, page * pageSize) ?? []
 
   const dweltWaybills = new Set(
     (dwellAlerts || []).filter(a => !a.acknowledged).map(a => a.waybillId)
@@ -83,6 +85,7 @@ export default function WaybillListPage() {
   function handleReturn(v: string) { setSearchParams(prev => { prev.set('return', v); prev.set('page', '1'); return prev }) }
   function handleTeam(v: string) { setSearchParams(prev => { prev.set('team', v); prev.set('page', '1'); return prev }) }
   function handlePageChange(newPage: number) { setSearchParams(prev => { prev.set('page', newPage.toString()); return prev }) }
+  function handlePageSizeChange(newPageSize: number) { setSearchParams(prev => { prev.set('pageSize', newPageSize.toString()); prev.set('page', '1'); return prev }) }
 
   return (
     <PageContainer
@@ -221,7 +224,7 @@ export default function WaybillListPage() {
           </tbody>
         </table>
       </div>
-      <Pagination page={page} totalPages={totalPages} total={filtered?.length ?? total} pageSize={PAGE_SIZE} onPageChange={handlePageChange} />
+      <Pagination page={page} totalPages={totalPages} total={filtered?.length ?? total} pageSize={pageSize} onPageChange={handlePageChange} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
     </PageContainer>
   )
 }

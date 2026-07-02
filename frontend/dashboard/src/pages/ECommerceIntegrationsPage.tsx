@@ -6,6 +6,7 @@ import {
   ShoppingCart, RefreshCw, CheckCircle, XCircle, Link2,
   Globe, Package, AlertTriangle, Plus, X, Pencil, Trash2,
 } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -102,7 +103,7 @@ export default function ECommerceIntegrationsPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>E-Commerce Integrations</h1>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
           {[1,2,3].map(i => (
-            <div key={i} style={{ height: 160, borderRadius: 10, background: 'var(--color-surface)', animation: 'pulse 1.5s infinite' }} />
+            <SkeletonBlock key={i} height={160} />
           ))}
         </div>
       </div>

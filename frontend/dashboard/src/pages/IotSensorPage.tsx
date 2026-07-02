@@ -4,6 +4,7 @@ import {
   Activity, Thermometer, Droplets, Zap, Sun, AlertTriangle,
   Battery, Radio, Wifi,
 } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 
 function ago(iso: string | null) {
@@ -43,7 +44,7 @@ export default function IotSensorPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>IoT Sensor Data</h1>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
           {[1,2,3,4,5].map(i => (
-            <div key={i} style={{ height: 120, borderRadius: 10, background: 'var(--color-surface)', animation: 'pulse 1.5s infinite' }} />
+            <SkeletonBlock key={i} height={120} />
           ))}
         </div>
       </div>

@@ -20,9 +20,25 @@ export default function TrackingPage() {
     if (trackingNumber.trim()) setSearchTerm(trackingNumber.trim())
   }
 
+  const pageTitle = wb
+    ? `Shipment ${wb.trackingNumber} — ${wb.status.replace(/_/g, ' ')}`
+    : searchTerm
+    ? `Tracking ${searchTerm}`
+    : 'Track Shipment'
+  const pageDescription = wb
+    ? `Track shipment ${wb.trackingNumber} with Waybill Tracking. Current status: ${wb.status.replace(/_/g, ' ')}.`
+    : 'Track your shipment in real-time with Waybill Tracking. Enter your waybill number to see status, location, and estimated delivery.'
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
+
   return (
     <>
-      <PageTitle title="Track Shipment" />
+      <PageTitle
+        title={pageTitle}
+        description={pageDescription}
+        ogTitle={pageTitle}
+        ogDescription={pageDescription}
+        ogUrl={pageUrl}
+      />
       <div
         style={{
           display: 'flex',

@@ -3,6 +3,7 @@ import { demandForecastService } from '@/services/api'
 import {
   TrendingUp, TrendingDown, BarChart3, MapPin, ArrowLeftRight, Package,
 } from 'lucide-react'
+import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 
 function pct(n: number) { return n + '%' }
@@ -22,7 +23,7 @@ export default function DemandForecastingPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Demand Forecasting</h1>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
           {[1,2,3,4].map(i => (
-            <div key={i} style={{ height: 120, borderRadius: 10, background: 'var(--color-surface)', animation: 'pulse 1.5s infinite' }} />
+            <SkeletonBlock key={i} height={120} />
           ))}
         </div>
       </div>

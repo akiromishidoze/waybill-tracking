@@ -20,6 +20,30 @@ provider "aws" {
 
 resource "aws_ecs_cluster" "waybill" {
   name = "waybill-cluster"
+
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
+  default_capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = 1
+    base              = 1
+  }
+}
+
+resource "aws_security_group" "rds" {
+  name        = "waybill-rds-sg"
+  description = "RDS Aurora security group"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group_rule" "rds_from_ecs" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.core_api.id
+  security_group_id        = aws_security_group.rds.id
+  description              = "Allow PostgreSQL traffic from ECS tasks"
 }
 
 resource "aws_rds_cluster" "postgres" {
@@ -33,6 +57,29 @@ resource "aws_rds_cluster" "postgres" {
   backup_retention_period = 7
   preferred_backup_window = "03:00-04:00"
   skip_final_snapshot     = true
+  vpc_security_group_ids  = [aws_security_group.rds.id]
+  db_subnet_group_name    = aws_db_subnet_group.rds.name
+}
+
+resource "aws_db_subnet_group" "rds" {
+  name       = "waybill-rds-subnet-group"
+  subnet_ids = var.subnet_ids
+}
+
+resource "aws_security_group" "redis" {
+  name        = "waybill-redis-sg"
+  description = "Redis security group"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group_rule" "redis_from_ecs" {
+  type                     = "ingress"
+  from_port                = 6379
+  to_port                  = 6379
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.core_api.id
+  security_group_id        = aws_security_group.redis.id
+  description              = "Allow Redis traffic from ECS tasks"
 }
 
 resource "aws_elasticache_cluster" "redis" {
@@ -42,6 +89,13 @@ resource "aws_elasticache_cluster" "redis" {
   num_cache_nodes      = 2
   parameter_group_name = "default.redis7"
   port                 = 6379
+  security_group_ids   = [aws_security_group.redis.id]
+  subnet_group_name    = aws_elasticache_subnet_group.redis.name
+}
+
+resource "aws_elasticache_subnet_group" "redis" {
+  name       = "waybill-redis-subnet-group"
+  subnet_ids = var.subnet_ids
 }
 
 resource "aws_msk_cluster" "kafka" {
@@ -59,4 +113,15 @@ resource "aws_msk_cluster" "kafka" {
 resource "aws_security_group" "kafka" {
   name        = "waybill-kafka-sg"
   description = "Kafka broker security group"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group_rule" "kafka_from_ecs" {
+  type                     = "ingress"
+  from_port                = 9092
+  to_port                  = 9092
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.core_api.id
+  security_group_id        = aws_security_group.kafka.id
+  description              = "Allow Kafka traffic from ECS tasks"
 }

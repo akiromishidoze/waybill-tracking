@@ -13,3 +13,13 @@ output "database_ip" {
 output "redis_host" {
   value = google_redis_instance.cache.host
 }
+
+output "dashboard_url" {
+  description = "Load balancer URL for the dashboard service (may take a few minutes to provision)"
+  value       = kubernetes_service.dashboard.status[0].load_balancer[0].ingress[0].ip
+}
+
+output "api_url" {
+  description = "Load balancer URL for the core-api service (may take a few minutes to provision)"
+  value       = "http://${kubernetes_service.core_api.status[0].load_balancer[0].ingress[0].ip}:8080"
+}

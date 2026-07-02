@@ -64,6 +64,12 @@ jobs:
           terraform plan \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="subnet_ids=${{ vars.AWS_SUBNET_IDS }}" \
+            -var="vpc_id=${{ vars.AWS_VPC_ID }}" \
+            -var="public_subnet_ids=${{ vars.AWS_PUBLIC_SUBNET_IDS }}" \
+            -var="private_subnet_ids=${{ vars.AWS_PRIVATE_SUBNET_IDS }}" \
+            -var="ecr_repository_url=${{ vars.AWS_ECR_REPOSITORY_URL }}" \
+            -var="jwt_secret=${{ secrets.JWT_SECRET }}" \
+            -var="admin_password=${{ secrets.ADMIN_PASSWORD }}" \
             -out=tfplan \
             -no-color 2>&1 | tee plan.txt
         continue-on-error: true
@@ -129,6 +135,9 @@ jobs:
           terraform plan \
             -var="project_id=${{ vars.GCP_PROJECT_ID }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="artifact_registry_url=${{ vars.GCP_ARTIFACT_REGISTRY_URL }}" \
+            -var="jwt_secret=${{ secrets.JWT_SECRET }}" \
+            -var="admin_password=${{ secrets.ADMIN_PASSWORD }}" \
             -out=tfplan \
             -no-color 2>&1 | tee plan.txt
         continue-on-error: true

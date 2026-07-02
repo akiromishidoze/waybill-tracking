@@ -7,14 +7,16 @@ This directory contains Terraform configurations for deploying the Waybill Track
 ```
 infrastructure/terraform/
 ├── .gitignore                  # Excludes *.tfstate, backend.tfbackend, terraform.tfvars
-├── aws/                        # AWS resources (ECS, RDS Aurora, ElastiCache, MSK)
-│   ├── main.tf
+├── aws/                        # AWS resources (ECS, RDS Aurora, ElastiCache, MSK, ALB)
+│   ├── main.tf                 # Data stores and cluster
+│   ├── app.tf                  # ECS task definitions, services, IAM, ALB
 │   ├── variables.tf
 │   ├── outputs.tf
 │   ├── backend.tfbackend.example
 │   └── terraform.tfvars.example
-├── gcp/                        # GCP resources (GKE, Cloud SQL, Memorystore)
-│   ├── main.tf
+├── gcp/                        # GCP resources (GKE, Cloud SQL, Memorystore, Kubernetes workloads)
+│   ├── main.tf                 # GKE cluster, Cloud SQL, Redis
+│   ├── app.tf                  # Kubernetes deployments and services
 │   ├── variables.tf
 │   ├── outputs.tf
 │   ├── backend.tfbackend.example
@@ -24,6 +26,35 @@ infrastructure/terraform/
 │   └── gcs-bootstrap/          # GCS bucket for remote state
 └── README.md
 ```
+
+## What is deployed
+
+### AWS (`aws/`)
+
+- **ECS Fargate cluster** with services for:
+  - `core-api` (2 replicas, exposed via `/api/*` ALB listener rule)
+  - `dashboard` (2 replicas, default ALB listener target)
+  - `analytics-api` (1 replica)
+  - `celery-worker` (1 replica)
+  - `celery-beat` (1 replica)
+- **Application Load Balancer** with HTTP listener and health checks on `/health` (core-api) and `/` (dashboard).
+- **IAM roles** for ECS task execution and task runtime.
+- **Security groups** for the ALB, core-api, and dashboard.
+- **CloudWatch Log Groups** for each ECS service.
+- **Data stores**: Aurora PostgreSQL, ElastiCache Redis, MSK Kafka.
+
+### GCP (`gcp/`)
+
+- **GKE cluster** with a default node pool.
+- **Cloud SQL PostgreSQL** instance and `waybill` database.
+- **Memorystore Redis** instance.
+- **Kubernetes workloads** in the `waybill` namespace:
+  - `core-api` deployment + ClusterIP service
+  - `dashboard` deployment + LoadBalancer service
+  - `analytics-api` deployment
+  - `celery-worker` deployment
+  - `celery-beat` deployment
+- **ConfigMap** and **Secret** for shared environment variables and credentials.
 
 ## Remote State
 
@@ -47,7 +78,7 @@ cd infrastructure/terraform/aws
 cp backend.tfbackend.example backend.tfbackend
 # Edit backend.tfbackend — set bucket, region, dynamodb_table
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set db_password, subnet_ids
+# Edit terraform.tfvars — set vpc_id, subnet_ids, public_subnet_ids, private_subnet_ids, db_password, jwt_secret, admin_password, ecr_repository_url
 terraform init -backend-config=backend.tfbackend
 terraform plan
 ```
@@ -72,7 +103,7 @@ cd infrastructure/terraform/gcp
 cp backend.tfbackend.example backend.tfbackend
 # Edit backend.tfbackend — set bucket
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set project_id, db_password
+# Edit terraform.tfvars — set project_id, db_password, jwt_secret, admin_password, artifact_registry_url
 terraform init -backend-config=backend.tfbackend
 terraform plan
 ```
@@ -102,6 +133,8 @@ The workflow at `.github/workflows/terraform.yml` runs automatically on every PR
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials for Terraform |
 | `GCP_SA_KEY` | GCP service account JSON key |
 | `DB_PASSWORD` | PostgreSQL master password |
+| `JWT_SECRET` | JWT secret for the core-api container |
+| `ADMIN_PASSWORD` | Admin user password for the seeded admin account |
 
 **Required GitHub variables (non-secret):**
 
@@ -110,9 +143,14 @@ The workflow at `.github/workflows/terraform.yml` runs automatically on every PR
 | `AWS_REGION` | `us-east-1` |
 | `TF_STATE_BUCKET_AWS` | `waybill-tfstate-prod` |
 | `TF_STATE_LOCK_TABLE` | `terraform-state-lock` |
+| `AWS_VPC_ID` | `vpc-12345678` |
 | `AWS_SUBNET_IDS` | `["subnet-aaa","subnet-bbb","subnet-ccc"]` |
+| `AWS_PUBLIC_SUBNET_IDS` | `["subnet-pub-aaa","subnet-pub-bbb"]` |
+| `AWS_PRIVATE_SUBNET_IDS` | `["subnet-priv-aaa","subnet-priv-bbb","subnet-priv-ccc"]` |
+| `AWS_ECR_REPOSITORY_URL` | `123456789012.dkr.ecr.us-east-1.amazonaws.com` |
 | `TF_STATE_BUCKET_GCP` | `waybill-tfstate-prod` |
 | `GCP_PROJECT_ID` | `my-gcp-project` |
+| `GCP_ARTIFACT_REGISTRY_URL` | `us-central1-docker.pkg.dev/my-gcp-project/waybill` |
 
 ## State Security Best Practices
 

@@ -1,4 +1,12 @@
 # Copy to terraform.tfvars and fill in real values (never commit terraform.tfvars).
-region      = "us-east-1"
-db_password = "CHANGE_ME_strong_password"
-subnet_ids  = ["subnet-aaaaaa", "subnet-bbbbbb", "subnet-cccccc"]
+region             = "us-east-1"
+vpc_id             = "vpc-12345678"
+public_subnet_ids  = ["subnet-aaaaaa", "subnet-bbbbbb"]
+private_subnet_ids = ["subnet-dddddd", "subnet-eeeeee", "subnet-ffffff"]
+subnet_ids         = ["subnet-dddddd", "subnet-eeeeee", "subnet-ffffff"]
+db_password        = "CHANGE_ME_strong_password"
+jwt_secret         = "CHANGE_ME_long_random_string"
+admin_password     = "CHANGE_ME_admin_password"
+ecr_repository_url = "123456789012.dkr.ecr.us-east-1.amazonaws.com"
+image_tag          = "latest"
+# alb_ingress_cidr = ["10.0.0.0/8"]

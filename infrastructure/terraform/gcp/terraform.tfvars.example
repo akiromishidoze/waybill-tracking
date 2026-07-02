@@ -1,4 +1,8 @@
 # Copy to terraform.tfvars and fill in real values (never commit terraform.tfvars).
-project_id  = "my-gcp-project-id"
-region      = "us-central1"
-db_password = "CHANGE_ME_strong_password"
+project_id            = "my-gcp-project-id"
+region                = "us-central1"
+db_password           = "CHANGE_ME_strong_password"
+jwt_secret            = "CHANGE_ME_long_random_string"
+admin_password        = "CHANGE_ME_admin_password"
+artifact_registry_url = "us-central1-docker.pkg.dev/my-gcp-project-id/waybill"
+image_tag             = "latest"

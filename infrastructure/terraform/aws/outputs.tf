@@ -22,3 +22,18 @@ output "kafka_bootstrap_brokers" {
   description = "MSK bootstrap broker connection string"
   value       = aws_msk_cluster.kafka.bootstrap_brokers
 }
+
+output "alb_dns_name" {
+  description = "DNS name of the application load balancer"
+  value       = aws_lb.waybill.dns_name
+}
+
+output "api_url" {
+  description = "Public URL for the core-api endpoints"
+  value       = "http://${aws_lb.waybill.dns_name}/api"
+}
+
+output "dashboard_url" {
+  description = "Public URL for the dashboard"
+  value       = "http://${aws_lb.waybill.dns_name}"
+}

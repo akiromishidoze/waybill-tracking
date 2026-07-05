@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, Trash2, Shield } from 'lucide-react'
+import { AlertTriangle, Trash2, Shield, FileText } from 'lucide-react'
 import { waybillService, teamService, analyticsService } from '@/services/api'
 import ConfirmModal from '@/components/ConfirmModal'
 import type { Waybill } from '@/types/waybill'
@@ -11,6 +11,12 @@ import ScanTimeline from '@/components/waybill-detail/ScanTimeline'
 import AttachmentsTab from '@/components/waybill-detail/AttachmentsTab'
 import ReturnTab from '@/components/waybill-detail/ReturnTab'
 import TrackingTab from '@/components/waybill-detail/TrackingTab'
+
+const getPodUrl = (waybillId: string) => {
+  const base = import.meta.env.VITE_API_URL || '/api/v1'
+  const token = localStorage.getItem('access_token') || ''
+  return `${base}/waybills/${waybillId}/pod?token=${encodeURIComponent(token)}`
+}
 
 type TabKey = 'scans' | 'attachments' | 'returns' | 'tracking'
 
@@ -152,6 +158,20 @@ export default function WaybillDetailPage() {
               Edit Waybill
             </button>
           )}
+          <a
+            href={getPodUrl(id!)}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.375rem',
+              padding: '0.5rem 1rem', background: 'var(--color-surface)',
+              border: '1px solid var(--color-border-input)', borderRadius: 6,
+              fontSize: '0.8125rem', cursor: 'pointer', color: 'var(--color-text)',
+              textDecoration: 'none',
+            }}
+          >
+            <FileText size={16} /> POD
+          </a>
           <button
             onClick={() => setDeleteWaybillId(id!)}
             style={{

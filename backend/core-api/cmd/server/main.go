@@ -64,12 +64,15 @@ type Dependencies struct {
 	CustomsHandler           *handlers.CustomsHandler
 	CODHandler               *handlers.CODHandler
 	BiIntegrationHandler     *handlers.BiIntegrationHandler
+	PODHandler               *handlers.PODHandler
 }
 
 func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 	cfg := deps.Cfg
 	db := deps.DB
 	rdb := deps.RDB
+
+	api.GET("/waybills/:id/pod", deps.PODHandler.GeneratePOD)
 
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, rdb, deps.AuditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
@@ -330,6 +333,7 @@ func main() {
 	auditLogHandler := handlers.NewAuditLogHandler(auditLogRepo)
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
+	podHandler := handlers.NewPODHandler(waybillRepo, db, cfg.JWTSecret)
 	notificationDispatcher := notifications.NewDispatcher(cfg.AnalyticsAPIURL, cfg.InternalAPIKey)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, notificationDispatcher, auditLogger)
 	teamRepo := repository.NewTeamRepository(db)
@@ -421,6 +425,7 @@ func main() {
 		CustomsHandler:           customsHandler,
 		CODHandler:               codHandler,
 		BiIntegrationHandler:     biHandler,
+		PODHandler:               podHandler,
 	}
 
 	registerCoreAPIRoutes(r.Group("/api"), deps)

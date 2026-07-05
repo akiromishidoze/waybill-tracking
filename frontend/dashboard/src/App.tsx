@@ -49,6 +49,7 @@ const BiIntegrationsPage = lazy(() => import('./pages/BiIntegrationsPage'))
 const AutoCommunicationsPage = lazy(() => import('./pages/AutoCommunicationsPage'))
 const DynamicReroutingPage = lazy(() => import('./pages/DynamicReroutingPage'))
 const WhiteLabelPortalPage = lazy(() => import('./pages/WhiteLabelPortalPage'))
+const DriverPWAPage = lazy(() => import('./pages/DriverPWAPage'))
 
 const PageLoader = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-muted)' }}>
@@ -93,6 +94,7 @@ export default function App() {
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/escalations" element={<EscalationsPage />} />
           <Route path="/driver-app" element={<DriverAppPage />} />
+          <Route path="/driver-pwa" element={<DriverPWAPage />} />
            <Route path="/rerouting" element={<DynamicReroutingPage />} />
            <Route path="/customs" element={<CustomsCompliancePage />} />
           <Route path="/cod" element={<CODPage />} />

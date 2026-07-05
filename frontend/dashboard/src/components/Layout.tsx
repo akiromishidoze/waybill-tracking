@@ -32,6 +32,7 @@ const navGroupDefs: NavGroupDef[] = [
     items: [
       { to: '/returns', labelKey: 'nav.returns', icon: ArrowLeftRight },
       { to: '/driver-app', labelKey: 'nav.driverApp', icon: Truck },
+      { to: '/driver-pwa', labelKey: 'nav.driverPwa', icon: Navigation },
       { to: '/customs', labelKey: 'nav.customsCompliance', icon: Globe },
       { to: '/rerouting', labelKey: 'nav.rerouting', icon: Navigation },
       { to: '/auto-comms', labelKey: 'nav.autoComms', icon: Bell },

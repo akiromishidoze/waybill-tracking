@@ -28,12 +28,25 @@ func (r *AuditLogRepository) Create(ctx context.Context, log *models.AuditLog) e
 	return err
 }
 
-func (r *AuditLogRepository) List(ctx context.Context) ([]models.AuditLog, error) {
-	rows, err := r.db.Query(ctx, `
+func (r *AuditLogRepository) List(ctx context.Context, page, limit int) ([]models.AuditLog, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 500 {
+		limit = 50
+	}
+
+	var total int
+	if err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM audit_logs`).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	rows, err := r.db.Query(ctx, fmt.Sprintf(`
 		SELECT id, user_id, user_name, user_role, action, resource_type, resource_id, details, ip_address, created_at
-		FROM audit_logs ORDER BY created_at DESC LIMIT 200`)
+		FROM audit_logs ORDER BY created_at DESC LIMIT %d OFFSET %d`, limit, offset))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -43,11 +56,14 @@ func (r *AuditLogRepository) List(ctx context.Context) ([]models.AuditLog, error
 		if err := rows.Scan(&l.ID, &l.UserID, &l.UserName, &l.UserRole,
 			&l.Action, &l.ResourceType, &l.ResourceID, &l.Details,
 			&l.IPAddress, &l.CreatedAt); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		logs = append(logs, l)
 	}
-	return logs, nil
+	if logs == nil {
+		logs = []models.AuditLog{}
+	}
+	return logs, total, nil
 }
 
 func (r *AuditLogRepository) Export(ctx context.Context, from, to *time.Time) ([]models.AuditLog, error) {

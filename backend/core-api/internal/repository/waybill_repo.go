@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/internal/models"
-	"time"
 )
 
 type WaybillRepository struct {
@@ -255,7 +256,7 @@ func (r *WaybillRepository) Update(ctx context.Context, id string, req models.Up
 		return err
 	}
 
-	cacheKey := fmt.Sprintf("track:*")
+	cacheKey := "track:*"
 	iter := r.redis.Scan(ctx, 0, cacheKey, 0).Iterator()
 	for iter.Next(ctx) {
 		r.redis.Del(ctx, iter.Val())

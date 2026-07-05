@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/waybill-tracking/core-api/internal/models"
@@ -65,10 +66,18 @@ func (h *DriverHandler) UpdateAssignmentStatus(c *gin.Context) {
 }
 
 func (h *DriverHandler) ListScans(c *gin.Context) {
-	scans, err := h.repo.ListScans(c.Request.Context())
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	scans, total, err := h.repo.ListScans(c.Request.Context(), page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, scans)
+	c.JSON(http.StatusOK, gin.H{
+		"data":  scans,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
 }

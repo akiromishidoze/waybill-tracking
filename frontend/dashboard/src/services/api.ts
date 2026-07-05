@@ -156,7 +156,7 @@ export const aggregatedTrackingService = {
 }
 
 export const auditLogService = {
-  list: () => api.get<AuditLog[]>('/audit-logs'),
+  list: (page = 1, limit = 20) => api.get<{ data: AuditLog[]; total: number; page: number; limit: number }>(`/audit-logs?page=${page}&limit=${limit}`),
   export: (from?: string, to?: string) => {
     const params = new URLSearchParams()
     if (from) params.set('from', from)

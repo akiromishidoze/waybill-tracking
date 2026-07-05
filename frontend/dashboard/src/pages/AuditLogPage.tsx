@@ -33,6 +33,8 @@ const ACTION_LABELS: Record<string, string> = {
 
 export default function AuditLogPage() {
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(20)
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
   const [exporting, setExporting] = useState(false)
@@ -66,13 +68,17 @@ export default function AuditLogPage() {
     }
   }
 
-  const { data: logs, isLoading } = useQuery({
-    queryKey: ['audit-logs'],
-    queryFn: () => auditLogService.list().then((r) => r.data),
+  const { data: pageResult, isLoading } = useQuery({
+    queryKey: ['audit-logs', page],
+    queryFn: () => auditLogService.list(page, limit).then((r) => r.data),
     refetchInterval: 15000,
   })
 
-  const filtered = (logs || []).filter(
+  const logs = pageResult?.data ?? []
+  const total = pageResult?.total ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / limit))
+
+  const filtered = logs.filter(
     (l) =>
       l.userName.toLowerCase().includes(search.toLowerCase()) ||
       l.action.toLowerCase().includes(search.toLowerCase()) ||
@@ -85,6 +91,16 @@ export default function AuditLogPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Audit Log</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+            Rows per page:
+            <select
+              value={limit}
+              onChange={(e) => { setLimit(Number(e.target.value)); setPage(1) }}
+              style={{ padding: '0.4rem 0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.8125rem', background: 'var(--color-surface)', color: 'var(--color-text)', cursor: 'pointer' }}
+            >
+              {[20, 50, 100, 200].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </label>
           <div style={{ position: 'relative' }}>
             <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted-lighter)' }} />
             <input
@@ -191,6 +207,22 @@ export default function AuditLogPage() {
           </table>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            style={{ padding: '0.375rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, background: 'var(--color-surface)', cursor: page === 1 ? 'not-allowed' : 'pointer', opacity: page === 1 ? 0.5 : 1 }}
+          >← Prev</button>
+          <span>Page {page} of {totalPages} ({total} total)</span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            style={{ padding: '0.375rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, background: 'var(--color-surface)', cursor: page === totalPages ? 'not-allowed' : 'pointer', opacity: page === totalPages ? 0.5 : 1 }}
+          >Next →</button>
+        </div>
+      )}
     </div>
   )
 }

@@ -4,10 +4,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
 
@@ -20,15 +20,20 @@ func NewAuditLogHandler(repo *repository.AuditLogRepository) *AuditLogHandler {
 }
 
 func (h *AuditLogHandler) List(c *gin.Context) {
-	logs, err := h.repo.List(c.Request.Context())
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	logs, total, err := h.repo.List(c.Request.Context(), page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if logs == nil {
-		logs = []models.AuditLog{}
-	}
-	c.JSON(http.StatusOK, logs)
+	c.JSON(http.StatusOK, gin.H{
+		"data":  logs,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
 }
 
 func (h *AuditLogHandler) Export(c *gin.Context) {

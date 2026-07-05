@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -145,13 +146,26 @@ func (r *DriverRepository) UpdateAssignmentStatus(ctx context.Context, id string
 	return a, nil
 }
 
-func (r *DriverRepository) ListScans(ctx context.Context) ([]models.DriverScanEvent, error) {
-	rows, err := r.db.Query(ctx, `
+func (r *DriverRepository) ListScans(ctx context.Context, page, limit int) ([]models.DriverScanEvent, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 500 {
+		limit = 50
+	}
+
+	var total int
+	if err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM driver_scan_events`).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	rows, err := r.db.Query(ctx, fmt.Sprintf(`
 		SELECT id, driver_id, driver_name, waybill_id, tracking_number, scan_type,
 		       location, latitude, longitude, photo_url, signature, remark, timestamp
-		FROM driver_scan_events ORDER BY timestamp DESC LIMIT 200`)
+		FROM driver_scan_events ORDER BY timestamp DESC LIMIT %d OFFSET %d`, limit, offset))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -162,12 +176,12 @@ func (r *DriverRepository) ListScans(ctx context.Context) ([]models.DriverScanEv
 			&s.ID, &s.DriverID, &s.DriverName, &s.WaybillID, &s.TrackingNumber, &s.ScanType,
 			&s.Location, &s.Latitude, &s.Longitude, &s.PhotoURL, &s.Signature, &s.Remark, &s.Timestamp,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		scans = append(scans, s)
 	}
 	if scans == nil {
 		scans = []models.DriverScanEvent{}
 	}
-	return scans, nil
+	return scans, total, nil
 }

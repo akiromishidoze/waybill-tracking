@@ -52,9 +52,26 @@ export default function LoginPage() {
       >
         <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
         {import.meta.env.DEV ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-            Dev hint: Email: <strong>admin@waybilltrack.com</strong> / Password: <strong>teccadmin00</strong>
-          </p>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', margin: '0 0 0.5rem' }}>
+              Dev hint: <strong>admin@waybilltrack.com</strong> / <strong>teccadmin00</strong>
+            </p>
+            <button
+              type="button"
+              onClick={() => { setEmail('admin@waybilltrack.com'); setPassword('teccadmin00'); setErrors({}); setServerError('') }}
+              style={{
+                padding: '0.25rem 0.75rem',
+                fontSize: '0.75rem',
+                background: 'transparent',
+                border: '1px solid var(--color-border-input)',
+                borderRadius: 4,
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+              }}
+            >
+              Fill default credentials
+            </button>
+          </div>
         ) : (
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
             Enter your credentials to access the dashboard.

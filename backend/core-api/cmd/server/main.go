@@ -239,12 +239,13 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 }
 
 func seedAdmin(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log *zap.Logger) {
-	if cfg.AdminPassword == "" {
-		log.Warn("ADMIN_PASSWORD not set, skipping admin seed")
-		return
+	adminPassword := cfg.AdminPassword
+	if adminPassword == "" {
+		adminPassword = "teccadmin00"
+		log.Warn("ADMIN_PASSWORD not set, using default password — change this in production")
 	}
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(cfg.AdminPassword), bcrypt.DefaultCost)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal("failed to hash admin password", zap.Error(err))
 	}

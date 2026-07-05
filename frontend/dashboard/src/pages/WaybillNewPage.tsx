@@ -146,7 +146,7 @@ export default function WaybillNewPage() {
         weight: parseFloat(form.weight),
         dimensions: form.dimensions,
         serviceType: form.serviceType,
-        ...(selectedQuote ? { carrierId: selectedQuote.carrierId } : {}),
+        ...(selectedQuote ? { carrierName: selectedQuote.carrierName } : {}),
       })
       navigate('/waybills')
     } catch {

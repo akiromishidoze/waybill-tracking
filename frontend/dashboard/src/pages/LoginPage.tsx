@@ -3,8 +3,8 @@ import { authService } from '@/services/api'
 import PageTitle from '@/components/PageTitle'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState(import.meta.env.DEV ? 'admin@waybilltrack.com' : '')
+  const [password, setPassword] = useState(import.meta.env.DEV ? 'teccadmin00' : '')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [serverError, setServerError] = useState('')
 

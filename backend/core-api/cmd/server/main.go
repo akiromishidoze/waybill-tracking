@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
@@ -30,39 +29,40 @@ import (
 	"github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Dependencies struct {
-	Cfg          *config.Config
-	DB           *pgxpool.Pool
-	RDB          *redis.Client
-	AuditLogger  *repository.AuditLogger
+	Cfg         *config.Config
+	DB          *pgxpool.Pool
+	RDB         *redis.Client
+	AuditLogger *repository.AuditLogger
 
-	WaybillHandler            *handlers.WaybillHandler
-	TeamHandler               *handlers.TeamHandler
-	EcommerceHandler          *handlers.ECommerceHandler
-	WhiteLabelHandler         *handlers.WhiteLabelHandler
-	GPSHandler                *handlers.GPSHandler
-	AttachmentHandler         *handlers.AttachmentHandler
-	AuditLogHandler           *handlers.AuditLogHandler
-	DriverHandler             *handlers.DriverHandler
-	CarrierHandler            *handlers.CarrierHandler
-	WebhookHandler            *handlers.WebhookHandler
-	SettingsHandler           *handlers.SettingsHandler
-	AnalyticsHandler          *handlers.AnalyticsHandler
-	EcommerceWebhookHandler   *handlers.ECommerceWebhookHandler
-	ErpHandler                *handlers.ErpHandler
-	ScheduledReportHandler    *handlers.ScheduledReportHandler
-	DwellAlertHandler         *handlers.DwellAlertHandler
-	EscalationHandler         *handlers.EscalationHandler
-	GeofenceEventHandler      *handlers.GeofenceEventHandler
-	AutoCommunicationHandler  *handlers.AutoCommunicationHandler
-	IoTSensorHandler          *handlers.IoTSensorHandler
-	WebhookDeliveryHandler    *handlers.WebhookDeliveryHandler
-	ReturnHandler             *handlers.ReturnHandler
-	CustomsHandler            *handlers.CustomsHandler
-	CODHandler                *handlers.CODHandler
-	BiIntegrationHandler      *handlers.BiIntegrationHandler
+	WaybillHandler           *handlers.WaybillHandler
+	TeamHandler              *handlers.TeamHandler
+	EcommerceHandler         *handlers.ECommerceHandler
+	WhiteLabelHandler        *handlers.WhiteLabelHandler
+	GPSHandler               *handlers.GPSHandler
+	AttachmentHandler        *handlers.AttachmentHandler
+	AuditLogHandler          *handlers.AuditLogHandler
+	DriverHandler            *handlers.DriverHandler
+	CarrierHandler           *handlers.CarrierHandler
+	WebhookHandler           *handlers.WebhookHandler
+	SettingsHandler          *handlers.SettingsHandler
+	AnalyticsHandler         *handlers.AnalyticsHandler
+	EcommerceWebhookHandler  *handlers.ECommerceWebhookHandler
+	ErpHandler               *handlers.ErpHandler
+	ScheduledReportHandler   *handlers.ScheduledReportHandler
+	DwellAlertHandler        *handlers.DwellAlertHandler
+	EscalationHandler        *handlers.EscalationHandler
+	GeofenceEventHandler     *handlers.GeofenceEventHandler
+	AutoCommunicationHandler *handlers.AutoCommunicationHandler
+	IoTSensorHandler         *handlers.IoTSensorHandler
+	WebhookDeliveryHandler   *handlers.WebhookDeliveryHandler
+	ReturnHandler            *handlers.ReturnHandler
+	CustomsHandler           *handlers.CustomsHandler
+	CODHandler               *handlers.CODHandler
+	BiIntegrationHandler     *handlers.BiIntegrationHandler
 }
 
 func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
@@ -239,13 +239,10 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 }
 
 func seedAdmin(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log *zap.Logger) {
-	adminPassword := cfg.AdminPassword
-	if adminPassword == "" {
-		adminPassword = "teccadmin00"
-		log.Warn("ADMIN_PASSWORD not set, using default password — change this in production")
-	}
-
-	hashed, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	// Always seed — never skip. Config.AdminPassword defaults to "teccadmin00" so
+	// this is always non-empty. We unconditionally upsert so the admin credential
+	// is guaranteed to match cfg.AdminPassword after every startup.
+	hashed, err := bcrypt.GenerateFromPassword([]byte(cfg.AdminPassword), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal("failed to hash admin password", zap.Error(err))
 	}
@@ -311,12 +308,12 @@ func main() {
 
 	wsHub := ws.NewHub()
 	esClient := elastic.NewClient(cfg.ElasticsearchURL, cfg.ElasticsearchUsername, cfg.ElasticsearchPassword)
-	
+
 	// Initialize Elasticsearch index
 	if err := esClient.CreateIndex(context.Background()); err != nil {
 		log.Warn("failed to create elasticsearch index", zap.Error(err))
 	}
-	
+
 	webhookRepo := repository.NewWebhookRepository(db)
 	webhookDeliveryRepo := repository.NewWebhookDeliveryRepository(db)
 	webhookDispatcher := webhook.NewDispatcher(webhookRepo, webhookDeliveryRepo)
@@ -384,36 +381,36 @@ func main() {
 	r.Use(middleware.Gzip())
 
 	deps := &Dependencies{
-		Cfg:          cfg,
-		DB:           db,
-		RDB:          rdb,
-		AuditLogger:  auditLogger,
+		Cfg:         cfg,
+		DB:          db,
+		RDB:         rdb,
+		AuditLogger: auditLogger,
 
-		WaybillHandler:            waybillHandler,
-		TeamHandler:               teamHandler,
-		EcommerceHandler:          ecommerceHandler,
-		WhiteLabelHandler:         whiteLabelHandler,
-		GPSHandler:                gpsHandler,
-		AttachmentHandler:         attachmentHandler,
-		AuditLogHandler:           auditLogHandler,
-		DriverHandler:             driverHandler,
-		CarrierHandler:            carrierHandler,
-		WebhookHandler:            webhookHandler,
-		SettingsHandler:           settingsHandler,
-		AnalyticsHandler:          analyticsHandler,
-		EcommerceWebhookHandler:   ecommerceWebhookHandler,
-		ErpHandler:                erpHandler,
-		ScheduledReportHandler:    scheduledReportHandler,
-		DwellAlertHandler:         dwellAlertHandler,
-		EscalationHandler:         escalationHandler,
-		GeofenceEventHandler:      geofenceEventHandler,
-		AutoCommunicationHandler:  autoCommunicationHandler,
-		IoTSensorHandler:          iotSensorHandler,
-		WebhookDeliveryHandler:    webhookDeliveryHandler,
-		ReturnHandler:             returnHandler,
-		CustomsHandler:            customsHandler,
-		CODHandler:                codHandler,
-		BiIntegrationHandler:      biHandler,
+		WaybillHandler:           waybillHandler,
+		TeamHandler:              teamHandler,
+		EcommerceHandler:         ecommerceHandler,
+		WhiteLabelHandler:        whiteLabelHandler,
+		GPSHandler:               gpsHandler,
+		AttachmentHandler:        attachmentHandler,
+		AuditLogHandler:          auditLogHandler,
+		DriverHandler:            driverHandler,
+		CarrierHandler:           carrierHandler,
+		WebhookHandler:           webhookHandler,
+		SettingsHandler:          settingsHandler,
+		AnalyticsHandler:         analyticsHandler,
+		EcommerceWebhookHandler:  ecommerceWebhookHandler,
+		ErpHandler:               erpHandler,
+		ScheduledReportHandler:   scheduledReportHandler,
+		DwellAlertHandler:        dwellAlertHandler,
+		EscalationHandler:        escalationHandler,
+		GeofenceEventHandler:     geofenceEventHandler,
+		AutoCommunicationHandler: autoCommunicationHandler,
+		IoTSensorHandler:         iotSensorHandler,
+		WebhookDeliveryHandler:   webhookDeliveryHandler,
+		ReturnHandler:            returnHandler,
+		CustomsHandler:           customsHandler,
+		CODHandler:               codHandler,
+		BiIntegrationHandler:     biHandler,
 	}
 
 	registerCoreAPIRoutes(r.Group("/api"), deps)

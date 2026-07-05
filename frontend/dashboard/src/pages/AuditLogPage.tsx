@@ -36,18 +36,31 @@ export default function AuditLogPage() {
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
   const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
 
   const handleExport = async () => {
     setExporting(true)
+    setExportError('')
     try {
       const res = await auditLogService.export(exportFrom || undefined, exportTo || undefined)
-      const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }))
+      const blob: Blob = res.data
+      const contentType = String(res.headers['content-type'] ?? '')
+      if (!contentType.includes('text/csv')) {
+        const text = await blob.text()
+        let message = 'Export failed.'
+        try { message = (JSON.parse(text) as { error?: string }).error ?? message } catch { /* not JSON */ }
+        setExportError(message)
+        return
+      }
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       const today = new Date().toISOString().slice(0, 10)
       a.download = `audit-logs-${today}.csv`
       a.click()
       URL.revokeObjectURL(url)
+    } catch {
+      setExportError('Export failed. Please try again.')
     } finally {
       setExporting(false)
     }
@@ -120,6 +133,9 @@ export default function AuditLogPage() {
           </button>
         </div>
       </div>
+      {exportError && (
+        <p style={{ color: 'var(--status-red, #dc2626)', fontSize: '0.8125rem', marginBottom: '0.75rem' }}>{exportError}</p>
+      )}
 
       <div style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
         {isLoading ? (

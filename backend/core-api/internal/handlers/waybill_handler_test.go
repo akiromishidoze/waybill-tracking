@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,7 +37,7 @@ func TestGenerateTrackingNumber_Unique(t *testing.T) {
 }
 
 func TestNewWaybillHandler(t *testing.T) {
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 
 	if h == nil {
 		t.Fatal("expected non-nil handler")
@@ -57,7 +58,7 @@ func TestNewWaybillHandler(t *testing.T) {
 
 func TestCreateWaybill_InvalidJSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 
 	r.POST("/waybills", func(c *gin.Context) {
@@ -78,7 +79,7 @@ func TestCreateWaybill_InvalidJSON(t *testing.T) {
 
 func TestCreateWaybill_MissingRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 
 	r.POST("/waybills", func(c *gin.Context) {
@@ -103,17 +104,17 @@ func TestCreateWaybill_MissingRequiredFields(t *testing.T) {
 
 func TestCreateWaybill_MissingUserContext(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.POST("/waybills", h.Create)
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"recipientName": "John Doe",
+		"recipientName":    "John Doe",
 		"recipientAddress": "123 Main St",
-		"recipientPhone": "555-0100",
-		"origin": "NYC",
-		"destination": "LAX",
-		"weight": 10.5,
+		"recipientPhone":   "555-0100",
+		"origin":           "NYC",
+		"destination":      "LAX",
+		"weight":           10.5,
 	})
 
 	w := httptest.NewRecorder()
@@ -128,7 +129,7 @@ func TestCreateWaybill_MissingUserContext(t *testing.T) {
 
 func TestUpdateStatus_InvalidJSON(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.PATCH("/waybills/:id/status", h.UpdateStatus)
 
@@ -144,7 +145,7 @@ func TestUpdateStatus_InvalidJSON(t *testing.T) {
 
 func TestUpdateStatus_MissingStatus(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.PATCH("/waybills/:id/status", h.UpdateStatus)
 
@@ -164,7 +165,7 @@ func TestUpdateStatus_MissingStatus(t *testing.T) {
 
 func TestListWaybills_NoAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.GET("/waybills", h.List)
 
@@ -179,7 +180,7 @@ func TestListWaybills_NoAuth(t *testing.T) {
 
 func TestGetWaybill_NoAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.GET("/waybills/:id", h.Get)
 
@@ -194,7 +195,7 @@ func TestGetWaybill_NoAuth(t *testing.T) {
 
 func TestTrackWaybill_NoAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.GET("/track/:trackingNumber", h.Track)
 
@@ -209,7 +210,7 @@ func TestTrackWaybill_NoAuth(t *testing.T) {
 
 func TestCreateWaybill_EmptyBody(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 
 	r.POST("/waybills", func(c *gin.Context) {
@@ -230,7 +231,7 @@ func TestCreateWaybill_EmptyBody(t *testing.T) {
 
 func TestSanitizeSearchTerm(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	h := NewWaybillHandler(nil, nil, nil)
+	h := NewWaybillHandler(nil, nil, nil, nil, nil, nil, nil)
 	r := gin.New()
 	r.GET("/waybills", h.List)
 

@@ -80,12 +80,10 @@ func TestBroadcastWithNoClients(t *testing.T) {
 }
 
 func TestBroadcastWithNoSubscriptions(t *testing.T) {
-	h := NewHub()
-	_, s, err := gorillaws.DefaultDialer.Dial("ws://localhost:0", nil)
+	conn, _, err := gorillaws.DefaultDialer.Dial("ws://localhost:0", nil)
 	if err == nil {
-		defer s.Close()
+		defer conn.Close()
 	}
-	_ = s
 
 	h2 := NewHub()
 	c := &Client{

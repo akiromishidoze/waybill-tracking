@@ -66,3 +66,18 @@ func (h *Hub) BroadcastWaybillUpdate(trackingNumber string, data interface{}) {
 		client.mu.Unlock()
 	}
 }
+
+func (h *Hub) BroadcastStatsUpdate() {
+	msg, _ := json.Marshal(map[string]interface{}{
+		"type": "stats_update",
+	})
+
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	for client := range h.clients {
+		client.mu.Lock()
+		client.Conn.WriteMessage(websocket.TextMessage, msg)
+		client.mu.Unlock()
+	}
+}

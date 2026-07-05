@@ -4,6 +4,11 @@ import (
 	"encoding/csv"
 	"time"
 
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
@@ -16,10 +21,6 @@ import (
 	wh "github.com/waybill-tracking/core-api/internal/webhook"
 	ws "github.com/waybill-tracking/core-api/internal/websocket"
 	"go.uber.org/zap"
-	"io"
-	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/waybill-tracking/core-api/internal/logger"
 )
@@ -401,6 +402,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+	h.wsHub.BroadcastStatsUpdate()
 
 	if err := h.esClient.IndexWaybill(c.Request.Context(), wb); err != nil {
 		logger.WithRequestID(reqID(c)).Error("elasticsearch index error", zap.Error(err))
@@ -481,6 +483,7 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 	}
 
 	h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+	h.wsHub.BroadcastStatsUpdate()
 	h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 
 	// Dispatch notifications for significant scan events
@@ -578,6 +581,7 @@ func (h *WaybillHandler) BatchUpdateStatus(c *gin.Context) {
 			continue
 		}
 		h.wsHub.BroadcastWaybillUpdate(wb.TrackingNumber, wb)
+		h.wsHub.BroadcastStatsUpdate()
 		h.webhooks.Dispatch(c.Request.Context(), "status.changed", wb.ID, wb)
 		updated++
 	}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { auditLogService } from '@/services/api'
 
-import { Search, Clock, ClipboardList } from 'lucide-react'
+import { Search, Clock, ClipboardList, Download } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
 import BackButton from '@/components/BackButton'
@@ -33,6 +33,25 @@ const ACTION_LABELS: Record<string, string> = {
 
 export default function AuditLogPage() {
   const [search, setSearch] = useState('')
+  const [exportFrom, setExportFrom] = useState('')
+  const [exportTo, setExportTo] = useState('')
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const res = await auditLogService.export(exportFrom || undefined, exportTo || undefined)
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }))
+      const a = document.createElement('a')
+      a.href = url
+      const today = new Date().toISOString().slice(0, 10)
+      a.download = `audit-logs-${today}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const { data: logs, isLoading } = useQuery({
     queryKey: ['audit-logs'],
@@ -50,23 +69,55 @@ export default function AuditLogPage() {
   return (
     <div>
       <BackButton fallback="/dashboard" />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Audit Log</h2>
-        <div style={{ position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted-lighter)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted-lighter)' }} />
+            <input
+              type="text"
+              placeholder="Search logs..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                padding: '0.5rem 0.75rem 0.5rem 2rem',
+                border: '1px solid var(--color-border-input)',
+                borderRadius: 6,
+                fontSize: '0.875rem',
+                width: 220,
+              }}
+            />
+          </div>
+          <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>Export range:</span>
           <input
-            type="text"
-            placeholder="Search logs..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              padding: '0.5rem 0.75rem 0.5rem 2rem',
-              border: '1px solid var(--color-border-input)',
-              borderRadius: 6,
-              fontSize: '0.875rem',
-              width: 280,
-            }}
+            type="date"
+            value={exportFrom}
+            onChange={(e) => setExportFrom(e.target.value)}
+            style={{ padding: '0.45rem 0.6rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.8125rem', background: 'var(--color-surface)', color: 'var(--color-text)' }}
           />
+          <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>to</span>
+          <input
+            type="date"
+            value={exportTo}
+            onChange={(e) => setExportTo(e.target.value)}
+            style={{ padding: '0.45rem 0.6rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.8125rem', background: 'var(--color-surface)', color: 'var(--color-text)' }}
+          />
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.375rem',
+              padding: '0.5rem 1rem',
+              background: exporting ? 'var(--color-border)' : '#2563eb',
+              color: exporting ? 'var(--color-text-muted)' : '#fff',
+              border: 'none', borderRadius: 6,
+              fontSize: '0.8125rem', fontWeight: 600, cursor: exporting ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <Download size={15} />
+            {exporting ? 'Exporting…' : 'Export CSV'}
+          </button>
         </div>
       </div>
 

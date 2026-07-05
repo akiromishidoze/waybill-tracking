@@ -157,6 +157,12 @@ export const aggregatedTrackingService = {
 
 export const auditLogService = {
   list: () => api.get<AuditLog[]>('/audit-logs'),
+  export: (from?: string, to?: string) => {
+    const params = new URLSearchParams()
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
+    return api.get(`/audit-logs/export?${params.toString()}`, { responseType: 'blob' })
+  },
 }
 
 export const settingsService = {

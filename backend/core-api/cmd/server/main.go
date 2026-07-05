@@ -242,6 +242,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 			admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
 			admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
 			admin.GET("/audit-logs", deps.AuditLogHandler.List)
+			admin.GET("/audit-logs/export", deps.AuditLogHandler.Export)
 			admin.GET("/webhook-deliveries", deps.WebhookDeliveryHandler.List)
 			admin.POST("/webhook-deliveries/:id/retry", deps.WebhookDeliveryHandler.Retry)
 		}

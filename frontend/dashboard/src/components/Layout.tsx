@@ -1,68 +1,69 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import PageTitle from '@/components/PageTitle'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
-  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity, UploadCloud,
+  Package, BarChart3, LayoutDashboard, LogOut, Eye, Settings, PieChart, Link2, Shield, ClipboardList, Truck, Webhook, TrendingUp, MapPin, ArrowLeftRight, Clock, ChevronDown, ChevronRight, Map, Navigation, Bell, Globe, Sun, Moon, DollarSign, Calculator, Leaf, ShoppingCart, Activity, UploadCloud, Languages,
 } from 'lucide-react'
 
-interface NavGroup {
-  label: string
+interface NavGroupDef {
+  labelKey: string
   icon: typeof Eye
-  items: { to: string; label: string; icon: typeof Eye }[]
+  items: { to: string; labelKey: string; icon: typeof Eye }[]
 }
 
-const navGroups: NavGroup[] = [
+const navGroupDefs: NavGroupDef[] = [
   {
-    label: 'Tracking', icon: Eye,
+    labelKey: 'nav.tracking', icon: Eye,
     items: [
-      { to: '/tracking/aggregated', label: 'Multi-Carrier', icon: Truck },
-      { to: '/batch-status', label: 'Batch Status', icon: ClipboardList },
-      { to: '/map', label: 'GPS Tracking', icon: MapPin },
-      { to: '/gps-simulator', label: 'GPS Simulator', icon: Navigation },
-      { to: '/geofence', label: 'Geofence Events', icon: Map },
-      { to: '/roadmap/tracking', label: 'Roadmap', icon: Eye },
+      { to: '/tracking/aggregated', labelKey: 'nav.multiCarrier', icon: Truck },
+      { to: '/batch-status', labelKey: 'nav.batchStatus', icon: ClipboardList },
+      { to: '/map', labelKey: 'nav.gpsTracking', icon: MapPin },
+      { to: '/gps-simulator', labelKey: 'nav.gpsSimulator', icon: Navigation },
+      { to: '/geofence', labelKey: 'nav.geofenceEvents', icon: Map },
+      { to: '/roadmap/tracking', labelKey: 'nav.roadmap', icon: Eye },
     ],
   },
   {
-    label: 'Operations', icon: Settings,
+    labelKey: 'nav.operations', icon: Settings,
     items: [
-      { to: '/returns', label: 'Returns', icon: ArrowLeftRight },
-      { to: '/driver-app', label: 'Driver App', icon: Truck },
-      { to: '/customs', label: 'Customs & Compliance', icon: Globe },
-      { to: '/rerouting', label: 'Re-routing', icon: Navigation },
-      { to: '/auto-comms', label: 'Auto Comms', icon: Bell },
-      { to: '/dwell-alerts', label: 'Dwell Alerts', icon: Clock },
-      { to: '/cod', label: 'COD Reconciliation', icon: DollarSign },
-      { to: '/escalations', label: 'Escalations', icon: ArrowLeftRight },
-      { to: '/roadmap/operations', label: 'Roadmap', icon: Settings },
+      { to: '/returns', labelKey: 'nav.returns', icon: ArrowLeftRight },
+      { to: '/driver-app', labelKey: 'nav.driverApp', icon: Truck },
+      { to: '/customs', labelKey: 'nav.customsCompliance', icon: Globe },
+      { to: '/rerouting', labelKey: 'nav.rerouting', icon: Navigation },
+      { to: '/auto-comms', labelKey: 'nav.autoComms', icon: Bell },
+      { to: '/dwell-alerts', labelKey: 'nav.dwellAlerts', icon: Clock },
+      { to: '/cod', labelKey: 'nav.codReconciliation', icon: DollarSign },
+      { to: '/escalations', labelKey: 'nav.escalations', icon: ArrowLeftRight },
+      { to: '/roadmap/operations', labelKey: 'nav.roadmap', icon: Settings },
     ],
   },
   {
-    label: 'Reports', icon: PieChart,
+    labelKey: 'nav.reports', icon: PieChart,
     items: [
-      { to: '/carrier-performance', label: 'Carrier Scoreboard', icon: TrendingUp },
-      { to: '/reports/schedules', label: 'Scheduled Reports', icon: PieChart },
-      { to: '/analytics/regions', label: 'Region Performance', icon: BarChart3 },
-      { to: '/analytics/bi-tools', label: 'BI Integrations', icon: BarChart3 },
-      { to: '/analytics/cost-per-shipment', label: 'Cost Analytics', icon: Calculator },
-      { to: '/analytics/demand-forecast', label: 'Demand Forecast', icon: BarChart3 },
-      { to: '/analytics/carbon-footprint', label: 'Carbon Footprint', icon: Leaf },
-      { to: '/roadmap/analytics', label: 'Roadmap', icon: PieChart },
+      { to: '/carrier-performance', labelKey: 'nav.carrierScoreboard', icon: TrendingUp },
+      { to: '/reports/schedules', labelKey: 'nav.scheduledReports', icon: PieChart },
+      { to: '/analytics/regions', labelKey: 'nav.regionPerformance', icon: BarChart3 },
+      { to: '/analytics/bi-tools', labelKey: 'nav.biIntegrations', icon: BarChart3 },
+      { to: '/analytics/cost-per-shipment', labelKey: 'nav.costAnalytics', icon: Calculator },
+      { to: '/analytics/demand-forecast', labelKey: 'nav.demandForecast', icon: BarChart3 },
+      { to: '/analytics/carbon-footprint', labelKey: 'nav.carbonFootprint', icon: Leaf },
+      { to: '/roadmap/analytics', labelKey: 'nav.roadmap', icon: PieChart },
     ],
   },
   {
-    label: 'Integrations', icon: Link2,
+    labelKey: 'nav.integrations', icon: Link2,
     items: [
-      { to: '/webhooks', label: 'Webhooks', icon: Webhook },
-      { to: '/integrations/erp', label: 'ERP Integrations', icon: Link2 },
-      { to: '/integrations/ecommerce', label: 'E-Commerce', icon: ShoppingCart },
-      { to: '/integrations/white-label', label: 'White-Label Portal', icon: Globe },
-      { to: '/integrations/iot-sensors', label: 'IoT Sensors', icon: Activity },
-      { to: '/audit-logs', label: 'Audit Log', icon: ClipboardList },
-      { to: '/roadmap/integrations', label: 'Roadmap', icon: Link2 },
+      { to: '/webhooks', labelKey: 'nav.webhooks', icon: Webhook },
+      { to: '/integrations/erp', labelKey: 'nav.erpIntegrations', icon: Link2 },
+      { to: '/integrations/ecommerce', labelKey: 'nav.ecommerce', icon: ShoppingCart },
+      { to: '/integrations/white-label', labelKey: 'nav.whiteLabelPortal', icon: Globe },
+      { to: '/integrations/iot-sensors', labelKey: 'nav.iotSensors', icon: Activity },
+      { to: '/audit-logs', labelKey: 'nav.auditLog', icon: ClipboardList },
+      { to: '/roadmap/integrations', labelKey: 'nav.roadmap', icon: Link2 },
     ],
   },
 ]
@@ -100,11 +101,13 @@ const subLinkStyle = (isActive: boolean): React.CSSProperties => ({
   fontSize: '0.75rem',
 })
 
-function NavGroupSection({ group }: { group: NavGroup }) {
+function NavGroupSection({ group }: { group: NavGroupDef }) {
+  const { t } = useTranslation()
   const location = useLocation()
   const isActiveGroup = group.items.some(item => location.pathname === item.to || location.pathname.startsWith(item.to + '/'))
   const [open, setOpen] = useState(isActiveGroup)
-  const groupId = `nav-group-${group.label.toLowerCase().replace(/\s+/g, '-')}`
+  const groupLabel = t(group.labelKey)
+  const groupId = `nav-group-${group.labelKey.replace(/\./g, '-')}`
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -114,14 +117,14 @@ function NavGroupSection({ group }: { group: NavGroup }) {
   }
 
   return (
-    <div role="group" aria-label={group.label}>
+    <div role="group" aria-label={groupLabel}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         onKeyDown={handleKeyDown}
         aria-expanded={open}
         aria-controls={groupId}
-        aria-label={`${group.label} navigation group`}
+        aria-label={`${groupLabel} navigation group`}
         style={{
           display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
           borderRadius: 8, border: 'none', background: 'transparent', color: isActiveGroup ? '#fff' : '#94a3b8',
@@ -130,17 +133,20 @@ function NavGroupSection({ group }: { group: NavGroup }) {
         className="nav-link"
       >
         <group.icon size={20} aria-hidden="true" />
-        {group.label}
+        {groupLabel}
         <span style={{ marginLeft: 'auto' }} aria-hidden="true">{open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
       </button>
       {open && (
-        <div id={groupId} role="region" aria-label={`${group.label} links`}>
-          {group.items.map(item => (
-            <NavLink key={item.to} to={item.to} style={({ isActive }) => subLinkStyle(isActive)} className="nav-link" end aria-label={item.label}>
-              <item.icon size={16} aria-hidden="true" />
-              {item.label}
-            </NavLink>
-          ))}
+        <div id={groupId} role="region" aria-label={`${groupLabel} links`}>
+          {group.items.map(item => {
+            const itemLabel = t(item.labelKey)
+            return (
+              <NavLink key={item.to} to={item.to} style={({ isActive }) => subLinkStyle(isActive)} className="nav-link" end aria-label={itemLabel}>
+                <item.icon size={16} aria-hidden="true" />
+                {itemLabel}
+              </NavLink>
+            )
+          })}
         </div>
       )}
     </div>
@@ -199,12 +205,20 @@ export default function Layout() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { t, i18n } = useTranslation()
   const location = useLocation()
 
   const handleLogout = () => {
     localStorage.removeItem('access_token')
     navigate('/login')
   }
+
+  const toggleLanguage = () => {
+    const next = i18n.language.startsWith('tl') ? 'en' : 'tl'
+    i18n.changeLanguage(next)
+  }
+
+  const currentLangLabel = i18n.language.startsWith('tl') ? t('language.tl') : t('language.en')
 
   return (
     <>
@@ -228,42 +242,45 @@ export default function Layout() {
         </div>
 
         <nav role="navigation" aria-label="Primary navigation" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, overflowY: 'auto', minHeight: 0 }} className="custom-scrollbar">
-          <NavLink to="/dashboard" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Dashboard">
-            <LayoutDashboard size={20} aria-hidden="true" /> Dashboard
+          <NavLink to="/dashboard" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.dashboard')}>
+            <LayoutDashboard size={20} aria-hidden="true" /> {t('nav.dashboard')}
           </NavLink>
-          <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Waybills">
-            <Package size={20} aria-hidden="true" /> Waybills
+          <NavLink to="/waybills" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.waybills')}>
+            <Package size={20} aria-hidden="true" /> {t('nav.waybills')}
           </NavLink>
-          <NavLink to="/waybills/import" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Import Waybills">
-            <UploadCloud size={20} aria-hidden="true" /> Import Waybills
+          <NavLink to="/waybills/import" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.importWaybills')}>
+            <UploadCloud size={20} aria-hidden="true" /> {t('nav.importWaybills')}
           </NavLink>
-          <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Analytics">
-            <BarChart3 size={20} aria-hidden="true" /> Analytics
+          <NavLink to="/analytics" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.analytics')}>
+            <BarChart3 size={20} aria-hidden="true" /> {t('nav.analytics')}
           </NavLink>
           <div style={{ borderTop: '1px solid #334155', margin: '0.25rem 0' }} aria-hidden="true" />
-          {navGroups.map(group => (
-            <NavGroupSection key={group.label} group={group} />
+          {navGroupDefs.map(group => (
+            <NavGroupSection key={group.labelKey} group={group} />
           ))}
           {user?.role === 'ADMIN' && (
             <>
               <div style={{ borderTop: '1px solid #334155', marginTop: '0.25rem', paddingTop: '0.25rem' }} aria-hidden="true" />
-              <NavLink to="/users" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Users">
-                <Shield size={20} aria-hidden="true" /> Users
+              <NavLink to="/users" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.users')}>
+                <Shield size={20} aria-hidden="true" /> {t('nav.users')}
               </NavLink>
-              <NavLink to="/carriers" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Carriers">
-                <Truck size={20} aria-hidden="true" /> Carriers
+              <NavLink to="/carriers" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.carriers')}>
+                <Truck size={20} aria-hidden="true" /> {t('nav.carriers')}
               </NavLink>
-              <NavLink to="/settings" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label="Settings">
-                <Settings size={20} aria-hidden="true" /> Settings
+              <NavLink to="/settings" style={({ isActive }) => navLinkStyle(isActive)} className="nav-link" aria-label={t('nav.settings')}>
+                <Settings size={20} aria-hidden="true" /> {t('nav.settings')}
               </NavLink>
             </>
           )}
         </nav>
-        <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
-          {theme === 'dark' ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />} {theme === 'dark' ? 'Light' : 'Dark'} Mode
+        <button type="button" onClick={toggleLanguage} aria-label={`Switch language, current: ${currentLangLabel}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          <Languages size={20} aria-hidden="true" /> {currentLangLabel}
         </button>
-        <button type="button" onClick={handleLogout} aria-label="Logout" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
-          <LogOut size={20} aria-hidden="true" /> Logout
+        <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          {theme === 'dark' ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />} {theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
+        </button>
+        <button type="button" onClick={handleLogout} aria-label={t('nav.logout')} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', borderRadius: 8, fontSize: '1rem' }}>
+          <LogOut size={20} aria-hidden="true" /> {t('nav.logout')}
         </button>
       </aside>
       <style>{`

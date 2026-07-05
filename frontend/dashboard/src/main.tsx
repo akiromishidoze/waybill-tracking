@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { initErrorReporter } from '@/utils/errorReporter'
 import { registerServiceWorker } from '@/utils/registerServiceWorker'
 import App from './App'
+import './i18n'
 import './index.css'
 
 initErrorReporter()

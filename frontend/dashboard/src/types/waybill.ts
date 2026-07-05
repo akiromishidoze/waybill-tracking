@@ -130,6 +130,39 @@ export interface Carrier {
   createdAt: string
 }
 
+export interface CarrierRate {
+  id: string
+  carrierId: string
+  carrierName: string
+  serviceType: string
+  originZone: string
+  destinationZone: string
+  weightMinKg: number
+  weightMaxKg: number
+  baseRate: number
+  perKgRate: number
+  currency: string
+  transitDaysMin: number
+  transitDaysMax: number
+  isActive: boolean
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RateQuote {
+  carrierId: string
+  carrierName: string
+  rateId: string
+  serviceType: string
+  totalRate: number
+  baseRate: number
+  weightCharge: number
+  currency: string
+  transitDaysMin: number
+  transitDaysMax: number
+}
+
 export interface CarrierEvent {
   id: string
   carrierId: string

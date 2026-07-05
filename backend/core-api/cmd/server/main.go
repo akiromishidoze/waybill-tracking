@@ -47,6 +47,7 @@ type Dependencies struct {
 	AuditLogHandler          *handlers.AuditLogHandler
 	DriverHandler            *handlers.DriverHandler
 	CarrierHandler           *handlers.CarrierHandler
+	CarrierRateHandler       *handlers.CarrierRateHandler
 	WebhookHandler           *handlers.WebhookHandler
 	SettingsHandler          *handlers.SettingsHandler
 	AnalyticsHandler         *handlers.AnalyticsHandler
@@ -212,6 +213,12 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 		protected.PATCH("/carriers/:id", middleware.RoleMiddleware("OPS", "ADMIN"), deps.CarrierHandler.Update)
 		protected.DELETE("/carriers/:id", middleware.RoleMiddleware("OPS", "ADMIN"), deps.CarrierHandler.Delete)
 
+		protected.GET("/carriers/:carrierId/rates", deps.CarrierRateHandler.ListByCarrier)
+		protected.POST("/carriers/:carrierId/rates", middleware.RoleMiddleware("OPS", "ADMIN"), deps.CarrierRateHandler.Create)
+		protected.PATCH("/carrier-rates/:rateId", middleware.RoleMiddleware("OPS", "ADMIN"), deps.CarrierRateHandler.Update)
+		protected.DELETE("/carrier-rates/:rateId", middleware.RoleMiddleware("OPS", "ADMIN"), deps.CarrierRateHandler.Delete)
+		protected.GET("/carrier-rates/compare", deps.CarrierRateHandler.Compare)
+
 		protected.GET("/driver-assignments", deps.DriverHandler.ListAssignments)
 		protected.POST("/driver-assignments", middleware.RoleMiddleware("OPS", "ADMIN"), deps.DriverHandler.CreateAssignment)
 		protected.GET("/driver-assignments/:id", deps.DriverHandler.GetAssignment)
@@ -339,6 +346,8 @@ func main() {
 	driverHandler := handlers.NewDriverHandler(driverRepo)
 	carrierRepo := repository.NewCarrierRepository(db)
 	carrierHandler := handlers.NewCarrierHandler(carrierRepo)
+	carrierRateRepo := repository.NewCarrierRateRepository(db)
+	carrierRateHandler := handlers.NewCarrierRateHandler(carrierRateRepo)
 	webhookHandler := handlers.NewWebhookHandler(webhookRepo)
 	webhookDeliveryHandler := handlers.NewWebhookDeliveryHandler(webhookDeliveryRepo, webhookDispatcher)
 	settingsHandler := handlers.NewSettingsHandler(db)
@@ -395,6 +404,7 @@ func main() {
 		AuditLogHandler:          auditLogHandler,
 		DriverHandler:            driverHandler,
 		CarrierHandler:           carrierHandler,
+		CarrierRateHandler:       carrierRateHandler,
 		WebhookHandler:           webhookHandler,
 		SettingsHandler:          settingsHandler,
 		AnalyticsHandler:         analyticsHandler,

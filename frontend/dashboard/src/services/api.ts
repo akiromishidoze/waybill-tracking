@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierRate, RateQuote, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -136,6 +136,15 @@ export const carrierService = {
   update: (id: string, data: Partial<Carrier>) => api.patch<Carrier>(`/carriers/${id}`, data),
   delete: (id: string) => api.delete(`/carriers/${id}`),
   getEvents: (waybillId: string) => api.get<CarrierEvent[]>(`/carriers/events/${waybillId}`),
+}
+
+export const carrierRateService = {
+  listByCarrier: (carrierId: string) => api.get<CarrierRate[]>(`/carriers/${carrierId}/rates`),
+  create: (carrierId: string, data: Partial<CarrierRate>) => api.post<CarrierRate>(`/carriers/${carrierId}/rates`, data),
+  update: (rateId: string, data: Partial<CarrierRate>) => api.patch<CarrierRate>(`/carrier-rates/${rateId}`, data),
+  delete: (rateId: string) => api.delete(`/carrier-rates/${rateId}`),
+  compare: (params: { serviceType: string; origin: string; destination: string; weight: number }) =>
+    api.get<RateQuote[]>('/carrier-rates/compare', { params }),
 }
 
 export const aggregatedTrackingService = {

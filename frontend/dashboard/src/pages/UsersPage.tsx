@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/api'
 import type { User } from '@/types/waybill'
+import type { AxiosError } from 'axios'
 import { userSchema, validate, type FieldErrors } from '@/utils/validation'
 import { Plus, Pencil, Trash2, X, Check, Users as UsersIcon } from 'lucide-react'
 import { SkeletonTableRow } from '@/components/Skeleton'
@@ -29,9 +30,9 @@ export default function UsersPage() {
   })
 
   const createUser = useMutation({
-    mutationFn: () => userService.create(form as any),
+    mutationFn: () => userService.create(form as Partial<User>),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setShowForm(false); resetForm(); setFormErrors({}); toast.success('User created') },
-    onError: (err: any) => toast.error(err?.response?.data?.error || 'Failed to create user'),
+    onError: (err: AxiosError<{ error: string }>) => toast.error(err.response?.data?.error || 'Failed to create user'),
   })
 
   const handleCreate = () => {
@@ -42,15 +43,15 @@ export default function UsersPage() {
   }
 
   const updateUser = useMutation({
-    mutationFn: () => userService.update(editingId!, form as any),
+    mutationFn: () => userService.update(editingId!, form as Partial<User>),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setEditingId(null); resetForm(); toast.success('User updated') },
-    onError: (err: any) => toast.error(err?.response?.data?.error || 'Failed to update user'),
+    onError: (err: AxiosError<{ error: string }>) => toast.error(err.response?.data?.error || 'Failed to update user'),
   })
 
   const deleteUser = useMutation({
     mutationFn: (id: string) => userService.delete(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['users'] }); setDeleteUserId(null); toast.success('User deleted') },
-    onError: (err: any) => { setDeleteUserId(null); toast.error(err?.response?.data?.error || 'Failed to delete user') },
+    onError: (err: AxiosError<{ error: string }>) => { setDeleteUserId(null); toast.error(err.response?.data?.error || 'Failed to delete user') },
   })
 
   const resetForm = () => setForm({ email: '', name: '', role: 'SHIPPER', company: '', password: '' })

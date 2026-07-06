@@ -699,3 +699,71 @@ export interface AutoCommunicationLog {
   sentAt: string
   status: 'SENT' | 'FAILED'
 }
+
+export interface Webhook {
+  id: string
+  url: string
+  events: string[]
+  isActive: boolean
+  secret?: string
+  createdAt: string
+}
+
+export interface WebhookLog {
+  id: string
+  webhookId: string
+  event: string
+  statusCode: number
+  responseBody: string
+  sentAt: string
+  success: boolean
+}
+
+export interface AggregatedTracking {
+  waybillId: string
+  trackingNumber: string
+  carrier: string
+  externalTrackingNumber: string
+  status: string
+  lastUpdated: string
+}
+
+export interface ReturnRequest {
+  reason: string
+  notes?: string
+}
+
+export interface ReturnStatusUpdate {
+  status: ReturnStatus
+  notes?: string
+}
+
+export interface DriverStatusUpdate {
+  status: DriverAssignment['status']
+  location?: string
+  notes?: string
+  latitude?: number
+  longitude?: number
+}
+
+export interface WaybillListParams {
+  search?: string
+  page?: number
+  limit?: number
+  status?: WaybillStatus
+  from?: string
+  to?: string
+}
+
+export interface WaybillListResponse {
+  data: Waybill[]
+  meta: {
+    total: number
+    page: number
+    limit: number
+  } | null
+}
+
+export interface ApiError {
+  error: string
+}

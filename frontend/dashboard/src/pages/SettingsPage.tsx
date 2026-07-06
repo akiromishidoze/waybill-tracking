@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { settingsService, userService, teamService, escalationRuleService } from '@/services/api'
+import type { AppSettings, User, EscalationRule } from '@/types/waybill'
+import type { AxiosError } from 'axios'
 import { userSchema, validate, type FieldErrors } from '@/utils/validation'
 import { UserPlus, Save, Plus, Trash2, Check, X, Shield, AlertTriangle } from 'lucide-react'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -15,7 +17,7 @@ export default function SettingsPage() {
   const [createUserMsg, setCreateUserMsg] = useState('')
   const [createUserErrors, setCreateUserErrors] = useState<FieldErrors>({})
 
-  const [settingsForm, setSettingsForm] = useState<any>(null)
+  const [settingsForm, setSettingsForm] = useState<Partial<AppSettings> | null>(null)
   const [savedMsg, setSavedMsg] = useState('')
 
   const [teamForm, setTeamForm] = useState({ name: '', description: '', color: '#2563eb' })
@@ -29,9 +31,9 @@ export default function SettingsPage() {
   const [deleteRuleTarget, setDeleteRuleTarget] = useState<{ id: string; name: string } | null>(null)
 
   const createUser = useMutation({
-    mutationFn: () => userService.create(createUserForm as any),
+    mutationFn: () => userService.create(createUserForm as Partial<User>),
     onSuccess: (r) => { setCreateUserMsg(`User ${r.data.name} created successfully`); setCreateUserForm({ email: '', name: '', password: '', role: 'SHIPPER', company: '' }); setCreateUserErrors({}); queryClient.invalidateQueries({ queryKey: ['users'] }) },
-    onError: (e: any) => setCreateUserMsg(e.response?.data?.error || 'Failed to create user'),
+    onError: (e: AxiosError<{ error: string }>) => setCreateUserMsg(e.response?.data?.error || 'Failed to create user'),
   })
 
   const handleCreateUser = () => {
@@ -43,7 +45,7 @@ export default function SettingsPage() {
   }
 
   const saveSettings = useMutation({
-    mutationFn: () => settingsService.update(settingsForm),
+    mutationFn: () => settingsService.update(settingsForm ?? {}),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['settings'] }); setSavedMsg('Settings saved') },
   })
 
@@ -62,11 +64,11 @@ export default function SettingsPage() {
 
   const { data: rules } = useQuery({ queryKey: ['escalation-rules'], queryFn: () => escalationRuleService.list().then(r => r.data) })
   const createRule = useMutation({
-    mutationFn: () => escalationRuleService.create(ruleForm as any),
+    mutationFn: () => escalationRuleService.create(ruleForm as Partial<EscalationRule>),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['escalation-rules'] }); setShowRuleForm(false); setRuleForm({ name: '', condition: 'SLA_BREACHED', threshold: 0, targetRole: 'OPS', isActive: true }) },
   })
   const updateRule = useMutation({
-    mutationFn: () => escalationRuleService.update(editingRuleId!, ruleForm as any),
+    mutationFn: () => escalationRuleService.update(editingRuleId!, ruleForm as Partial<EscalationRule>),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['escalation-rules'] }); setEditingRuleId(null); setShowRuleForm(false); setRuleForm({ name: '', condition: 'SLA_BREACHED', threshold: 0, targetRole: 'OPS', isActive: true }) },
   })
   const deleteRule = useMutation({
@@ -220,7 +222,7 @@ export default function SettingsPage() {
             <p style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.875rem' }}>No teams created yet.</p>
           ) : (
             <div style={{ display: 'grid', gap: '0.5rem' }}>
-              {(teams || []).map((t: any) => (
+              {(teams || []).map((t) => (
                 <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: t.color }} />
                   <div style={{ flex: 1 }}>
@@ -286,7 +288,7 @@ export default function SettingsPage() {
             <p style={{ color: 'var(--color-text-muted-lighter)', fontSize: '0.875rem' }}>No escalation rules configured.</p>
           ) : (
             <div style={{ display: 'grid', gap: '0.5rem' }}>
-              {(rules || []).map((r: any) => (
+              {(rules || []).map((r) => (
                 <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
                   <AlertTriangle size={14} color={r.isActive ? 'var(--badge-red-text)' : 'var(--color-text-muted-lighter)'} />
                   <div style={{ flex: 1 }}>

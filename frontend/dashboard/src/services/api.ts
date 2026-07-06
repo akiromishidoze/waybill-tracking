@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierRate, RateQuote, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierRate, RateQuote, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog, Webhook, WebhookLog, AggregatedTracking, ReturnRequest, ReturnStatusUpdate, DriverStatusUpdate, WaybillListParams, WaybillListResponse } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -90,7 +90,7 @@ export const authService = {
 }
 
 export const waybillService = {
-  list: (params?: Record<string, any>) => api.get<any>('/waybills', { params }).then(r => ({
+  list: (params?: WaybillListParams) => api.get<WaybillListResponse>('/waybills', { params }).then(r => ({
     ...r,
     data: Array.isArray(r.data) ? r.data : (r.data?.data ?? []),
     meta: r.data?.meta ?? null,
@@ -118,8 +118,8 @@ export const analyticsService = {
     api.get('/analytics/sla', { params: { from, to } }),
   exportExcel: (from: string, to: string) =>
     api.get('/analytics/export', { params: { from, to }, responseType: 'blob' }),
-  carrierPerformance: () => api.get<any[]>('/analytics/carrier-performance'),
-  getWaybillsMap: () => api.get<any[]>('/waybills/map-data'),
+  carrierPerformance: () => api.get<Record<string, unknown>[]>('/analytics/carrier-performance'),
+  getWaybillsMap: () => api.get<WaybillGPSView[]>('/waybills/map-data'),
   predictEta: (waybillId: string) => api.get<ETAPrediction>(`/analytics/predict-eta/${waybillId}`),
 }
 
@@ -149,9 +149,9 @@ export const carrierRateService = {
 }
 
 export const aggregatedTrackingService = {
-  list: () => api.get<any[]>('/tracking/aggregated'),
-  assign: (waybillId: string, data: any) =>
-    api.post(`/tracking/aggregated/${waybillId}`, data),
+  list: () => api.get<AggregatedTracking[]>('/tracking/aggregated'),
+  assign: (waybillId: string, data: Partial<AggregatedTracking>) =>
+    api.post<AggregatedTracking>(`/tracking/aggregated/${waybillId}`, data),
   remove: (waybillId: string) =>
     api.delete(`/tracking/aggregated/${waybillId}`),
 }
@@ -183,29 +183,29 @@ export const teamService = {
 }
 
 export const webhookService = {
-  list: () => api.get<any[]>('/webhooks'),
-  create: (data: any) => api.post<any>('/webhooks', data),
-  update: (id: string, data: any) => api.patch<any>(`/webhooks/${id}`, data),
+  list: () => api.get<Webhook[]>('/webhooks'),
+  create: (data: Partial<Webhook>) => api.post<Webhook>('/webhooks', data),
+  update: (id: string, data: Partial<Webhook>) => api.patch<Webhook>(`/webhooks/${id}`, data),
   delete: (id: string) => api.delete(`/webhooks/${id}`),
   getEvents: () => api.get<string[]>('/webhooks/events'),
-  test: (id: string) => api.post<any>(`/webhooks/${id}`, {}),
-  log: () => api.get<any[]>('/webhooks/log'),
+  test: (id: string) => api.post<{ success: boolean; message: string }>(`/webhooks/${id}`, {}),
+  log: () => api.get<WebhookLog[]>('/webhooks/log'),
 }
 
 export const attachmentService = {
   list: (waybillId: string) => api.get<Attachment[]>(`/waybills/${waybillId}/attachments`),
-  upload: (waybillId: string, data: any) =>
-    api.post<Attachment>(`/waybills/${waybillId}/attachments`, data),
+  upload: (waybillId: string, data: FormData) =>
+    api.post<Attachment>(`/waybills/${waybillId}/attachments`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   get: (attachmentId: string) => api.get<Attachment>(`/attachments/${attachmentId}`),
   delete: (attachmentId: string) => api.delete(`/attachments/${attachmentId}`),
 }
 
 export const returnService = {
-  listReturns: () => api.get<any[]>('/returns'),
-  initiateReturn: (waybillId: string, data: any) =>
-    api.post(`/waybills/${waybillId}/initiate-return`, data),
-  updateReturnStatus: (waybillId: string, data: any) =>
-    api.patch(`/waybills/${waybillId}/return-status`, data),
+  listReturns: () => api.get<Waybill[]>('/returns'),
+  initiateReturn: (waybillId: string, data: ReturnRequest) =>
+    api.post<Waybill>(`/waybills/${waybillId}/initiate-return`, data),
+  updateReturnStatus: (waybillId: string, data: ReturnStatusUpdate) =>
+    api.patch<Waybill>(`/waybills/${waybillId}/return-status`, data),
 }
 
 export const escalationService = {
@@ -257,7 +257,7 @@ export const driverService = {
   updateAssignment: (id: string, data: Partial<DriverAssignment>) =>
     api.patch<DriverAssignment>(`/driver-assignments/${id}`, data),
   deleteAssignment: (id: string) => api.delete(`/driver-assignments/${id}`),
-  updateStatus: (id: string, data: any) =>
+  updateStatus: (id: string, data: DriverStatusUpdate) =>
     api.post<DriverAssignment>(`/driver-assignments/${id}/status`, data),
   listScans: () => api.get<DriverScanEvent[]>('/driver-scans'),
   createScan: (data: Partial<DriverScanEvent>) =>

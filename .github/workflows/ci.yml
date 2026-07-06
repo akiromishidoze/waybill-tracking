@@ -13,6 +13,8 @@ env:
 jobs:
   test-core-api:
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
     defaults:
       run:
         working-directory: backend/core-api
@@ -25,8 +27,6 @@ jobs:
       - run: go mod download
       - run: go vet ./...
       - run: go test ./... -v -race -coverprofile=coverage.out
-        env:
-          GOTOOLCHAIN: local
       - uses: codecov/codecov-action@v5
         with:
           file: backend/core-api/coverage.out

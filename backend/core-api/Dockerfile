@@ -4,7 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOTOOLCHAIN=local go build -o server ./cmd/server
+RUN go mod tidy && CGO_ENABLED=0 go build -o server ./cmd/server
 
 # dev stage — full Go toolchain + air for hot-reload (used by docker-compose.override.yml)
 FROM golang:1.23-alpine AS dev

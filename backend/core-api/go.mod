@@ -2,8 +2,6 @@ module github.com/waybill-tracking/core-api
 
 go 1.23.0
 
-toolchain go1.23.0
-
 require (
 	github.com/elastic/go-elasticsearch/v8 v8.14.0
 	github.com/gin-gonic/gin v1.10.0

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { isAxiosError } from 'axios'
+import { useTranslation } from 'react-i18next'
 import { authService } from '@/services/api'
 import PageTitle from '@/components/PageTitle'
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState(import.meta.env.DEV ? 'admin@waybilltrack.com' : '')
   const [password, setPassword] = useState(import.meta.env.DEV ? 'teccadmin00' : '')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
@@ -36,7 +38,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <PageTitle title="Sign In" />
+      <PageTitle title={t('auth.signIn')} />
       <div
         style={{
         display: 'flex',
@@ -57,7 +59,7 @@ export default function LoginPage() {
           maxWidth: 400,
         }}
       >
-        <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>Sign In</h1>
+        <h1 style={{ marginBottom: '0.25rem', fontSize: '1.5rem' }}>{t('auth.signIn')}</h1>
         {import.meta.env.DEV ? (
           <div style={{ marginBottom: '1.25rem' }}>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', margin: '0 0 0.5rem' }}>
@@ -91,7 +93,7 @@ export default function LoginPage() {
         )}
         <div style={{ marginBottom: '1rem' }}>
           <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
-            Email
+            {t('auth.email')}
           </label>
           <input
             type="text"
@@ -109,7 +111,7 @@ export default function LoginPage() {
         </div>
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
-            Password
+            {t('auth.password')}
           </label>
           <input
             type="password"
@@ -139,7 +141,7 @@ export default function LoginPage() {
             cursor: 'pointer',
           }}
         >
-          Sign In
+          {t('auth.signIn')}
         </button>
       </form>
     </div>

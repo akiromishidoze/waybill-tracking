@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { analyticsService, escalationService } from '@/services/api'
 import { AlertTriangle, RefreshCw, Radio, PauseCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { SkeletonBlock } from '@/components/Skeleton'
 import { useLiveDashboard } from '@/hooks/useLiveDashboard'
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -54,13 +55,14 @@ function formatLastUpdated(d: Date): string {
 }
 
 const statsCards = [
-  { label: 'Active Waybills', key: 'totalActive', color: 'var(--badge-blue-text)' },
-  { label: 'Delivered Today', key: 'deliveredToday', color: 'var(--badge-green-text)' },
-  { label: 'In Transit', key: 'inTransit', color: 'var(--badge-amber-text)' },
-  { label: 'Pending Pickup', key: 'pendingPickup', color: 'var(--badge-red-text)' },
+  { labelKey: 'dashboard.totalWaybills', key: 'totalActive', color: 'var(--badge-blue-text)' },
+  { labelKey: 'dashboard.delivered', key: 'deliveredToday', color: 'var(--badge-green-text)' },
+  { labelKey: 'dashboard.inTransit', key: 'inTransit', color: 'var(--badge-amber-text)' },
+  { labelKey: 'dashboard.failed', key: 'pendingPickup', color: 'var(--badge-red-text)' },
 ]
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -225,7 +227,7 @@ export default function DashboardPage() {
               boxShadow: 'var(--shadow-sm)',
             }}
           >
-            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{card.label}</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{t(card.labelKey)}</p>
             {statsLoading ? (
               <SkeletonBlock width={80} height={32} style={{ marginTop: 4 }} />
             ) : (

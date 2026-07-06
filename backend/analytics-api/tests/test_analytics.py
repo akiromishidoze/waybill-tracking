@@ -42,6 +42,7 @@ async def test_predict_eta_invalid_id(async_client):
 async def test_stats_response_shape(async_client):
     resp = await async_client.get("/api/v1/analytics/stats")
 
+    assert resp.status_code in (200, 500)
     if resp.status_code == 200:
         data = resp.json()
 

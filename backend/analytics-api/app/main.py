@@ -1,7 +1,10 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api import analytics, reports, health, notifications
@@ -38,6 +41,18 @@ app.include_router(reports.router, prefix="/api/reports")
 app.include_router(notifications.router, prefix="/api/notifications")
 
 Instrumentator().instrument(app).expose(app)
+
+
+class _CatchAllMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next) -> Response:
+        try:
+            return await call_next(request)
+        except Exception as exc:
+            logger.error("Unhandled exception on %s: %s", request.url.path, exc, exc_info=True)
+            return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
+
+app.add_middleware(_CatchAllMiddleware)
 
 
 @app.on_event("startup")

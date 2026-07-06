@@ -27,11 +27,11 @@ export default function LoginPage() {
       window.location.href = '/dashboard'
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 401) {
-        setServerError('Invalid email or password')
+        setServerError(t('auth.invalidCredentials'))
       } else if (isAxiosError(err) && !err.response) {
-        setServerError('Cannot reach the server. Please check your connection or try again later.')
+        setServerError(t('auth.serverUnreachable'))
       } else {
-        setServerError('Something went wrong. Please try again.')
+        setServerError(t('auth.unknownError'))
       }
     }
   }
@@ -83,7 +83,7 @@ export default function LoginPage() {
           </div>
         ) : (
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-            Enter your credentials to access the dashboard.
+            {t('auth.enterCredentials')}
           </p>
         )}
         {serverError && (

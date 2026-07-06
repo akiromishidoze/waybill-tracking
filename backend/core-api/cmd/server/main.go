@@ -88,8 +88,10 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 	public.GET("/portal/:slug", middleware.RateLimitMiddleware(rdb, 60, 1*time.Minute), deps.WhiteLabelHandler.GetPublicPortal)
 	public.GET("/portal/:slug/track/:trackingNumber", middleware.RateLimitMiddleware(rdb, 60, 1*time.Minute), deps.WhiteLabelHandler.PublicTrack)
 
+	api.POST("/auth/logout", handlers.LogoutHandler(rdb))
+
 	protected := api.Group("")
-	protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+	protected.Use(middleware.AuthMiddleware(rdb, cfg.JWTSecret))
 	{
 		protected.GET("/auth/me", handlers.MeHandler(db))
 		protected.GET("/teams", deps.TeamHandler.List)

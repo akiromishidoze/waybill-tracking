@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strings"
@@ -8,9 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/waybill-tracking/core-api/config"
 	"github.com/redis/go-redis/v9"
+	"github.com/waybill-tracking/core-api/config"
 	"github.com/waybill-tracking/core-api/internal/password"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	"github.com/waybill-tracking/core-api/internal/utils"
@@ -43,6 +45,7 @@ var validRoles = map[string]bool{
 
 func respondWithToken(c *gin.Context, jwtSecret, userID, email, name, role, company string) {
 	claims := jwt.MapClaims{
+		"jti":   uuid.New().String(),
 		"sub":   userID,
 		"email": email,
 		"name":  name,
@@ -147,6 +150,7 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLo
 		utils.ClearFailedLogin(c.Request.Context(), rdb, req.Email)
 
 		claims := jwt.MapClaims{
+			"jti":   uuid.New().String(),
 			"sub":   user.ID,
 			"email": user.Email,
 			"role":  user.Role,
@@ -343,6 +347,36 @@ func ResetPasswordWithTokenHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "password updated"})
+	}
+}
+
+func LogoutHandler(rdb *redis.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || len(authHeader) < 8 {
+			c.JSON(http.StatusOK, gin.H{"message": "logged out"})
+			return
+		}
+		tokenStr := authHeader[7:]
+
+		parser := jwt.NewParser(jwt.WithoutClaimsValidation())
+		token, _, _ := parser.ParseUnverified(tokenStr, jwt.MapClaims{})
+		if token != nil {
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				jti, _ := claims["jti"].(string)
+				if jti != "" {
+					ttl := 25 * time.Hour
+					if exp, ok := claims["exp"].(float64); ok {
+						remaining := time.Until(time.Unix(int64(exp), 0))
+						if remaining > 0 {
+							ttl = remaining + time.Minute
+						}
+					}
+					rdb.Set(context.Background(), "blocklist:jti:"+jti, "1", ttl)
+				}
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "logged out"})
 	}
 }
 

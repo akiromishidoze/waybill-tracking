@@ -86,6 +86,7 @@ export const authService = {
   me: () => api.get<User>('/auth/me'),
   refresh: (accessToken: string) =>
     api.post<{ accessToken: string; user: User }>('/auth/refresh', { accessToken }),
+  logout: () => api.post('/auth/logout'),
 }
 
 export const waybillService = {

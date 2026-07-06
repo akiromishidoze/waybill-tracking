@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/store/auth'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import PageTitle from '@/components/PageTitle'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -209,8 +210,10 @@ export default function Layout() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
 
+  const logout = useAuthStore((s) => s.logout)
+
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
+    logout()
     navigate('/login')
   }
 

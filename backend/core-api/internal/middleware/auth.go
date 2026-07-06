@@ -1,13 +1,16 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
-func AuthMiddleware(secrets ...string) gin.HandlerFunc {
+func AuthMiddleware(rdb *redis.Client, secrets ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
@@ -47,6 +50,16 @@ func AuthMiddleware(secrets ...string) gin.HandlerFunc {
 		if !valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
+		}
+
+		if rdb != nil {
+			if jti, ok := claims["jti"].(string); ok && jti != "" {
+				exists, err := rdb.Exists(context.Background(), "blocklist:jti:"+jti).Result()
+				if err == nil && exists > 0 {
+					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token has been revoked"})
+					return
+				}
+			}
 		}
 
 		c.Set("userID", claims["sub"])

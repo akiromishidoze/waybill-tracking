@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -12,7 +13,7 @@ import (
 func TestAuthMiddleware_MissingHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -28,7 +29,7 @@ func TestAuthMiddleware_MissingHeader(t *testing.T) {
 func TestAuthMiddleware_InvalidFormat(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -45,7 +46,7 @@ func TestAuthMiddleware_InvalidFormat(t *testing.T) {
 func TestAuthMiddleware_InvalidBearerPrefix(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -62,7 +63,7 @@ func TestAuthMiddleware_InvalidBearerPrefix(t *testing.T) {
 func TestAuthMiddleware_InvalidToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -79,15 +80,15 @@ func TestAuthMiddleware_InvalidToken(t *testing.T) {
 func TestAuthMiddleware_WrongSigningMethod(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	token := jwt.NewWithClaims(jwt.SigningMethodNone, jwt.MapClaims{
-		"sub": "user-1",
+		"sub":  "user-1",
 		"role": "ADMIN",
-		"exp": time.Now().Add(1 * time.Hour).Unix(),
+		"exp":  time.Now().Add(1 * time.Hour).Unix(),
 	})
 
 	tokenStr, _ := token.SignedString(jwt.UnsafeAllowNoneSignatureType)
 
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -104,15 +105,15 @@ func TestAuthMiddleware_WrongSigningMethod(t *testing.T) {
 func TestAuthMiddleware_ExpiredToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": "user-1",
+		"sub":  "user-1",
 		"role": "ADMIN",
-		"exp": time.Now().Add(-1 * time.Hour).Unix(),
+		"exp":  time.Now().Add(-1 * time.Hour).Unix(),
 	})
 
 	tokenStr, _ := token.SignedString([]byte("secret"))
 
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 
@@ -129,24 +130,24 @@ func TestAuthMiddleware_ExpiredToken(t *testing.T) {
 func TestAuthMiddleware_ValidToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	claims := jwt.MapClaims{
-		"sub": "user-1",
+		"sub":  "user-1",
 		"role": "ADMIN",
 		"name": "Test User",
-		"exp": time.Now().Add(1 * time.Hour).Unix(),
+		"exp":  time.Now().Add(1 * time.Hour).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, _ := token.SignedString([]byte("secret"))
 
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "secret"), func(c *gin.Context) {
 		uid, _ := c.Get("userID")
 		role, _ := c.Get("userRole")
 		name, _ := c.Get("userName")
 		c.JSON(http.StatusOK, gin.H{
 			"userID": uid,
-			"role": role,
-			"name": name,
+			"role":   role,
+			"name":   name,
 		})
 	})
 
@@ -163,15 +164,15 @@ func TestAuthMiddleware_ValidToken(t *testing.T) {
 func TestAuthMiddleware_WrongSecret(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": "user-1",
+		"sub":  "user-1",
 		"role": "ADMIN",
-		"exp": time.Now().Add(1 * time.Hour).Unix(),
+		"exp":  time.Now().Add(1 * time.Hour).Unix(),
 	})
 
 	tokenStr, _ := token.SignedString([]byte("wrong-secret"))
 
 	r := gin.New()
-	r.GET("/test", AuthMiddleware("correct-secret"), func(c *gin.Context) {
+	r.GET("/test", AuthMiddleware(nil, "correct-secret"), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"ok": true})
 	})
 

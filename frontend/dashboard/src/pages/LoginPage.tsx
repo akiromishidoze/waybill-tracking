@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { isAxiosError } from 'axios'
 import { authService } from '@/services/api'
 import PageTitle from '@/components/PageTitle'
 
@@ -22,8 +23,14 @@ export default function LoginPage() {
       const res = await authService.login(trimmed, password)
       localStorage.setItem('access_token', res.data.accessToken)
       window.location.href = '/dashboard'
-    } catch {
-      setServerError('Invalid email or password')
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.status === 401) {
+        setServerError('Invalid email or password')
+      } else if (isAxiosError(err) && !err.response) {
+        setServerError('Cannot reach the server. Please check your connection or try again later.')
+      } else {
+        setServerError('Something went wrong. Please try again.')
+      }
     }
   }
 

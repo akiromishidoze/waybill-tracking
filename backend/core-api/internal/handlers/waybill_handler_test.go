@@ -122,8 +122,8 @@ func TestCreateWaybill_MissingUserContext(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
 
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500 for missing user context, got %d", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 for missing user context, got %d", w.Code)
 	}
 }
 

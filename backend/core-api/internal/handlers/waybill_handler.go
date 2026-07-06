@@ -49,16 +49,24 @@ func (h *WaybillHandler) List(c *gin.Context) {
 	var err error
 
 	// Use Elasticsearch for search queries, PostgreSQL for regular listing
-	if search != "" {
+	if search != "" && h.esClient != nil {
 		var esTotal int64
 		waybills, esTotal, err = h.esClient.SearchWaybills(c.Request.Context(), search, page, limit)
 		total = int(esTotal)
 		// If Elasticsearch fails or returns no results, fall back to PostgreSQL
 		if err != nil || len(waybills) == 0 {
 			logger.WithRequestID(reqID(c)).Warn("elasticsearch search failed or empty, falling back to postgres", zap.Error(err))
+			if h.repo == nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "repository unavailable"})
+				return
+			}
 			waybills, total, err = h.repo.List(c.Request.Context(), search, page, limit)
 		}
 	} else {
+		if h.repo == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "repository unavailable"})
+			return
+		}
 		waybills, total, err = h.repo.List(c.Request.Context(), search, page, limit)
 	}
 
@@ -80,6 +88,11 @@ func (h *WaybillHandler) List(c *gin.Context) {
 func (h *WaybillHandler) Get(c *gin.Context) {
 	id := c.Param("id")
 
+	if h.repo == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		return
+	}
+
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
@@ -91,6 +104,11 @@ func (h *WaybillHandler) Get(c *gin.Context) {
 
 func (h *WaybillHandler) Track(c *gin.Context) {
 	trackingNumber := c.Param("trackingNumber")
+
+	if h.repo == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "tracking number not found"})
+		return
+	}
 
 	wb, err := h.repo.GetByTrackingNumber(c.Request.Context(), trackingNumber)
 
@@ -111,14 +129,19 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("userID")
+	userIDRaw, _ := c.Get("userID")
+	userID, ok := userIDRaw.(string)
+	if !ok || userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	userName, _ := c.Get("userName")
 	shipperName, _ := userName.(string)
 
 	wb := &models.Waybill{
 		ID:                 uuid.New().String(),
 		TrackingNumber:     generateTrackingNumber(),
-		ShipperID:          userID.(string),
+		ShipperID:          userID,
 		ShipperName:        shipperName,
 		Status:             models.StatusCreated,
 		RecipientName:      req.RecipientName,
@@ -151,7 +174,7 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 
 	h.webhooks.Dispatch(c.Request.Context(), "waybill.created", wb.ID, wb)
 
-	h.auditLogger.Log(c.Request.Context(), userID.(string), shipperName, c.GetString("userRole"),
+	h.auditLogger.Log(c.Request.Context(), userID, shipperName, c.GetString("userRole"),
 		"WAYBILL_CREATE", "waybill", wb.ID, "Waybill "+wb.TrackingNumber+" created", c.ClientIP())
 
 	c.JSON(http.StatusCreated, wb)
@@ -612,7 +635,7 @@ func (h *WaybillHandler) ListExceptionCodes(c *gin.Context) {
 }
 
 func generateTrackingNumber() string {
-	return "WBT-" + uuid.New().String()[:8]
+	return "WBT-" + uuid.New().String()[:9]
 }
 
 func isMilestoneStatus(s models.WaybillStatus) bool {

@@ -60,7 +60,7 @@ func (h *Hub) BroadcastWaybillUpdate(trackingNumber string, data interface{}) {
 
 	for client := range h.clients {
 		client.mu.Lock()
-		if client.Subscriptions[trackingNumber] {
+		if client.Conn != nil && client.Subscriptions[trackingNumber] {
 			client.Conn.WriteMessage(websocket.TextMessage, msg)
 		}
 		client.mu.Unlock()
@@ -77,7 +77,9 @@ func (h *Hub) BroadcastStatsUpdate() {
 
 	for client := range h.clients {
 		client.mu.Lock()
-		client.Conn.WriteMessage(websocket.TextMessage, msg)
+		if client.Conn != nil {
+			client.Conn.WriteMessage(websocket.TextMessage, msg)
+		}
 		client.mu.Unlock()
 	}
 }

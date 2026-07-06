@@ -26,7 +26,7 @@ jobs:
         working-directory: infrastructure/terraform/aws
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -102,7 +102,7 @@ jobs:
         working-directory: infrastructure/terraform/gcp
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: hashicorp/setup-terraform@v3
         with:

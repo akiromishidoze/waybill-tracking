@@ -100,16 +100,26 @@ jobs:
     needs: [build-and-push]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    env:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
     steps:
       - uses: actions/checkout@v4.2.2
+      - name: Skip deploy if GCP credentials not configured
+        if: env.GCP_SA_KEY == ''
+        run: |
+          echo "GCP_SA_KEY secret is not set — skipping deploy."
+          exit 0
       - uses: google-github-actions/auth@v2
+        if: env.GCP_SA_KEY != ''
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/get-gke-credentials@v2
+        if: env.GCP_SA_KEY != ''
         with:
           cluster_name: waybill-cluster
           location: us-central1
-      - run: |
+      - if: env.GCP_SA_KEY != ''
+        run: |
           kubectl set image deployment/core-api core-api=ghcr.io/${{ github.repository }}/core-api:${{ env.IMAGE_TAG }} -n waybill
           kubectl set image deployment/analytics-api analytics-api=ghcr.io/${{ github.repository }}/analytics-api:${{ env.IMAGE_TAG }} -n waybill
           kubectl set image deployment/dashboard dashboard=ghcr.io/${{ github.repository }}/dashboard:${{ env.IMAGE_TAG }} -n waybill

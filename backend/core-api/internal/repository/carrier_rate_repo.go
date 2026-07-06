@@ -189,8 +189,8 @@ func (r *CarrierRateRepository) Compare(ctx context.Context, serviceType, origin
 		  AND c.is_active = true
 		  AND cr.service_type = $1
 		  AND $4 BETWEEN cr.weight_min_kg AND cr.weight_max_kg
-		  AND (cr.origin_zone = '' OR cr.origin_zone ILIKE $2)
-		  AND (cr.destination_zone = '' OR cr.destination_zone ILIKE $3)
+		  AND (cr.origin_zone = '' OR cr.origin_zone = '*' OR cr.origin_zone ILIKE $2)
+		  AND (cr.destination_zone = '' OR cr.destination_zone = '*' OR cr.destination_zone ILIKE $3)
 		ORDER BY (cr.base_rate + cr.per_kg_rate * $4) ASC`,
 		serviceType, "%"+origin+"%", "%"+destination+"%", weightKg,
 	)

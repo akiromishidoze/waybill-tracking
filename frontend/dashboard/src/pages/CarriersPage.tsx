@@ -66,8 +66,8 @@ function RateCards({ carrier }: { carrier: Carrier }) {
             <div>{lbl('Service Type')}<select value={rateForm.serviceType} onChange={e => setRateForm(f => ({ ...f, serviceType: e.target.value }))} style={{ width: '100%', padding: '0.4rem', border: '1px solid var(--color-border-input)', borderRadius: 5, fontSize: '0.8rem', background: 'var(--color-surface)' }}>
               {['STANDARD','EXPRESS','OVERNIGHT','FREIGHT'].map(s => <option key={s} value={s}>{s}</option>)}
             </select></div>
-            <div>{lbl('Origin Zone')}{inp(rateForm.originZone, v => setRateForm(f => ({ ...f, originZone: v })))}</div>
-            <div>{lbl('Dest Zone')}{inp(rateForm.destinationZone, v => setRateForm(f => ({ ...f, destinationZone: v })))}</div>
+            <div>{lbl('Origin Zone (use * for any)')}{inp(rateForm.originZone, v => setRateForm(f => ({ ...f, originZone: v })))}</div>
+            <div>{lbl('Dest Zone (use * for any)')}{inp(rateForm.destinationZone, v => setRateForm(f => ({ ...f, destinationZone: v })))}</div>
             <div>{lbl('Min Wt (kg)')}{inp(rateForm.weightMinKg, v => setRateForm(f => ({ ...f, weightMinKg: v })), 'number', '0.001')}</div>
             <div>{lbl('Max Wt (kg)')}{inp(rateForm.weightMaxKg, v => setRateForm(f => ({ ...f, weightMaxKg: v })), 'number', '0.001')}</div>
             <div>{lbl('Base Rate')}{inp(rateForm.baseRate, v => setRateForm(f => ({ ...f, baseRate: v })), 'number', '0.01')}</div>

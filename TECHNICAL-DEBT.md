@@ -15,7 +15,7 @@ Status legend: `[ ]` open · `[x]` done
     `carrierName` in the request body, or a `carrier_id` FK column added to the
     `waybills` table with a new migration.
 
-- [ ] [2] **`go.mod` declares non-existent Go version `1.25`**
+- [x] [2] **`go.mod` declares non-existent Go version `1.25`**
   - `go.mod:3` — Go 1.25 does not exist. Every IDE language server and standard
     CI runner rejects this. Downgrade to `go 1.23` (current stable) or whichever
     version is actually installed (`1.26.4` locally).

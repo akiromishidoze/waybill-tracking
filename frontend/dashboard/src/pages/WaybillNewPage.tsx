@@ -37,7 +37,7 @@ function RateCompare({ form, onSelect, selectedRateId, onSkip }: {
   onSkip: () => void
 }) {
   const weight = parseFloat(form.weight) || 1
-  const { data: quotes, isLoading, isError } = useQuery({
+  const { data: quotes, isLoading, isError, refetch } = useQuery({
     queryKey: ['rate-compare', form.serviceType, form.origin, form.destination, weight],
     queryFn: () => carrierRateService.compare({
       serviceType: form.serviceType,
@@ -49,10 +49,21 @@ function RateCompare({ form, onSelect, selectedRateId, onSkip }: {
   })
 
   if (isLoading) return <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Loading carrier rates…</p>
-  if (isError || !quotes?.length) return (
+  if (isError) return (
+    <div style={{ padding: '1.25rem', background: 'var(--color-bg)', borderRadius: 8, border: '1px solid var(--color-border)', textAlign: 'center' }}>
+      <p style={{ color: '#dc2626', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+        Failed to load carrier rates. Check your connection and try again.
+      </p>
+      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+        <button type="button" onClick={() => refetch()} className={s.btnPrimary} style={{ fontSize: '0.875rem' }}>Retry</button>
+        <button type="button" onClick={onSkip} className={s.btnOutline} style={{ fontSize: '0.875rem' }}>Skip carrier selection</button>
+      </div>
+    </div>
+  )
+  if (!quotes?.length) return (
     <div style={{ padding: '1.25rem', background: 'var(--color-bg)', borderRadius: 8, border: '1px solid var(--color-border)', textAlign: 'center' }}>
       <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-        No carrier rates found for the selected route and service type. You can skip and create the waybill without a carrier.
+        No carrier rates found for this route and service type. You can skip and create the waybill without a carrier.
       </p>
       <button type="button" onClick={onSkip} className={s.btnOutline} style={{ fontSize: '0.875rem' }}>Skip carrier selection</button>
     </div>

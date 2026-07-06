@@ -1,6 +1,8 @@
 module github.com/waybill-tracking/core-api
 
-go 1.22
+go 1.23.0
+
+toolchain go1.23.0
 
 require (
 	github.com/elastic/go-elasticsearch/v8 v8.14.0
@@ -43,7 +45,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
-	github.com/rogpeppe/go-internal v1.15.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect

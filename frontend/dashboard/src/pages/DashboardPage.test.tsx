@@ -30,10 +30,10 @@ describe('DashboardPage', () => {
 
   it('renders stat card labels', () => {
     renderWithProviders(<DashboardPage />)
-    expect(screen.getByText('Active Waybills')).toBeDefined()
-    expect(screen.getByText('Delivered Today')).toBeDefined()
+    expect(screen.getByText('Total Waybills')).toBeDefined()
+    expect(screen.getByText('Delivered')).toBeDefined()
     expect(screen.getByText('In Transit')).toBeDefined()
-    expect(screen.getByText('Pending Pickup')).toBeDefined()
+    expect(screen.getByText('Failed')).toBeDefined()
   })
 
   it('renders Dashboard heading', () => {

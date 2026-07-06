@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierRate, RateQuote, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog, Webhook, WebhookLog, AggregatedTracking, ReturnRequest, ReturnStatusUpdate, DriverStatusUpdate, WaybillListParams, WaybillListResponse } from '@/types/waybill'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, CarrierRate, RateQuote, CarrierEvent, AppSettings, Team, Attachment, ETAPrediction, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CodPayment, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, ECommercePlatform, ECommerceSyncLog, WhiteLabelPortalData, IotSensorDashboard, GPSLocation, WaybillGPSView, CustomsShipment, CustomsDocument, AutoCommunicationRule, AutoCommunicationLog, Webhook, WebhookLog, WebhookTestResult, AggregatedTracking, ReturnRequest, ReturnStatusUpdate, DriverStatusUpdate, WaybillListParams, WaybillListResponse } from '@/types/waybill'
 import { isTokenExpired } from '@/utils/jwt'
 
 const api = axios.create({
@@ -188,14 +188,14 @@ export const webhookService = {
   update: (id: string, data: Partial<Webhook>) => api.patch<Webhook>(`/webhooks/${id}`, data),
   delete: (id: string) => api.delete(`/webhooks/${id}`),
   getEvents: () => api.get<string[]>('/webhooks/events'),
-  test: (id: string) => api.post<{ success: boolean; message: string }>(`/webhooks/${id}`, {}),
+  test: (id: string) => api.post<WebhookTestResult>(`/webhooks/${id}`, {}),
   log: () => api.get<WebhookLog[]>('/webhooks/log'),
 }
 
 export const attachmentService = {
   list: (waybillId: string) => api.get<Attachment[]>(`/waybills/${waybillId}/attachments`),
-  upload: (waybillId: string, data: FormData) =>
-    api.post<Attachment>(`/waybills/${waybillId}/attachments`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  upload: (waybillId: string, data: Pick<Attachment, 'fileName' | 'fileType' | 'fileSize' | 'data'>) =>
+    api.post<Attachment>(`/waybills/${waybillId}/attachments`, data),
   get: (attachmentId: string) => api.get<Attachment>(`/attachments/${attachmentId}`),
   delete: (attachmentId: string) => api.delete(`/attachments/${attachmentId}`),
 }

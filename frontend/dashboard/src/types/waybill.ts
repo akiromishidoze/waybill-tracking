@@ -700,8 +700,16 @@ export interface AutoCommunicationLog {
   status: 'SENT' | 'FAILED'
 }
 
+export interface WebhookTestResult {
+  url: string
+  status: number
+  success: boolean
+  message?: string
+}
+
 export interface Webhook {
   id: string
+  name?: string
   url: string
   events: string[]
   isActive: boolean
@@ -722,19 +730,21 @@ export interface WebhookLog {
 export interface AggregatedTracking {
   waybillId: string
   trackingNumber: string
-  carrier: string
-  externalTrackingNumber: string
+  carrierId: string
+  carrierName: string
+  carrierTrackingNumber: string
   status: string
   lastUpdated: string
 }
 
 export interface ReturnRequest {
   reason: string
+  carrier?: string
   notes?: string
 }
 
 export interface ReturnStatusUpdate {
-  status: ReturnStatus
+  status: string
   notes?: string
 }
 

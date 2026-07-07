@@ -7,7 +7,7 @@ let nextTeamId = 2
 let nextAttachmentId = 1
 
 const USER_PASSWORDS = {
-  'u1': 'admin',
+  'u1': 'teccadmin00',
   'u2': 'admin',
   'u3': 'admin',
   'u4': 'admin',
@@ -56,7 +56,7 @@ const CARRIER_EVENTS = {
 }
 
 const USERS = [
-  { id: 'u1', email: 'Admin', name: 'Admin User', role: 'ADMIN', company: 'Waybill Corp' },
+  { id: 'u1', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'Waybill Corp' },
   { id: 'u2', email: 'shipper@acme.com', name: 'John Shipper', role: 'SHIPPER', company: 'ACME Inc' },
   { id: 'u3', email: 'courier@fastdeliver.com', name: 'Jane Courier', role: 'COURIER', company: 'Fast Deliver Co' },
   { id: 'u4', email: 'ops@waybill.com', name: 'Ops Manager', role: 'OPS', company: 'Waybill Corp' },
@@ -237,7 +237,7 @@ const server = http.createServer((req, res) => {
   if (path === '/api/auth/login' && req.method === 'POST') {
     parseBody().then(({ email, password }) => {
       const user = USERS.find(u => u.email.toLowerCase() === email.toLowerCase())
-      if (!user || password !== 'admin') {
+      if (!user || password !== USER_PASSWORDS[user.id]) {
         send(401, { error: 'invalid credentials' })
         return
       }

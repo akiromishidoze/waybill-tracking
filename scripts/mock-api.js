@@ -929,8 +929,93 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  // --- E-Commerce Integrations ---
+  if (path === '/api/integrations/ecommerce' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, { platforms: ECOMMERCE_PLATFORMS, recentSyncs: ECOMMERCE_SYNC_LOGS, summary: ECOMMERCE_SUMMARY })
+    return
+  }
+
+  if (path === '/api/integrations/ecommerce/platforms' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, ECOMMERCE_PLATFORMS)
+    return
+  }
+
+  if (path === '/api/integrations/ecommerce/platforms' && req.method === 'POST') {
+    if (!requireAdmin()) return
+    parseBody().then((body) => {
+      if (!body.platform || !body.storeName) { send(400, { error: 'platform and storeName are required' }); return }
+      const platform = {
+        id: 'ec' + (ECOMMERCE_PLATFORMS.length + 1),
+        platform: body.platform,
+        storeName: body.storeName,
+        connected: body.connected !== false,
+        lastSync: null,
+        totalOrders: 0,
+        syncedOrders: 0,
+        webhookUrl: body.webhookUrl || null,
+        storeUrl: body.storeUrl || null,
+      }
+      ECOMMERCE_PLATFORMS.push(platform)
+      send(201, platform)
+    })
+    return
+  }
+
+  const ecommercePlatformMatch = path.match(/^\/api\/integrations\/ecommerce\/platforms\/([^/]+)$/)
+  if (ecommercePlatformMatch) {
+    if (!requireAdmin()) return
+    const id = ecommercePlatformMatch[1]
+    const idx = ECOMMERCE_PLATFORMS.findIndex(p => p.id === id)
+
+    if (req.method === 'PATCH') {
+      if (idx === -1) { send(404, { error: 'platform not found' }); return }
+      parseBody().then((body) => {
+        if (body.storeName !== undefined) ECOMMERCE_PLATFORMS[idx].storeName = body.storeName
+        if (body.storeUrl !== undefined) ECOMMERCE_PLATFORMS[idx].storeUrl = body.storeUrl
+        if (body.webhookUrl !== undefined) ECOMMERCE_PLATFORMS[idx].webhookUrl = body.webhookUrl
+        if (body.connected !== undefined) ECOMMERCE_PLATFORMS[idx].connected = body.connected
+        send(200, ECOMMERCE_PLATFORMS[idx])
+      })
+      return
+    }
+
+    if (req.method === 'DELETE') {
+      if (idx === -1) { send(404, { error: 'platform not found' }); return }
+      ECOMMERCE_PLATFORMS.splice(idx, 1)
+      send(200, { message: 'platform deleted' })
+      return
+    }
+  }
+
+  if (path === '/api/integrations/ecommerce/sync-logs' && req.method === 'GET') {
+    if (!requireAdmin()) return
+    send(200, ECOMMERCE_SYNC_LOGS)
+    return
+  }
+
   send(404, { error: 'not found' })
 })
+
+const ECOMMERCE_PLATFORMS = [
+  { id: 'ec1', platform: 'Shopify', storeName: 'ACME Store', connected: true, lastSync: new Date(Date.now() - 3600000).toISOString(), totalOrders: 1240, syncedOrders: 1185, webhookUrl: 'https://acme-store.myshopify.com/webhooks/waybill', storeUrl: 'https://acme-store.myshopify.com' },
+  { id: 'ec2', platform: 'Lazada', storeName: 'ACME Lazada Mall', connected: true, lastSync: new Date(Date.now() - 7200000).toISOString(), totalOrders: 856, syncedOrders: 842, webhookUrl: 'https://lazada.com/webhooks/waybill', storeUrl: 'https://lazada.com/shop/acme' },
+  { id: 'ec3', platform: 'Shopee', storeName: 'ACME Shopee Official', connected: false, lastSync: null, totalOrders: 0, syncedOrders: 0, webhookUrl: null, storeUrl: 'https://shopee.ph/acme' },
+]
+
+const ECOMMERCE_SYNC_LOGS = [
+  { id: 's1', platformId: 'ec1', platform: 'Shopify', storeName: 'ACME Store', status: 'success', ordersSynced: 45, errorsCount: 0, syncedAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: 's2', platformId: 'ec2', platform: 'Lazada', storeName: 'ACME Lazada Mall', status: 'success', ordersSynced: 32, errorsCount: 1, syncedAt: new Date(Date.now() - 7200000).toISOString() },
+  { id: 's3', platformId: 'ec1', platform: 'Shopify', storeName: 'ACME Store', status: 'failed', ordersSynced: 0, errorsCount: 0, syncedAt: new Date(Date.now() - 10800000).toISOString() },
+]
+
+const ECOMMERCE_SUMMARY = {
+  totalConnected: 2,
+  totalDisconnected: 1,
+  totalOrdersSynced: 2027,
+  lastSyncAt: new Date(Date.now() - 3600000).toISOString(),
+}
 
 const WEBHOOK_LOG = []
 

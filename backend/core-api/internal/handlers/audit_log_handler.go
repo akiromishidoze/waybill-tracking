@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -21,6 +22,10 @@ func NewAuditLogHandler(repo *repository.AuditLogRepository) *AuditLogHandler {
 }
 
 func (h *AuditLogHandler) List(c *gin.Context) {
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 
@@ -56,6 +61,10 @@ func (h *AuditLogHandler) Export(c *gin.Context) {
 		}
 		end := t.Add(24*time.Hour - time.Second)
 		to = &end
+	}
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
 	}
 
 	logs, err := h.repo.Export(c.Request.Context(), from, to)

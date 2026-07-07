@@ -57,6 +57,10 @@ func (h *PODHandler) GeneratePOD(c *gin.Context) {
 		apierror.UnauthorizedJSON(c, "unauthorized")
 		return
 	}
+	if h.waybillRepo == nil || h.db == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 
 	id := c.Param("id")
 	ctx := context.Background()

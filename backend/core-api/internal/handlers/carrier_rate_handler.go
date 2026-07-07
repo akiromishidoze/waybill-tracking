@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -19,6 +20,10 @@ func NewCarrierRateHandler(repo *repository.CarrierRateRepository) *CarrierRateH
 }
 
 func (h *CarrierRateHandler) ListByCarrier(c *gin.Context) {
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 	carrierID := c.Param("carrierId")
 	rates, err := h.repo.ListByCarrier(c.Request.Context(), carrierID)
 	if err != nil {
@@ -33,6 +38,10 @@ func (h *CarrierRateHandler) Create(c *gin.Context) {
 	var req models.CreateCarrierRateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apierror.BadRequestJSON(c, err.Error())
+		return
+	}
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
 		return
 	}
 	rate, err := h.repo.Create(c.Request.Context(), carrierID, req)
@@ -50,6 +59,10 @@ func (h *CarrierRateHandler) Update(c *gin.Context) {
 		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 	rate, err := h.repo.Update(c.Request.Context(), id, req)
 	if err != nil {
 		apierror.InternalJSON(c, err)
@@ -59,6 +72,10 @@ func (h *CarrierRateHandler) Update(c *gin.Context) {
 }
 
 func (h *CarrierRateHandler) Delete(c *gin.Context) {
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 	id := c.Param("rateId")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
 		apierror.InternalJSON(c, err)
@@ -68,6 +85,10 @@ func (h *CarrierRateHandler) Delete(c *gin.Context) {
 }
 
 func (h *CarrierRateHandler) Compare(c *gin.Context) {
+	if h.repo == nil {
+		apierror.InternalJSON(c, errors.New("repository unavailable"))
+		return
+	}
 	serviceType := c.Query("serviceType")
 	origin := c.Query("origin")
 	destination := c.Query("destination")

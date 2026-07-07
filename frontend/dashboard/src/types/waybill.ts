@@ -735,6 +735,12 @@ export interface AggregatedTracking {
   carrierTrackingNumber: string
   status: string
   lastUpdated: string
+  recipientName: string
+  destination: string
+  lastCarrierEvent?: {
+    status: string
+    location?: string
+  }
 }
 
 export interface ReturnRequest {
@@ -752,6 +758,9 @@ export interface DriverStatusUpdate {
   status: DriverAssignment['status']
   location?: string
   notes?: string
+  scanType?: string
+  remark?: string
+  signature?: string
   latitude?: number
   longitude?: number
 }

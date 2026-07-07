@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { reportScheduleService } from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { ReportSchedule } from '@/types/waybill'
 import { Calendar, FileText, Trash2, Plus, Pencil, X, Play, ToggleLeft, ToggleRight } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
@@ -26,7 +27,7 @@ function ReportModal({ title, onClose, children }: { title: string; onClose: () 
 }
 
 function ReportForm({ value, onChange }: { value: Partial<ReportSchedule>; onChange: (v: Partial<ReportSchedule>) => void }) {
-  const f = (k: keyof ReportSchedule, v: any) => onChange({ ...value, [k]: v })
+  const f = (k: keyof ReportSchedule, v: unknown) => onChange({ ...value, [k]: v })
   return (
     <>
       <div style={{ marginBottom: '1rem' }}>
@@ -79,13 +80,13 @@ export default function ScheduledReportsPage() {
   const create = useMutation({
     mutationFn: (d: Partial<ReportSchedule>) => reportScheduleService.create(d),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['report-schedules'] }); setShowCreate(false); setForm(BLANK); setError('') },
-    onError: (e: any) => setError(e?.response?.data?.error || 'Create failed'),
+    onError: (e: AxiosError<{ error: string }>) => setError(e?.response?.data?.error || 'Create failed'),
   })
 
   const update = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ReportSchedule> }) => reportScheduleService.update(id, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['report-schedules'] }); setEditing(null); setError('') },
-    onError: (e: any) => setError(e?.response?.data?.error || 'Update failed'),
+    onError: (e: AxiosError<{ error: string }>) => setError(e?.response?.data?.error || 'Update failed'),
   })
 
   const del = useMutation({

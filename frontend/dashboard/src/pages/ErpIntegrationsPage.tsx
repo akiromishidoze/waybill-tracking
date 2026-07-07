@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { erpIntegrationService } from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { ErpIntegration } from '@/types/waybill'
 import { Database, RefreshCw, CheckCircle, XCircle, Plus, Pencil, Trash2, X, TestTube } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
@@ -29,18 +30,18 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 }
 
 function ErpForm({ value, onChange }: { value: Partial<ErpIntegration>; onChange: (v: Partial<ErpIntegration>) => void }) {
-  const f = (k: keyof ErpIntegration, v: any) => onChange({ ...value, [k]: v })
+  const f = (k: keyof ErpIntegration, v: unknown) => onChange({ ...value, [k]: v })
   const inp = (k: keyof ErpIntegration, label: string, placeholder = '') => (
     <div style={{ marginBottom: '1rem' }}>
       <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>{label}</label>
-      <input value={(value as any)[k] || ''} onChange={e => f(k, e.target.value)} placeholder={placeholder}
+      <input value={String(value[k] || '')} onChange={e => f(k, e.target.value)} placeholder={placeholder}
         style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
     </div>
   )
   const sel = (k: keyof ErpIntegration, label: string, opts: string[]) => (
     <div style={{ marginBottom: '1rem' }}>
       <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>{label}</label>
-      <select value={(value as any)[k] || ''} onChange={e => f(k, e.target.value)}
+      <select value={String(value[k] || '')} onChange={e => f(k, e.target.value)}
         style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }}>
         {opts.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
@@ -77,13 +78,13 @@ export default function ErpIntegrationsPage() {
   const create = useMutation({
     mutationFn: (d: Partial<ErpIntegration>) => erpIntegrationService.create(d),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['erp-integrations'] }); setShowCreate(false); setForm(BLANK); setError('') },
-    onError: (e: any) => setError(e?.response?.data?.error || 'Create failed'),
+    onError: (e: AxiosError<{ error: string }>) => setError(e?.response?.data?.error || 'Create failed'),
   })
 
   const update = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ErpIntegration> }) => erpIntegrationService.update(id, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['erp-integrations'] }); setEditing(null); setError('') },
-    onError: (e: any) => setError(e?.response?.data?.error || 'Update failed'),
+    onError: (e: AxiosError<{ error: string }>) => setError(e?.response?.data?.error || 'Update failed'),
   })
 
   const del = useMutation({

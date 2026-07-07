@@ -41,8 +41,8 @@ function RateCards({ carrier }: { carrier: Carrier }) {
   }
 
   const lbl = (t: string) => <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.2rem' }}>{t}</label>
-  const inp = (val: any, onChange: (v: any) => void, type = 'text', step?: string) => (
-    <input type={type} step={step} value={val} onChange={e => onChange(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
+  const inp = <T extends string | number>(val: T, onChange: (v: T) => void, type = 'text', step?: string) => (
+    <input type={type} step={step} value={val} onChange={e => onChange(type === 'number' ? (parseFloat(e.target.value) || 0) as T : e.target.value as T)}
       style={{ width: '100%', padding: '0.4rem 0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 5, fontSize: '0.8rem', background: 'var(--color-surface)' }} />
   )
 

@@ -39,7 +39,7 @@ export default function DynamicReroutingPage() {
   ) || []
 
   const rerouteMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => waybillService.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Waybill> }) => waybillService.update(id, data),
     onSuccess: (_, vars) => {
       const wb = rerouteCandidates.find((w: Waybill) => w.id === vars.id)
       if (wb && originalRef.current) {

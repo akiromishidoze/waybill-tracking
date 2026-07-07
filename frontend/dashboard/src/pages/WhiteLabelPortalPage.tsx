@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { whiteLabelService } from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { WhiteLabelPortalData } from '@/types/waybill'
 import {
   Globe, Users, Eye, Star, ShoppingBag, ExternalLink, Mail, Phone,
@@ -43,7 +44,7 @@ export default function WhiteLabelPortalPage() {
       setEditMode(false)
       setFormError('')
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ error: string }>) => {
       setFormError(err?.response?.data?.error || 'Failed to update portal configuration.')
     },
   })

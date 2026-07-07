@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { eCommerceService } from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { ECommercePlatform } from '@/types/waybill'
 import {
   ShoppingCart, RefreshCw, CheckCircle, XCircle, Link2,
@@ -54,7 +55,7 @@ export default function ECommerceIntegrationsPage() {
       setForm({ platform: '', storeName: '', storeUrl: '', webhookUrl: '' })
       setFormError('')
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ error: string }>) => {
       setFormError(err?.response?.data?.error || 'Failed to add platform. Please try again.')
     },
   })
@@ -67,7 +68,7 @@ export default function ECommerceIntegrationsPage() {
       setEditingPlatform(null)
       setFormError('')
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ error: string }>) => {
       setFormError(err?.response?.data?.error || 'Failed to update platform.')
     },
   })
@@ -279,7 +280,7 @@ export default function ECommerceIntegrationsPage() {
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>
                     {field === 'storeName' ? 'Store Name' : field === 'storeUrl' ? 'Store URL' : 'Webhook URL'}
                   </label>
-                  <input type="text" value={(editingPlatform as any)[field] || ''}
+                  <input type="text" value={editingPlatform[field] || ''}
                     onChange={e => setEditingPlatform(prev => prev ? { ...prev, [field]: e.target.value } : prev)}
                     style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--color-border)', borderRadius: 8, fontSize: '0.875rem', background: 'var(--color-surface)' }} />
                 </div>

@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, Trash2, Shield, FileText } from 'lucide-react'
 import { waybillService, teamService, analyticsService } from '@/services/api'
 import ConfirmModal from '@/components/ConfirmModal'
-import type { Waybill } from '@/types/waybill'
+import type { AxiosError } from 'axios'
+import type { Waybill, Team } from '@/types/waybill'
 import { SkeletonBlock, SkeletonLine } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 import ScanTimeline from '@/components/waybill-detail/ScanTimeline'
@@ -55,7 +56,7 @@ export default function WaybillDetailPage() {
       setIsEditing(false)
       setEditError('')
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ error: string }>) => {
       setEditError(err?.response?.data?.error || 'Failed to update waybill. Please try again.')
     },
   })
@@ -312,7 +313,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function TeamAssignment({ waybillId, teamId, teamName, teams }: { waybillId: string; teamId?: string; teamName?: string; teams: any[] }) {
+function TeamAssignment({ waybillId, teamId, teamName, teams }: { waybillId: string; teamId?: string; teamName?: string; teams: Team[] }) {
   const [selectedTeamId, setSelectedTeamId] = useState(teamId || '')
   const [assignError, setAssignError] = useState('')
   const queryClient = useQueryClient()
@@ -327,7 +328,7 @@ function TeamAssignment({ waybillId, teamId, teamName, teams }: { waybillId: str
       queryClient.invalidateQueries({ queryKey: ['waybill', waybillId] })
       setAssignError('')
     },
-    onError: (err: any) => {
+    onError: (err: AxiosError<{ error: string }>) => {
       setAssignError(err?.response?.data?.error || 'Failed to assign team. Please try again.')
     },
   })

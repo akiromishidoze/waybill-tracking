@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { BiIntegration } from '@/types/waybill'
 import { BarChart3, Database, RefreshCw, Unlink, ExternalLink, WifiOff, AlertTriangle, Search, Plus, Pencil, Trash2, X } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
@@ -25,7 +26,7 @@ function BiModal({ title, onClose, children }: { title: string; onClose: () => v
 }
 
 function BiForm({ value, onChange }: { value: Partial<BiIntegration>; onChange: (v: Partial<BiIntegration>) => void }) {
-  const f = (k: keyof BiIntegration, v: any) => onChange({ ...value, [k]: v })
+  const f = (k: keyof BiIntegration, v: unknown) => onChange({ ...value, [k]: v })
   const toggleDataset = (ds: string) => {
     const cur = value.datasets || []
     f('datasets', cur.includes(ds) ? cur.filter(d => d !== ds) : [...cur, ds])
@@ -107,13 +108,13 @@ export default function BiIntegrationsPage() {
   const createMutation = useMutation({
     mutationFn: (d: Partial<BiIntegration>) => api.post<BiIntegration>('/bi-integrations', d),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['bi-integrations'] }); setShowCreate(false); setForm(BLANK); setFormError('') },
-    onError: (e: any) => setFormError(e?.response?.data?.error || 'Create failed'),
+    onError: (e: AxiosError<{ error: string }>) => setFormError(e?.response?.data?.error || 'Create failed'),
   })
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<BiIntegration> }) => api.patch<BiIntegration>(`/bi-integrations/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['bi-integrations'] }); setEditing(null); setFormError('') },
-    onError: (e: any) => setFormError(e?.response?.data?.error || 'Update failed'),
+    onError: (e: AxiosError<{ error: string }>) => setFormError(e?.response?.data?.error || 'Update failed'),
   })
 
   const deleteMutation = useMutation({

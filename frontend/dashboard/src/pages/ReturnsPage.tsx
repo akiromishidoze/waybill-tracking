@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { returnService } from '@/services/api'
-import type { ReturnStatus } from '@/types/waybill'
+import type { ReturnStatus, Waybill } from '@/types/waybill'
 import { RETURN_LABELS, RETURN_COLORS } from '@/types/waybill'
 import { RefreshCw, MapPin } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
@@ -83,7 +83,7 @@ export default function ReturnsPage() {
             ) : !returns?.length ? (
               <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted-lighter)' }}>No returns yet.</td></tr>
             ) : (
-              returns.map((r: any) => (
+              (returns || []).filter((r: Waybill): r is Waybill & { returnInfo: NonNullable<Waybill['returnInfo']> } => !!r.returnInfo).map((r) => (
                 <tr key={r.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <Link to={`/waybills/${r.id}`} style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>{r.trackingNumber}</Link>

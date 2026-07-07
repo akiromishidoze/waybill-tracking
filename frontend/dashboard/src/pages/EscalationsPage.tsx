@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { escalationService, escalationRuleService } from '@/services/api'
-import type { EscalationRule } from '@/types/waybill'
+import type { AxiosError } from 'axios'
+import type { Escalation, EscalationRule } from '@/types/waybill'
 import { CheckCircle, Eye, AlertTriangle, Plus, Pencil, Trash2, X, Settings } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow, SkeletonBlock } from '@/components/Skeleton'
@@ -37,7 +38,7 @@ function RuleModal({ title, onClose, children }: { title: string; onClose: () =>
 }
 
 function RuleForm({ value, onChange }: { value: Partial<EscalationRule>; onChange: (v: Partial<EscalationRule>) => void }) {
-  const f = (k: keyof EscalationRule, v: any) => onChange({ ...value, [k]: v })
+  const f = (k: keyof EscalationRule, v: unknown) => onChange({ ...value, [k]: v })
   return (
     <>
       <div style={{ marginBottom: '1rem' }}>
@@ -102,20 +103,20 @@ export default function EscalationsPage() {
   const createRule = useMutation({
     mutationFn: (d: Partial<EscalationRule>) => escalationRuleService.create(d),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['escalation-rules'] }); setShowCreate(false); setRuleForm(BLANK_RULE); setRuleError('') },
-    onError: (e: any) => setRuleError(e?.response?.data?.error || 'Create failed'),
+    onError: (e: AxiosError<{ error: string }>) => setRuleError(e?.response?.data?.error || 'Create failed'),
   })
   const updateRule = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<EscalationRule> }) => escalationRuleService.update(id, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['escalation-rules'] }); setEditing(null); setRuleError('') },
-    onError: (e: any) => setRuleError(e?.response?.data?.error || 'Update failed'),
+    onError: (e: AxiosError<{ error: string }>) => setRuleError(e?.response?.data?.error || 'Update failed'),
   })
   const deleteRule = useMutation({
     mutationFn: (id: string) => escalationRuleService.delete(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['escalation-rules'] }); setDeleteId(null) },
   })
 
-  const openCount = escalations?.filter((e: any) => e?.status === 'OPEN').length || 0
-  const ackCount = escalations?.filter((e: any) => e?.status === 'ACKNOWLEDGED').length || 0
+  const openCount = escalations?.filter((e: Escalation) => e?.status === 'OPEN').length || 0
+  const ackCount = escalations?.filter((e: Escalation) => e?.status === 'ACKNOWLEDGED').length || 0
 
   const tabBtn = (t: typeof tab) => ({
     padding: '0.5rem 1.25rem', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem',
@@ -168,7 +169,7 @@ export default function EscalationsPage() {
               ) : !escalations?.length ? (
                 <tr><td colSpan={7}><EmptyState icon={AlertTriangle} title="No escalations" message="No shipment issues have been escalated yet." /></td></tr>
               ) : (
-                escalations.map((esc: any) => (
+                escalations.map((esc: Escalation) => (
                   <tr key={esc.id} style={{ borderBottom: '1px solid var(--color-border-subtle)', background: esc.status === 'OPEN' ? 'var(--badge-red-bg)' : undefined }}>
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <Link to={`/waybills/${esc.waybillId}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>

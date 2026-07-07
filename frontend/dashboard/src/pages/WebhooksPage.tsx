@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { webhookService } from '@/services/api'
+import type { Webhook as WebhookType } from '@/types/waybill'
 import { Webhook, Plus, Pencil, Trash2, Check, X, Send, Activity, Inbox } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
@@ -45,7 +46,7 @@ export default function WebhooksPage() {
   })
 
   const resetForm = () => setForm({ name: '', url: '', events: [], isActive: true })
-  const openEdit = (w: any) => { setEditingId(w.id); setForm({ name: w.name, url: w.url, events: [...w.events], isActive: w.isActive }); setShowForm(true) }
+  const openEdit = (w: WebhookType) => { setEditingId(w.id); setForm({ name: w.name || '', url: w.url, events: [...w.events], isActive: w.isActive }); setShowForm(true) }
   const openAdd = () => { resetForm(); setEditingId(null); setShowForm(true) }
 
   const toggleEvent = (evt: string) => {
@@ -119,7 +120,7 @@ export default function WebhooksPage() {
         <EmptyState icon={Inbox} title="No webhooks configured" message="Add a webhook to receive real-time shipment event notifications." />
       ) : (
         <div style={{ display: 'grid', gap: '1rem' }}>
-          {webhooks?.map((w: any) => (
+          {webhooks?.map((w: WebhookType) => (
             <div key={w.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: w.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

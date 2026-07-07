@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { driverService } from '@/services/api'
-import type { DriverAssignment } from '@/types/waybill'
+import type { DriverAssignment, DriverStatusUpdate } from '@/types/waybill'
 import { Package, ScanLine, CheckCircle, XCircle, Truck, Clock, MapPin, User, Phone, Navigation, Camera, PenLine, Plus, Trash2, X } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
@@ -52,7 +52,7 @@ export default function DriverAppPage() {
   })
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => driverService.updateStatus(id, data),
+    mutationFn: ({ id, data }: { id: string; data: DriverStatusUpdate }) => driverService.updateStatus(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['driver-assignments'] })
       queryClient.invalidateQueries({ queryKey: ['driver-scans'] })
@@ -60,7 +60,7 @@ export default function DriverAppPage() {
   })
 
   const scanMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => driverService.updateStatus(id, data),
+    mutationFn: ({ id, data }: { id: string; data: DriverStatusUpdate }) => driverService.updateStatus(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['driver-assignments'] })
       queryClient.invalidateQueries({ queryKey: ['driver-scans'] })
@@ -162,7 +162,7 @@ export default function DriverAppPage() {
                         const ns = nextStatus(a.status) as string
                         return (
                           <button
-                            onClick={() => statusMutation.mutate({ id: a.id, data: { status: ns, scanType: ns === 'DELIVERED' ? 'DELIVERY' : ns === 'FAILED' ? 'ATTEMPT' : 'ARRIVAL', location: a.destination } })}
+                            onClick={() => statusMutation.mutate({ id: a.id, data: { status: ns as DriverAssignment['status'], scanType: ns === 'DELIVERED' ? 'DELIVERY' : ns === 'FAILED' ? 'ATTEMPT' : 'ARRIVAL', location: a.destination } })}
                             disabled={statusMutation.isPending}
                             title={`Mark as ${ns}`}
                             style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.375rem 0.75rem', background: statusColor(ns) + '20', color: statusColor(ns), border: '1px solid ' + statusColor(ns), borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem', fontWeight: 500 }}

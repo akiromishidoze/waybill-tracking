@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { aggregatedTrackingService, carrierService, waybillService } from '@/services/api'
+import type { AggregatedTracking, Carrier, Waybill } from '@/types/waybill'
 import { Truck, ChevronRight, Plus, X, Trash2, Check } from 'lucide-react'
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
@@ -43,13 +44,13 @@ export default function AggregatedTrackingPage() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['aggregated-tracking'] }); queryClient.invalidateQueries({ queryKey: ['waybills'] }) },
   })
 
-  const unassignedWbs = (waybills || []).filter((w: any) => !w.carrierId)
+  const unassignedWbs = (waybills || []).filter((w: Waybill) => !w.carrierId)
 
-  const grouped = (items || []).reduce((acc: Record<string, any>, item: any) => {
+  const grouped = (items || []).reduce((acc: Record<string, { name: string; items: AggregatedTracking[] }>, item: AggregatedTracking) => {
     if (!acc[item.carrierId]) acc[item.carrierId] = { name: item.carrierName, items: [] }
     acc[item.carrierId].items.push(item)
     return acc
-  }, {} as Record<string, any>)
+  }, {} as Record<string, { name: string; items: AggregatedTracking[] }>)
 
   return (
     <div>
@@ -67,7 +68,7 @@ export default function AggregatedTrackingPage() {
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Waybill</label>
             <select value={assignForm.waybillId} onChange={e => setAssignForm({ ...assignForm, waybillId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', minWidth: 200 }}>
               <option value="">Select waybill...</option>
-              {unassignedWbs.map((wb: any) => (
+              {unassignedWbs.map((wb: Waybill) => (
                 <option key={wb.id} value={wb.id}>{wb.trackingNumber} — {wb.recipientName}</option>
               ))}
             </select>
@@ -76,7 +77,7 @@ export default function AggregatedTrackingPage() {
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Carrier</label>
             <select value={assignForm.carrierId} onChange={e => setAssignForm({ ...assignForm, carrierId: e.target.value })} style={{ padding: '0.5rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem', minWidth: 180 }}>
               <option value="">Select carrier...</option>
-              {(carriers || []).filter((c: any) => c.isActive).map((c: any) => (
+              {(carriers || []).filter((c: Carrier) => c.isActive).map((c: Carrier) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
@@ -101,7 +102,7 @@ export default function AggregatedTrackingPage() {
       ) : !items?.length ? (
         <p style={{ color: 'var(--color-text-muted)' }}>No carrier-tracked waybills yet. Assign a carrier to get started.</p>
       ) : (
-        Object.entries(grouped).map(([carrierId, group]: [string, any]) => (
+        Object.entries(grouped).map(([carrierId, group]: [string, { name: string; items: AggregatedTracking[] }]) => (
           <div key={carrierId} style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', marginBottom: '1.5rem', overflow: 'hidden' }}>
             <div style={{ padding: '0.75rem 1rem', background: (CARRIER_COLORS[carrierId] || 'var(--color-text-muted)') + '10', borderBottom: `2px solid ${CARRIER_COLORS[carrierId] || 'var(--color-text-muted)'}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Truck size={18} color={CARRIER_COLORS[carrierId] || 'var(--color-text-muted)'} />
@@ -120,7 +121,7 @@ export default function AggregatedTrackingPage() {
                 </tr>
               </thead>
               <tbody>
-                {group.items.map((item: any) => (
+                {group.items.map((item: AggregatedTracking) => (
                   <tr key={item.waybillId} style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                     <td style={{ padding: '0.625rem 1rem' }}>
                       <Link to={`/waybills/${item.waybillId}`} style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem' }}>{item.trackingNumber}</Link>

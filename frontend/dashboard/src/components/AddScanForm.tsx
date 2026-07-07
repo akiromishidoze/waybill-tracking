@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { waybillService } from '@/services/api'
+import type { AxiosError } from 'axios'
 import type { WaybillStatus } from '@/types/waybill'
 import s from '@/styles/components.module.css'
 
@@ -28,8 +29,9 @@ export default function AddScanForm({ waybillId, onAdded }: AddScanFormProps) {
       await waybillService.updateStatus(waybillId, { status, location: location.trim() })
       setLocation('')
       onAdded()
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to add scan event')
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ error: string }>
+      setError(axiosErr?.response?.data?.error || 'Failed to add scan event')
     } finally {
       setSubmitting(false)
     }

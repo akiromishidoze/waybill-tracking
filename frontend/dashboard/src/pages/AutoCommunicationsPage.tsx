@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { autoCommunicationService } from '@/services/api'
-import type { AutoCommunicationRule } from '@/types/waybill'
+import type { AutoCommunicationRule, AutoCommunicationLog } from '@/types/waybill'
 import { Bell, Mail, MessageSquare, Plus, Check, X, Clock, Truck, AlertTriangle, Package, Trash2 } from 'lucide-react'
 import BackButton from '@/components/BackButton'
 
@@ -28,16 +28,16 @@ export default function AutoCommunicationsPage() {
   const { data: rules = [] } = useQuery({
     queryKey: ['auto-comm-rules'],
     queryFn: () => autoCommunicationService.listRules().then(r => {
-      const d = r.data
-      return Array.isArray(d) ? d : (d as any)?.items ?? (d as any)?.data ?? []
+      const d = r.data as { items?: AutoCommunicationRule[]; data?: AutoCommunicationRule[] } | AutoCommunicationRule[]
+      return Array.isArray(d) ? d : d?.items ?? d?.data ?? []
     }),
   })
 
   const { data: logs = [] } = useQuery({
     queryKey: ['auto-comm-logs'],
     queryFn: () => autoCommunicationService.listLogs().then(r => {
-      const d = r.data
-      return Array.isArray(d) ? d : (d as any)?.items ?? (d as any)?.data ?? []
+      const d = r.data as { items?: AutoCommunicationLog[]; data?: AutoCommunicationLog[] } | AutoCommunicationLog[]
+      return Array.isArray(d) ? d : d?.items ?? d?.data ?? []
     }),
   })
 
@@ -83,7 +83,7 @@ export default function AutoCommunicationsPage() {
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Automated Customer Communications</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-            {(rules as AutoCommunicationRule[]).filter(r => r.isActive).length} active notification rules
+            {rules.filter(r => r.isActive).length} active notification rules
           </p>
         </div>
         <button onClick={() => { setEditingRule(null); resetForm(); setShowForm(true) }}
@@ -110,7 +110,7 @@ export default function AutoCommunicationsPage() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem' }}>Channel</label>
-              <select value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value as any })}
+              <select value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value as 'EMAIL' | 'SMS' })}
                 style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid var(--color-border-input)', borderRadius: 6, fontSize: '0.875rem' }}>
                 <option value="EMAIL">Email</option>
                 <option value="SMS">SMS</option>
@@ -152,7 +152,7 @@ export default function AutoCommunicationsPage() {
 
       {activeTab === 'rules' && (
         <div style={{ display: 'grid', gap: '1rem' }}>
-          {(rules as AutoCommunicationRule[]).map((rule: AutoCommunicationRule) => {
+          {rules.map((rule: AutoCommunicationRule) => {
             const ChanIcon = CHANNEL_ICONS[rule.channel as keyof typeof CHANNEL_ICONS]
             const TriggerIcon = rule.trigger === 'DELIVERED' ? Package : rule.trigger === 'SLA_BREACHED' ? AlertTriangle : rule.trigger === 'OUT_FOR_DELIVERY' ? Truck : Bell
             return (
@@ -213,7 +213,7 @@ export default function AutoCommunicationsPage() {
               </tr>
             </thead>
             <tbody>
-              {(logs as any[]).map((log: any) => (
+              {logs.map((log: AutoCommunicationLog) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.875rem 1.25rem', fontWeight: 500, color: 'var(--color-primary)' }}>{log.trackingNumber}</td>
                   <td style={{ padding: '0.875rem 1.25rem' }}>

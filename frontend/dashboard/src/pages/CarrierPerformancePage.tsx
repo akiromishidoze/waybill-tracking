@@ -1,13 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/api'
-import { Truck, CheckCircle, XCircle, Clock, AlertTriangle, TrendingUp, BarChart3, Percent } from 'lucide-react'
+import { Truck, CheckCircle, XCircle, Clock, AlertTriangle, TrendingUp, BarChart3, Percent, type LucideIcon } from 'lucide-react'
+
+interface CarrierPerformance {
+  carrierId: string
+  carrierName: string
+  isActive: boolean
+  totalShipments: number
+  onTimeRate: number
+  exceptionRate: number
+  deliveredCount: number
+  slaBreaches: number
+  avgTransitHours: number
+}
 import { SkeletonBlock } from '@/components/Skeleton'
 import BackButton from '@/components/BackButton'
 
 export default function CarrierPerformancePage() {
-  const { data: carriers, isLoading } = useQuery({
+  const { data: carriers, isLoading } = useQuery<CarrierPerformance[]>({
     queryKey: ['carrier-performance'],
-    queryFn: () => analyticsService.carrierPerformance().then((r) => r.data),
+    queryFn: () => analyticsService.carrierPerformance().then((r) => r.data as unknown as CarrierPerformance[]),
     refetchInterval: 30000,
   })
 
@@ -22,7 +34,7 @@ export default function CarrierPerformancePage() {
         <p style={{ color: 'var(--color-text-muted)' }}>No carrier data available.</p>
       ) : (
         <div style={{ display: 'grid', gap: '1.5rem' }}>
-          {carriers?.map((c: any) => (
+          {carriers?.map((c: CarrierPerformance) => (
             <div key={c.carrierId} style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
               <div style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid var(--color-border-subtle)' }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: c.isActive ? 'var(--badge-green-bg)' : 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -54,8 +66,8 @@ export default function CarrierPerformancePage() {
               <TrendingUp size={18} color="#2563eb" /> Carrier Comparison
             </h3>
             <div style={{ display: 'grid', gap: '1rem' }}>
-              {carriers?.map((c: any) => {
-                const maxRate = Math.max(...carriers.map((x: any) => x.onTimeRate), 1)
+              {carriers?.map((c: CarrierPerformance) => {
+                const maxRate = Math.max(...carriers.map((x: CarrierPerformance) => x.onTimeRate), 1)
                 return (
                   <div key={c.carrierId}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem', fontSize: '0.8125rem' }}>
@@ -76,7 +88,7 @@ export default function CarrierPerformancePage() {
   )
 }
 
-function MetricCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
+function MetricCard({ icon: Icon, label, value, color }: { icon: LucideIcon; label: string; value: string; color: string }) {
   return (
     <div style={{ padding: '1rem', background: 'var(--color-surface-hover)', borderRadius: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>

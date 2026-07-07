@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { driverService } from '@/services/api'
-import type { DriverAssignment } from '@/types/waybill'
+import type { DriverAssignment, DriverStatusUpdate } from '@/types/waybill'
 import {
   CheckCircle, XCircle, ScanLine, MapPin, Phone, User,
   Navigation, ChevronRight, ChevronLeft, Wifi, WifiOff, PenLine, RotateCcw,
@@ -60,7 +60,7 @@ export default function DriverPWAPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => driverService.updateStatus(id, data),
+    mutationFn: ({ id, data }: { id: string; data: DriverStatusUpdate }) => driverService.updateStatus(id, data),
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ['driver-assignments'] })
       queryClient.invalidateQueries({ queryKey: ['driver-scans'] })
@@ -140,7 +140,7 @@ export default function DriverPWAPage() {
     updateMutation.mutate({
       id: selected.id,
       data: {
-        status: pendingStatus,
+        status: pendingStatus as DriverAssignment['status'],
         scanType: SCAN_TYPE_FOR_STATUS[pendingStatus] || 'ARRIVAL',
         location: scanLocation || selected.destination,
         remark: scanRemark,

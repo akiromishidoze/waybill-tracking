@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { waybillService, dwellTimeService } from '@/services/api'
-import type { Waybill } from '@/types/waybill'
+import type { Waybill, WaybillListResponse } from '@/types/waybill'
 import { Truck, AlertTriangle, Clock, Shield, ArrowLeftRight, PackageOpen } from 'lucide-react'
 import PageContainer from '@/components/PageContainer'
 import { SkeletonTableRow } from '@/components/Skeleton'
@@ -45,14 +45,14 @@ export default function WaybillListPage() {
 
   const waybills = useMemo(() => {
     if (!rawData) return undefined
-    const list: Waybill[] = Array.isArray(rawData) ? rawData as Waybill[] : (rawData as any).data as Waybill[] ?? []
+    const list: Waybill[] = Array.isArray(rawData) ? rawData : (rawData as WaybillListResponse).data ?? []
     return list
   }, [rawData])
 
   const total = useMemo(() => {
     if (!rawData) return 0
     if (Array.isArray(rawData)) return rawData.length
-    return (rawData as any).meta?.total ?? (rawData as any).data?.length ?? 0
+    return (rawData as WaybillListResponse).meta?.total ?? (rawData as WaybillListResponse).data?.length ?? 0
   }, [rawData])
 
   const carriers = waybills

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/api'
-import { Package, Clock, AlertTriangle, TrendingUp, CheckCircle, Truck } from 'lucide-react'
+import { Package, Clock, AlertTriangle, TrendingUp, CheckCircle, Truck, type LucideIcon } from 'lucide-react'
 
 function KpiCard({
   label,
@@ -13,7 +13,7 @@ function KpiCard({
 }: {
   label: string
   value: string | number
-  icon: any
+  icon: LucideIcon
   color: string
   sublabel?: string
   progress?: number

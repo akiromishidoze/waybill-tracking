@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { analyticsService, escalationService } from '@/services/api'
+import type { Escalation } from '@/types/waybill'
 import { AlertTriangle, RefreshCw, Radio, PauseCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -132,7 +133,7 @@ export default function DashboardPage() {
     }
   }
 
-  const openEscalations = escalations?.filter((e: any) => e?.status === 'OPEN').length || 0
+  const openEscalations = escalations?.filter((e: Escalation) => e?.status === 'OPEN').length || 0
 
   return (
     <div>

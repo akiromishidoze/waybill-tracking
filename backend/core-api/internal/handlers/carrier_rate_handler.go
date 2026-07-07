@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -21,7 +22,7 @@ func (h *CarrierRateHandler) ListByCarrier(c *gin.Context) {
 	carrierID := c.Param("carrierId")
 	rates, err := h.repo.ListByCarrier(c.Request.Context(), carrierID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, rates)
@@ -31,12 +32,12 @@ func (h *CarrierRateHandler) Create(c *gin.Context) {
 	carrierID := c.Param("carrierId")
 	var req models.CreateCarrierRateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	rate, err := h.repo.Create(c.Request.Context(), carrierID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, rate)
@@ -46,12 +47,12 @@ func (h *CarrierRateHandler) Update(c *gin.Context) {
 	id := c.Param("rateId")
 	var req models.UpdateCarrierRateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	rate, err := h.repo.Update(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, rate)
@@ -60,7 +61,7 @@ func (h *CarrierRateHandler) Update(c *gin.Context) {
 func (h *CarrierRateHandler) Delete(c *gin.Context) {
 	id := c.Param("rateId")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -79,7 +80,7 @@ func (h *CarrierRateHandler) Compare(c *gin.Context) {
 
 	quotes, err := h.repo.Compare(c.Request.Context(), serviceType, origin, destination, weight)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, quotes)

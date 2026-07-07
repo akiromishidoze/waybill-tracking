@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"html/template"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -53,7 +54,7 @@ type podTemplateData struct {
 
 func (h *PODHandler) GeneratePOD(c *gin.Context) {
 	if !h.authFromRequest(c) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		apierror.UnauthorizedJSON(c, "unauthorized")
 		return
 	}
 
@@ -62,7 +63,7 @@ func (h *PODHandler) GeneratePOD(c *gin.Context) {
 
 	wb, err := h.waybillRepo.GetByID(ctx, id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
@@ -112,7 +113,7 @@ func (h *PODHandler) GeneratePOD(c *gin.Context) {
 		},
 	}).Parse(podHTMLTemplate)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "template error"})
+		apierror.InternalJSON(c, errors.New("template error"))
 		return
 	}
 

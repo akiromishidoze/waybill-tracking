@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -20,7 +21,7 @@ func NewDriverHandler(repo *repository.DriverRepository) *DriverHandler {
 func (h *DriverHandler) ListAssignments(c *gin.Context) {
 	assignments, err := h.repo.ListAssignments(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, assignments)
@@ -30,7 +31,7 @@ func (h *DriverHandler) GetAssignment(c *gin.Context) {
 	id := c.Param("id")
 	a, err := h.repo.GetAssignment(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "assignment not found"})
+		apierror.NotFoundJSON(c, "assignment not found")
 		return
 	}
 	c.JSON(http.StatusOK, a)
@@ -39,12 +40,12 @@ func (h *DriverHandler) GetAssignment(c *gin.Context) {
 func (h *DriverHandler) CreateAssignment(c *gin.Context) {
 	var req models.CreateDriverAssignmentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	a, err := h.repo.CreateAssignment(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, a)
@@ -54,12 +55,12 @@ func (h *DriverHandler) UpdateAssignmentStatus(c *gin.Context) {
 	id := c.Param("id")
 	var req models.UpdateDriverAssignmentStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	a, err := h.repo.UpdateAssignmentStatus(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, a)
@@ -71,7 +72,7 @@ func (h *DriverHandler) ListScans(c *gin.Context) {
 
 	scans, total, err := h.repo.ListScans(c.Request.Context(), page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -25,7 +26,7 @@ func (h *AutoCommunicationHandler) List(c *gin.Context) {
 
 	items, err := h.repo.List(c.Request.Context(), statusPtr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -34,7 +35,7 @@ func (h *AutoCommunicationHandler) List(c *gin.Context) {
 func (h *AutoCommunicationHandler) Create(c *gin.Context) {
 	var req models.AutoCommunication
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -43,7 +44,7 @@ func (h *AutoCommunicationHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, req)
@@ -52,7 +53,7 @@ func (h *AutoCommunicationHandler) Create(c *gin.Context) {
 func (h *AutoCommunicationHandler) MarkSent(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.MarkSent(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -64,12 +65,12 @@ func (h *AutoCommunicationHandler) MarkFailed(c *gin.Context) {
 		ErrorMessage string `json:"errorMessage"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := h.repo.MarkFailed(c.Request.Context(), id, req.ErrorMessage); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -78,7 +79,7 @@ func (h *AutoCommunicationHandler) MarkFailed(c *gin.Context) {
 func (h *AutoCommunicationHandler) ListRules(c *gin.Context) {
 	rules, err := h.repo.ListRules(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, rules)
@@ -87,12 +88,12 @@ func (h *AutoCommunicationHandler) ListRules(c *gin.Context) {
 func (h *AutoCommunicationHandler) CreateRule(c *gin.Context) {
 	var req models.AutoCommunicationRule
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateRule(c.Request.Context(), &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, req)
@@ -102,12 +103,12 @@ func (h *AutoCommunicationHandler) UpdateRule(c *gin.Context) {
 	id := c.Param("id")
 	var req models.AutoCommunicationRule
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := h.repo.UpdateRule(c.Request.Context(), id, &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, req)
@@ -116,7 +117,7 @@ func (h *AutoCommunicationHandler) UpdateRule(c *gin.Context) {
 func (h *AutoCommunicationHandler) DeleteRule(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.DeleteRule(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})

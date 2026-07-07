@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/jackc/pgx/v5"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
@@ -22,7 +23,7 @@ func NewWhiteLabelHandler(repo *repository.WhiteLabelRepository) *WhiteLabelHand
 func (h *WhiteLabelHandler) GetPortal(c *gin.Context) {
 	data, err := h.repo.Dashboard(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -32,13 +33,13 @@ func (h *WhiteLabelHandler) GetPortal(c *gin.Context) {
 func (h *WhiteLabelHandler) UpdateConfig(c *gin.Context) {
 	var req models.UpdateWhiteLabelConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	updated, err := h.repo.UpdateConfig(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, updated)
@@ -50,10 +51,10 @@ func (h *WhiteLabelHandler) GetPublicPortal(c *gin.Context) {
 	cfg, err := h.repo.GetBySlug(c.Request.Context(), slug)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "portal not found"})
+			apierror.NotFoundJSON(c, "portal not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -76,10 +77,10 @@ func (h *WhiteLabelHandler) PublicTrack(c *gin.Context) {
 	result, err := h.repo.GetPublicTrackingPage(c.Request.Context(), slug, trackingNumber)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "portal or tracking number not found"})
+			apierror.NotFoundJSON(c, "portal or tracking number not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 

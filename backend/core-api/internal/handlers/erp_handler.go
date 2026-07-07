@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -22,7 +23,7 @@ func NewErpHandler(repo *repository.ErpRepository) *ErpHandler {
 func (h *ErpHandler) List(c *gin.Context) {
 	items, err := h.repo.List(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -31,7 +32,7 @@ func (h *ErpHandler) List(c *gin.Context) {
 func (h *ErpHandler) Create(c *gin.Context) {
 	var req models.CreateErpIntegrationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -54,7 +55,7 @@ func (h *ErpHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), e); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, e)
@@ -64,13 +65,13 @@ func (h *ErpHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var req models.UpdateErpIntegrationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	updated, err := h.repo.Update(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, updated)
@@ -79,7 +80,7 @@ func (h *ErpHandler) Update(c *gin.Context) {
 func (h *ErpHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -89,7 +90,7 @@ func (h *ErpHandler) Test(c *gin.Context) {
 	id := c.Param("id")
 	e, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "integration not found"})
+		apierror.NotFoundJSON(c, "integration not found")
 		return
 	}
 
@@ -118,7 +119,7 @@ func (h *ErpHandler) Sync(c *gin.Context) {
 	id := c.Param("id")
 	e, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "integration not found"})
+		apierror.NotFoundJSON(c, "integration not found")
 		return
 	}
 

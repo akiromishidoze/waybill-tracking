@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -38,7 +39,7 @@ func (h *SettingsHandler) Get(c *gin.Context) {
 		&s.DefaultServiceType, &s.LogoURL, &s.DwellThresholdMinutes, &s.UpdatedAt,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, s)
@@ -55,7 +56,7 @@ func (h *SettingsHandler) Update(c *gin.Context) {
 		DwellThresholdMinutes *int   `json:"dwellThresholdMinutes"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -75,7 +76,7 @@ func (h *SettingsHandler) Update(c *gin.Context) {
 		req.DefaultServiceType, req.LogoURL, req.DwellThresholdMinutes, now,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -87,7 +88,7 @@ func (h *SettingsHandler) GetDwellThreshold(c *gin.Context) {
 	err := h.db.QueryRow(context.Background(), `
 		SELECT dwell_threshold_minutes FROM app_settings ORDER BY created_at LIMIT 1`).Scan(&threshold)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"thresholdMinutes": threshold})
@@ -98,7 +99,7 @@ func (h *SettingsHandler) SetDwellThreshold(c *gin.Context) {
 		ThresholdMinutes int `json:"thresholdMinutes" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	_, err := h.db.Exec(context.Background(), `
@@ -107,7 +108,7 @@ func (h *SettingsHandler) SetDwellThreshold(c *gin.Context) {
 		req.ThresholdMinutes, time.Now(),
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"thresholdMinutes": req.ThresholdMinutes})

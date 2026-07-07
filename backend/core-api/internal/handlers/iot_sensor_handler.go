@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -20,7 +21,7 @@ func NewIoTSensorHandler(repo *repository.IoTSensorRepository) *IoTSensorHandler
 func (h *IoTSensorHandler) ListSensors(c *gin.Context) {
 	items, err := h.repo.ListSensors(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -29,7 +30,7 @@ func (h *IoTSensorHandler) ListSensors(c *gin.Context) {
 func (h *IoTSensorHandler) CreateSensor(c *gin.Context) {
 	var req models.CreateSensorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -41,7 +42,7 @@ func (h *IoTSensorHandler) CreateSensor(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateSensor(c.Request.Context(), s); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, s)
@@ -63,7 +64,7 @@ func (h *IoTSensorHandler) ListReadings(c *gin.Context) {
 
 	items, err := h.repo.ListReadings(c.Request.Context(), sensorIDPtr, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -72,7 +73,7 @@ func (h *IoTSensorHandler) ListReadings(c *gin.Context) {
 func (h *IoTSensorHandler) CreateReading(c *gin.Context) {
 	var req models.CreateReadingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -84,7 +85,7 @@ func (h *IoTSensorHandler) CreateReading(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateReading(c.Request.Context(), reading); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -102,7 +103,7 @@ func (h *IoTSensorHandler) ListThresholds(c *gin.Context) {
 
 	items, err := h.repo.ListThresholds(c.Request.Context(), sensorIDPtr)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -111,12 +112,12 @@ func (h *IoTSensorHandler) ListThresholds(c *gin.Context) {
 func (h *IoTSensorHandler) CreateThreshold(c *gin.Context) {
 	var req models.IoTSensorThreshold
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateThreshold(c.Request.Context(), &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, req)
@@ -126,12 +127,12 @@ func (h *IoTSensorHandler) UpdateThreshold(c *gin.Context) {
 	id := c.Param("id")
 	var req models.IoTSensorThreshold
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := h.repo.UpdateThreshold(c.Request.Context(), id, &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, req)
@@ -140,7 +141,7 @@ func (h *IoTSensorHandler) UpdateThreshold(c *gin.Context) {
 func (h *IoTSensorHandler) DeleteThreshold(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.DeleteThreshold(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})

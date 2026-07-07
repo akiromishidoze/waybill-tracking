@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
 
@@ -25,7 +26,7 @@ func (h *AuditLogHandler) List(c *gin.Context) {
 
 	logs, total, err := h.repo.List(c.Request.Context(), page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -42,7 +43,7 @@ func (h *AuditLogHandler) Export(c *gin.Context) {
 	if v := c.Query("from"); v != "" {
 		t, err := time.Parse("2006-01-02", v)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid 'from' date, expected YYYY-MM-DD"})
+			apierror.BadRequestJSON(c, "invalid 'from' date, expected YYYY-MM-DD")
 			return
 		}
 		from = &t
@@ -50,7 +51,7 @@ func (h *AuditLogHandler) Export(c *gin.Context) {
 	if v := c.Query("to"); v != "" {
 		t, err := time.Parse("2006-01-02", v)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid 'to' date, expected YYYY-MM-DD"})
+			apierror.BadRequestJSON(c, "invalid 'to' date, expected YYYY-MM-DD")
 			return
 		}
 		end := t.Add(24*time.Hour - time.Second)
@@ -59,7 +60,7 @@ func (h *AuditLogHandler) Export(c *gin.Context) {
 
 	logs, err := h.repo.Export(c.Request.Context(), from, to)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 

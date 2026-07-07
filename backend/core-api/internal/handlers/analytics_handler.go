@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/waybill-tracking/core-api/internal/analytics"
 	"github.com/waybill-tracking/core-api/internal/feature"
@@ -77,7 +78,7 @@ func (h *AnalyticsHandler) SLAReport(c *gin.Context) {
 		GROUP BY DATE(updated_at)
 		ORDER BY date`, from, to)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	defer rows.Close()
@@ -115,7 +116,7 @@ func (h *AnalyticsHandler) CarrierPerformance(c *gin.Context) {
 		GROUP BY carrier_name
 		ORDER BY total_shipments DESC`)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	defer rows.Close()
@@ -159,7 +160,7 @@ func (h *AnalyticsHandler) RegionPerformance(c *gin.Context) {
 		ORDER BY total_shipments DESC
 		LIMIT 20`)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	defer rows.Close()
@@ -198,7 +199,7 @@ func (h *AnalyticsHandler) PredictETA(c *gin.Context) {
 		SELECT tracking_number, origin, destination, status, created_at
 		FROM waybills WHERE id=$1`, waybillID).Scan(&trackingNumber, &origin, &destination, &status, &createdAt)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
@@ -330,7 +331,7 @@ func (h *AnalyticsHandler) ExportExcel(c *gin.Context) {
 		SELECT tracking_number, status, origin, destination, COALESCE(carrier_name,''), created_at, updated_at
 		FROM waybills WHERE created_at BETWEEN $1 AND $2 ORDER BY created_at DESC`, from, to)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	defer rows.Close()

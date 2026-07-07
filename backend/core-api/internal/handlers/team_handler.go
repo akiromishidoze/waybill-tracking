@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/google/uuid"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
@@ -21,7 +22,7 @@ func NewTeamHandler(repo *repository.TeamRepository, waybillRepo *repository.Way
 func (h *TeamHandler) List(c *gin.Context) {
 	teams, err := h.repo.List(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, teams)
@@ -30,13 +31,13 @@ func (h *TeamHandler) List(c *gin.Context) {
 func (h *TeamHandler) Create(c *gin.Context) {
 	var req models.Team
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	req.ID = uuid.New().String()
 	team, err := h.repo.Create(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, team)
@@ -46,12 +47,12 @@ func (h *TeamHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var req models.Team
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	team, err := h.repo.Update(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, team)
@@ -60,7 +61,7 @@ func (h *TeamHandler) Update(c *gin.Context) {
 func (h *TeamHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -70,18 +71,18 @@ func (h *TeamHandler) AssignToWaybill(c *gin.Context) {
 	waybillID := c.Param("id")
 	var req models.AssignTeamRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	wb, err := h.waybillRepo.GetByID(c.Request.Context(), waybillID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
 	if err := h.waybillRepo.AssignTeam(c.Request.Context(), waybillID, req.TeamID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 

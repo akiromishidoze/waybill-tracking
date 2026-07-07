@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/csv"
+	"errors"
 	"time"
 
 	"io"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	es "github.com/waybill-tracking/core-api/internal/elastic"
 	"github.com/waybill-tracking/core-api/internal/feature"
 	"github.com/waybill-tracking/core-api/internal/kafka"
@@ -57,21 +59,21 @@ func (h *WaybillHandler) List(c *gin.Context) {
 		if err != nil || len(waybills) == 0 {
 			logger.WithRequestID(reqID(c)).Warn("elasticsearch search failed or empty, falling back to postgres", zap.Error(err))
 			if h.repo == nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "repository unavailable"})
+				apierror.InternalJSON(c, errors.New("repository unavailable"))
 				return
 			}
 			waybills, total, err = h.repo.List(c.Request.Context(), search, page, limit)
 		}
 	} else {
 		if h.repo == nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "repository unavailable"})
+			apierror.InternalJSON(c, errors.New("repository unavailable"))
 			return
 		}
 		waybills, total, err = h.repo.List(c.Request.Context(), search, page, limit)
 	}
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -89,13 +91,13 @@ func (h *WaybillHandler) Get(c *gin.Context) {
 	id := c.Param("id")
 
 	if h.repo == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
@@ -106,14 +108,14 @@ func (h *WaybillHandler) Track(c *gin.Context) {
 	trackingNumber := c.Param("trackingNumber")
 
 	if h.repo == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "tracking number not found"})
+		apierror.NotFoundJSON(c, "tracking number not found")
 		return
 	}
 
 	wb, err := h.repo.GetByTrackingNumber(c.Request.Context(), trackingNumber)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "tracking number not found"})
+		apierror.NotFoundJSON(c, "tracking number not found")
 		return
 	}
 
@@ -124,7 +126,7 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	var req models.CreateWaybillRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 
 		return
 	}
@@ -132,7 +134,7 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	userIDRaw, _ := c.Get("userID")
 	userID, ok := userIDRaw.(string)
 	if !ok || userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		apierror.UnauthorizedJSON(c, "unauthorized")
 		return
 	}
 	userName, _ := c.Get("userName")
@@ -159,7 +161,7 @@ func (h *WaybillHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), wb); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 
 		return
 	}
@@ -317,18 +319,18 @@ func (h *WaybillHandler) Update(c *gin.Context) {
 	var req models.UpdateWaybillRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
 	if err := h.repo.Update(c.Request.Context(), id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -365,7 +367,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	var req models.StatusUpdateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 
 		return
 	}
@@ -373,7 +375,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 
 		return
 	}
@@ -411,7 +413,7 @@ func (h *WaybillHandler) UpdateStatus(c *gin.Context) {
 	wb.Status = req.Status
 
 	if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 
 		return
 	}
@@ -452,13 +454,13 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 	var req models.StatusUpdateRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	wb, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "waybill not found"})
+		apierror.NotFoundJSON(c, "waybill not found")
 		return
 	}
 
@@ -494,7 +496,7 @@ func (h *WaybillHandler) CreateScan(c *gin.Context) {
 	wb.Status = req.Status
 
 	if err := h.repo.UpdateStatus(c.Request.Context(), wb, event); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -536,12 +538,12 @@ func (h *WaybillHandler) Delete(c *gin.Context) {
 
 	userRole := c.GetString("userRole")
 	if userRole != "ADMIN" && userRole != "OPS" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "only OPS and ADMIN can delete waybills"})
+		apierror.ForbiddenJSON(c, "only OPS and ADMIN can delete waybills")
 		return
 	}
 
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -563,11 +565,11 @@ func (h *WaybillHandler) BatchUpdateStatus(c *gin.Context) {
 		Remark   *string              `json:"remark,omitempty"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 	if len(req.IDs) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ids must not be empty"})
+		apierror.BadRequestJSON(c, "ids must not be empty")
 		return
 	}
 

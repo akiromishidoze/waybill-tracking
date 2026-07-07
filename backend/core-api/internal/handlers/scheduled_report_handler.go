@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -21,7 +22,7 @@ func (h *ScheduledReportHandler) List(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	items, err := h.repo.List(c.Request.Context(), userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, items)
@@ -31,7 +32,7 @@ func (h *ScheduledReportHandler) Create(c *gin.Context) {
 	userID, _ := c.Get("userID")
 	var req models.CreateScheduledReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -45,7 +46,7 @@ func (h *ScheduledReportHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), s); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, s)
@@ -55,13 +56,13 @@ func (h *ScheduledReportHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var req models.UpdateScheduledReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	updated, err := h.repo.Update(c.Request.Context(), id, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, updated)
@@ -70,7 +71,7 @@ func (h *ScheduledReportHandler) Update(c *gin.Context) {
 func (h *ScheduledReportHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
@@ -80,7 +81,7 @@ func (h *ScheduledReportHandler) RunNow(c *gin.Context) {
 	id := c.Param("id")
 	s, err := h.repo.GetByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
+		apierror.NotFoundJSON(c, "report not found")
 		return
 	}
 

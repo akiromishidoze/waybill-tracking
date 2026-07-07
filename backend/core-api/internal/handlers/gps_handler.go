@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/waybill-tracking/core-api/internal/logger"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ func NewGPSHandler(repo *repository.GPSRepository, wsHub *ws.Hub, kafkaProducer 
 func (h *GPSHandler) CreateLocation(c *gin.Context) {
 	var req models.CreateGPSLocationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -59,7 +60,7 @@ func (h *GPSHandler) CreateLocation(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), loc); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -84,7 +85,7 @@ func (h *GPSHandler) CreateLocation(c *gin.Context) {
 func (h *GPSHandler) ListCurrent(c *gin.Context) {
 	views, err := h.repo.ListCurrentWaybillViews(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, views)
@@ -93,12 +94,12 @@ func (h *GPSHandler) ListCurrent(c *gin.Context) {
 func (h *GPSHandler) GetHistory(c *gin.Context) {
 	waybillID := c.Param("id")
 	if waybillID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing waybill id"})
+		apierror.BadRequestJSON(c, "missing waybill id")
 		return
 	}
 	locs, err := h.repo.ListHistory(c.Request.Context(), waybillID, 100)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, locs)
@@ -107,12 +108,12 @@ func (h *GPSHandler) GetHistory(c *gin.Context) {
 func (h *GPSHandler) GetLatest(c *gin.Context) {
 	waybillID := c.Param("id")
 	if waybillID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing waybill id"})
+		apierror.BadRequestJSON(c, "missing waybill id")
 		return
 	}
 	loc, err := h.repo.GetLatestByWaybill(c.Request.Context(), waybillID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "no gps data found"})
+		apierror.NotFoundJSON(c, "no gps data found")
 		return
 	}
 	c.JSON(http.StatusOK, loc)

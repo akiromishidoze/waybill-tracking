@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/waybill-tracking/core-api/internal/utils"
 )
@@ -40,7 +41,7 @@ func (h *AttachmentHandler) List(c *gin.Context) {
 
 	rows, err := h.db.Query(c, `SELECT id, waybill_id, file_name, file_type, file_size, data, uploaded_by, uploaded_at FROM attachments WHERE waybill_id=$1 ORDER BY uploaded_at DESC`, waybillID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 	defer rows.Close()
@@ -49,7 +50,7 @@ func (h *AttachmentHandler) List(c *gin.Context) {
 	for rows.Next() {
 		var a Attachment
 		if err := rows.Scan(&a.ID, &a.WaybillID, &a.FileName, &a.FileType, &a.FileSize, &a.Data, &a.UploadedBy, &a.UploadedAt); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			apierror.InternalJSON(c, err)
 			return
 		}
 		attachments = append(attachments, a)
@@ -63,22 +64,22 @@ func (h *AttachmentHandler) Upload(c *gin.Context) {
 
 	var req uploadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := utils.ValidateFileSize(req.FileSize, 10*1024*1024); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := utils.ValidateFileName(req.FileName); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	if err := utils.ValidateFileType(req.FileType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -88,7 +89,7 @@ func (h *AttachmentHandler) Upload(c *gin.Context) {
 		waybillID, req.FileName, req.FileType, req.FileSize, req.Data, userID,
 	).Scan(&a.ID, &a.WaybillID, &a.FileName, &a.FileType, &a.FileSize, &a.Data, &a.UploadedBy, &a.UploadedAt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
@@ -103,7 +104,7 @@ func (h *AttachmentHandler) Get(c *gin.Context) {
 		`SELECT id, waybill_id, file_name, file_type, file_size, data, uploaded_by, uploaded_at FROM attachments WHERE id=$1`, attachmentID,
 	).Scan(&a.ID, &a.WaybillID, &a.FileName, &a.FileType, &a.FileSize, &a.Data, &a.UploadedBy, &a.UploadedAt)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "attachment not found"})
+		apierror.NotFoundJSON(c, "attachment not found")
 		return
 	}
 
@@ -116,7 +117,7 @@ func (h *AttachmentHandler) Delete(c *gin.Context) {
 
 	_, err := h.db.Exec(c, `DELETE FROM attachments WHERE id=$1 AND uploaded_by=$2`, attachmentID, userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "attachment not found"})
+		apierror.NotFoundJSON(c, "attachment not found")
 		return
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
 )
@@ -37,8 +38,8 @@ type ECommerceOrderWebhook struct {
 	Dimensions       string  `json:"dimensions"`
 	ServiceType      string  `json:"serviceType"`
 	Items            []struct {
-		Name     string `json:"name"`
-		Quantity int    `json:"quantity"`
+		Name     string  `json:"name"`
+		Quantity int     `json:"quantity"`
 		Price    float64 `json:"price"`
 	} `json:"items"`
 }
@@ -48,14 +49,14 @@ func (h *ECommerceWebhookHandler) ReceiveOrder(c *gin.Context) {
 
 	var req ECommerceOrderWebhook
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
 	// Verify platform exists
 	platform, err := h.ecommerceRepo.GetPlatformByID(c.Request.Context(), platformID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "platform not found"})
+		apierror.NotFoundJSON(c, "platform not found")
 		return
 	}
 
@@ -93,18 +94,18 @@ func (h *ECommerceWebhookHandler) ReceiveOrder(c *gin.Context) {
 	}
 
 	if err := h.waybillRepo.Create(c.Request.Context(), wb); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.InternalJSON(c, err)
 		return
 	}
 
 	// Log sync event
 	syncLog := models.ECommerceSyncLog{
-		PlatformID:  platformID,
-		Platform:    platform.Platform,
-		StoreName:   platform.StoreName,
-		Status:      "success",
+		PlatformID:   platformID,
+		Platform:     platform.Platform,
+		StoreName:    platform.StoreName,
+		Status:       "success",
 		OrdersSynced: 1,
-		ErrorsCount: 0,
+		ErrorsCount:  0,
 	}
 	h.ecommerceRepo.CreateSyncLog(c.Request.Context(), syncLog)
 

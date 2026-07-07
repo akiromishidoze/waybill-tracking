@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
 	"github.com/waybill-tracking/core-api/internal/repository"
-	"net/http"
 )
 
 type WebhookHandler struct {
@@ -22,11 +24,9 @@ func (h *WebhookHandler) List(c *gin.Context) {
 	hooks, err := h.repo.ListByUser(c.Request.Context(), userID)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		apierror.InternalJSON(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, hooks)
 }
 
@@ -34,8 +34,7 @@ func (h *WebhookHandler) Create(c *gin.Context) {
 	var req models.CreateWebhookRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -51,11 +50,9 @@ func (h *WebhookHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.repo.Create(c.Request.Context(), hook); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		apierror.InternalJSON(c, err)
 		return
 	}
-
 	c.JSON(http.StatusCreated, hook)
 }
 
@@ -64,8 +61,7 @@ func (h *WebhookHandler) Update(c *gin.Context) {
 	hook, err := h.repo.GetByID(c.Request.Context(), id)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "webhook not found"})
-
+		apierror.NotFoundJSON(c, "webhook not found")
 		return
 	}
 
@@ -73,16 +69,14 @@ func (h *WebhookHandler) Update(c *gin.Context) {
 	userIDStr2, _ := userIDRaw2.(string)
 
 	if hook.UserID != userIDStr2 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "not your webhook"})
-
+		apierror.ForbiddenJSON(c, "not your webhook")
 		return
 	}
 
 	var req models.UpdateWebhookRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
+		apierror.BadRequestJSON(c, err.Error())
 		return
 	}
 
@@ -103,11 +97,9 @@ func (h *WebhookHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.repo.Update(c.Request.Context(), hook); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		apierror.InternalJSON(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, hook)
 }
 
@@ -116,8 +108,7 @@ func (h *WebhookHandler) Delete(c *gin.Context) {
 	hook, err := h.repo.GetByID(c.Request.Context(), id)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "webhook not found"})
-
+		apierror.NotFoundJSON(c, "webhook not found")
 		return
 	}
 
@@ -125,16 +116,13 @@ func (h *WebhookHandler) Delete(c *gin.Context) {
 	userIDStr3, _ := userIDRaw3.(string)
 
 	if hook.UserID != userIDStr3 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "not your webhook"})
-
+		apierror.ForbiddenJSON(c, "not your webhook")
 		return
 	}
 
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		apierror.InternalJSON(c, err)
 		return
 	}
-
 	c.JSON(http.StatusNoContent, nil)
 }

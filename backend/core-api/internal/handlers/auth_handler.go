@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"database/sql"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -71,7 +73,7 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req registerRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -81,13 +83,13 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		if !validRoles[req.Role] {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid role"})
+			apierror.BadRequestJSON(c, "invalid role")
 			return
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			apierror.InternalJSON(c, errors.New("failed to hash password"))
 			return
 		}
 
@@ -102,7 +104,7 @@ func RegisterHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			req.Email, req.Name, string(hashed), req.Role, req.Company,
 		).Scan(&userID)
 		if err != nil {
-			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+			apierror.ConflictJSON(c, "email already registered")
 			return
 		}
 
@@ -114,7 +116,7 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLo
 	return func(c *gin.Context) {
 		var req loginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -135,7 +137,7 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLo
 			&user.ID, &user.Email, &user.Name, &user.Password, &user.Role, &user.Company,
 		)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			apierror.UnauthorizedJSON(c, "invalid credentials")
 			return
 		}
 
@@ -143,7 +145,7 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLo
 			utils.RecordFailedLogin(c.Request.Context(), rdb, req.Email)
 			auditLogger.Log(c.Request.Context(), user.ID, user.Name, user.Role,
 				"USER_LOGIN_FAILED", "user", user.ID, "Failed login attempt", c.ClientIP())
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			apierror.UnauthorizedJSON(c, "invalid credentials")
 			return
 		}
 
@@ -195,7 +197,7 @@ func MeHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			&user.ID, &user.Email, &user.Name, &user.Role, &user.Company,
 		)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			apierror.NotFoundJSON(c, "user not found")
 			return
 		}
 
@@ -218,7 +220,7 @@ func ListUsersHandler(db *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		rows, err := db.Query(c, `SELECT id, email, name, role, COALESCE(company,'') FROM users ORDER BY name`)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			apierror.InternalJSON(c, err)
 			return
 		}
 		defer rows.Close()
@@ -235,7 +237,7 @@ func ListUsersHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		for rows.Next() {
 			var u userResponse
 			if err := rows.Scan(&u.ID, &u.Email, &u.Name, &u.Role, &u.Company); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				apierror.InternalJSON(c, err)
 				return
 			}
 			users = append(users, u)
@@ -251,7 +253,7 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			NewPassword string `json:"newPassword" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -262,13 +264,13 @@ func ResetPasswordHandler(db *pgxpool.Pool) gin.HandlerFunc {
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			apierror.InternalJSON(c, errors.New("failed to hash password"))
 			return
 		}
 
 		_, err = db.Exec(c, `UPDATE users SET password=$1, updated_at=NOW() WHERE id=$2`, string(hashed), req.UserID)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			apierror.NotFoundJSON(c, "user not found")
 			return
 		}
 
@@ -282,7 +284,7 @@ func ForgotPasswordHandler(db *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc
 			Email string `json:"email" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -298,7 +300,7 @@ func ForgotPasswordHandler(db *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc
 
 		token, _, err := password.GenerateToken(c.Request.Context(), db, user.ID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate reset token"})
+			apierror.InternalJSON(c, errors.New("failed to generate reset token"))
 			return
 		}
 
@@ -314,7 +316,7 @@ func ResetPasswordWithTokenHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			NewPassword string `json:"newPassword" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -325,24 +327,24 @@ func ResetPasswordWithTokenHandler(db *pgxpool.Pool) gin.HandlerFunc {
 
 		userID, err := password.ValidateToken(c.Request.Context(), db, req.Token)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or expired token"})
+			apierror.BadRequestJSON(c, "invalid or expired token")
 			return
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			apierror.InternalJSON(c, errors.New("failed to hash password"))
 			return
 		}
 
 		_, err = db.Exec(c, `UPDATE users SET password=$1, password_changed_at=NOW(), updated_at=NOW() WHERE id=$2`, string(hashed), userID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update password"})
+			apierror.InternalJSON(c, errors.New("failed to update password"))
 			return
 		}
 
 		if err := password.MarkUsed(c.Request.Context(), db, req.Token); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to mark token used"})
+			apierror.InternalJSON(c, errors.New("failed to mark token used"))
 			return
 		}
 
@@ -386,7 +388,7 @@ func RefreshTokenHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			AccessToken string `json:"accessToken" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "missing accessToken"})
+			apierror.BadRequestJSON(c, "missing accessToken")
 			return
 		}
 
@@ -395,19 +397,19 @@ func RefreshTokenHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 			return []byte(jwtSecret), nil
 		})
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			apierror.UnauthorizedJSON(c, "invalid token")
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
+			apierror.UnauthorizedJSON(c, "invalid token claims")
 			return
 		}
 
 		if exp, ok := claims["exp"].(float64); ok {
 			if time.Now().Unix() > int64(exp)+7*24*3600 {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired beyond grace period"})
+				apierror.UnauthorizedJSON(c, "token expired beyond grace period")
 				return
 			}
 		}
@@ -422,7 +424,7 @@ func RefreshTokenHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 		}
 		err = db.QueryRow(c, `SELECT name, company FROM users WHERE id=$1`, userID).Scan(&user.Name, &user.Company)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			apierror.UnauthorizedJSON(c, "user not found")
 			return
 		}
 
@@ -440,18 +442,18 @@ func UpdateUserRoleHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		id := c.Param("id")
 		var req roleUpdateRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
 		if !validRoles[req.Role] {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid role"})
+			apierror.BadRequestJSON(c, "invalid role")
 			return
 		}
 
 		_, err := db.Exec(c, `UPDATE users SET role=$1 WHERE id=$2`, req.Role, id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			apierror.InternalJSON(c, err)
 			return
 		}
 
@@ -463,7 +465,7 @@ func CreateUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req registerRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			apierror.BadRequestJSON(c, err.Error())
 			return
 		}
 
@@ -473,13 +475,13 @@ func CreateUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		if !validRoles[req.Role] {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid role"})
+			apierror.BadRequestJSON(c, "invalid role")
 			return
 		}
 
 		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
+			apierror.InternalJSON(c, errors.New("failed to hash password"))
 			return
 		}
 
@@ -489,7 +491,7 @@ func CreateUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
 			req.Email, req.Name, string(hashed), req.Role, req.Company,
 		).Scan(&userID)
 		if err != nil {
-			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+			apierror.ConflictJSON(c, "email already registered")
 			return
 		}
 
@@ -509,22 +511,22 @@ func DeleteUserHandler(db *pgxpool.Pool) gin.HandlerFunc {
 
 		adminID, _ := c.Get("userID")
 		if adminID == id {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "cannot delete yourself"})
+			apierror.BadRequestJSON(c, "cannot delete yourself")
 			return
 		}
 
 		res, err := db.Exec(c, `DELETE FROM users WHERE id=$1`, id)
 		if err != nil {
 			if strings.Contains(err.Error(), "23503") {
-				c.JSON(http.StatusConflict, gin.H{"error": "cannot delete user with associated records; reassign or remove related waybills first"})
+				apierror.ConflictJSON(c, "cannot delete user with associated records; reassign or remove related waybills first")
 				return
 			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			apierror.InternalJSON(c, err)
 			return
 		}
 
 		if res.RowsAffected() == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			apierror.NotFoundJSON(c, "user not found")
 			return
 		}
 

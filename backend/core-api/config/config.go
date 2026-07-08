@@ -7,27 +7,27 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DatabaseURL      string
-	RedisURL         string
+	Port                  string
+	DatabaseURL           string
+	RedisURL              string
 	ElasticsearchURL      string
 	ElasticsearchUsername string
 	ElasticsearchPassword string
-	KafkaBrokers     string
-	KafkaTopic       string
-	JWTSecret        string
-	JWTSecretOld     string
-	TwilioSID        string
-	TwilioAuthToken  string
-	SendGridKey      string
-	AnalyticsAPIURL  string
-	InternalAPIKey   string
-	FrontendURL      string
-	MigrationsDir    string
-	AllowedOrigins   []string
-	AdminEmail       string
-	AdminPassword    string
-	AdminName        string
+	KafkaBrokers          string
+	KafkaTopic            string
+	JWTSecret             string
+	JWTSecretOld          string
+	TwilioSID             string
+	TwilioAuthToken       string
+	SendGridKey           string
+	AnalyticsAPIURL       string
+	InternalAPIKey        string
+	FrontendURL           string
+	MigrationsDir         string
+	AllowedOrigins        []string
+	AdminEmail            string
+	AdminPassword         string
+	AdminName             string
 }
 
 func Load() *Config {
@@ -35,27 +35,27 @@ func Load() *Config {
 	ginMode := getEnv("GIN_MODE", "debug")
 
 	cfg := &Config{
-		Port: getEnv("PORT", "8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
-		RedisURL: getEnv("REDIS_URL", "redis://localhost:6379/0"),
-		ElasticsearchURL: getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
+		Port:                  getEnv("PORT", "8080"),
+		DatabaseURL:           getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/waybill?sslmode=disable"),
+		RedisURL:              getEnv("REDIS_URL", "redis://localhost:6379/0"),
+		ElasticsearchURL:      getEnv("ELASTICSEARCH_URL", "http://localhost:9200"),
 		ElasticsearchUsername: getEnv("ELASTICSEARCH_USERNAME", ""),
 		ElasticsearchPassword: getEnv("ELASTICSEARCH_PASSWORD", ""),
-		KafkaBrokers: getEnv("KAFKA_BROKERS", "kafka:29092"),
-		KafkaTopic: getEnv("KAFKA_TOPIC", "waybill-events"),
-		JWTSecret: jwtSecret,
-		JWTSecretOld: getEnv("JWT_SECRET_OLD", ""),
-		MigrationsDir: getEnv("MIGRATIONS_DIR", "migrations"),
-		TwilioSID: getEnv("TWILIO_SID", ""),
-		TwilioAuthToken: getEnv("TWILIO_AUTH_TOKEN", ""),
-		SendGridKey: getEnv("SENDGRID_KEY", ""),
-		AnalyticsAPIURL: getEnv("ANALYTICS_API_URL", "http://localhost:8000"),
-		InternalAPIKey: getEnv("INTERNAL_API_KEY", ""),
-		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3010"),
-		AllowedOrigins: getEnvSliceTrimmed("ALLOWED_ORIGINS", "http://localhost:3010"),
-		AdminEmail: getEnv("ADMIN_EMAIL", "admin@waybilltrack.com"),
-		AdminPassword: getEnv("ADMIN_PASSWORD", "teccadmin00"),
-		AdminName: getEnv("ADMIN_NAME", "Admin"),
+		KafkaBrokers:          getEnv("KAFKA_BROKERS", "kafka:29092"),
+		KafkaTopic:            getEnv("KAFKA_TOPIC", "waybill-events"),
+		JWTSecret:             jwtSecret,
+		JWTSecretOld:          getEnv("JWT_SECRET_OLD", ""),
+		MigrationsDir:         getEnv("MIGRATIONS_DIR", "migrations"),
+		TwilioSID:             getEnv("TWILIO_SID", ""),
+		TwilioAuthToken:       getEnv("TWILIO_AUTH_TOKEN", ""),
+		SendGridKey:           getEnv("SENDGRID_KEY", ""),
+		AnalyticsAPIURL:       getEnv("ANALYTICS_API_URL", "http://localhost:8000"),
+		InternalAPIKey:        getEnv("INTERNAL_API_KEY", ""),
+		FrontendURL:           getEnv("FRONTEND_URL", "http://localhost:3010"),
+		AllowedOrigins:        getEnvSliceTrimmed("ALLOWED_ORIGINS", "http://localhost:3010"),
+		AdminEmail:            getEnv("ADMIN_EMAIL", "admin@waybilltrack.com"),
+		AdminPassword:         getEnv("ADMIN_PASSWORD", "teccadmin00"),
+		AdminName:             getEnv("ADMIN_NAME", "Admin"),
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {
@@ -65,6 +65,16 @@ func Load() *Config {
 
 	if len(cfg.JWTSecret) < 32 {
 		fmt.Fprintln(os.Stderr, "FATAL: JWT_SECRET must be at least 32 characters long.")
+		os.Exit(1)
+	}
+
+	if cfg.AdminPassword == "teccadmin00" && ginMode == "release" {
+		fmt.Fprintln(os.Stderr, "FATAL: ADMIN_PASSWORD is set to the default placeholder. Set a strong password before starting in production.")
+		os.Exit(1)
+	}
+
+	if len(cfg.AdminPassword) < 8 {
+		fmt.Fprintln(os.Stderr, "FATAL: ADMIN_PASSWORD must be at least 8 characters long.")
 		os.Exit(1)
 	}
 

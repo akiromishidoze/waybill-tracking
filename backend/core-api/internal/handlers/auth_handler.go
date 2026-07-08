@@ -2,19 +2,19 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"database/sql"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/waybill-tracking/core-api/config"
+	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/password"
 	"github.com/waybill-tracking/core-api/internal/repository"
 	"github.com/waybill-tracking/core-api/internal/utils"
@@ -52,6 +52,7 @@ func respondWithToken(c *gin.Context, jwtSecret, userID, email, name, role, comp
 		"email": email,
 		"name":  name,
 		"role":  role,
+		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -156,6 +157,7 @@ func LoginHandler(jwtSecret string, db *pgxpool.Pool, rdb *redis.Client, auditLo
 			"sub":   user.ID,
 			"email": user.Email,
 			"role":  user.Role,
+			"iat":   time.Now().Unix(),
 			"exp":   time.Now().Add(24 * time.Hour).Unix(),
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -437,7 +439,7 @@ func RefreshTokenHandler(jwtSecret string, db *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
-func UpdateUserRoleHandler(db *pgxpool.Pool) gin.HandlerFunc {
+func UpdateUserRoleHandler(db *pgxpool.Pool, rdb *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		var req roleUpdateRequest
@@ -455,6 +457,10 @@ func UpdateUserRoleHandler(db *pgxpool.Pool) gin.HandlerFunc {
 		if err != nil {
 			apierror.InternalJSON(c, err)
 			return
+		}
+
+		if rdb != nil {
+			rdb.Set(context.Background(), "user:invalidate-before:"+id, time.Now().Unix(), 25*time.Hour)
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "role updated"})

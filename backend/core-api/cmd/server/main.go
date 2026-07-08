@@ -241,7 +241,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 			admin.GET("/users", handlers.ListUsersHandler(db))
 			admin.POST("/users", handlers.CreateUserHandler(db))
 			admin.DELETE("/users/:id", handlers.DeleteUserHandler(db))
-			admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db))
+			admin.PATCH("/users/:id/role", handlers.UpdateUserRoleHandler(db, rdb))
 			admin.POST("/auth/reset-password", handlers.ResetPasswordHandler(db))
 			admin.GET("/audit-logs", deps.AuditLogHandler.List)
 			admin.GET("/audit-logs/export", deps.AuditLogHandler.Export)

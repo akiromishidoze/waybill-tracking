@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -58,6 +59,20 @@ func AuthMiddleware(rdb *redis.Client, secrets ...string) gin.HandlerFunc {
 				if err == nil && exists > 0 {
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token has been revoked"})
 					return
+				}
+			}
+
+			if userID, ok := claims["sub"].(string); ok && userID != "" {
+				fenceStr, err := rdb.Get(context.Background(), "user:invalidate-before:"+userID).Result()
+				if err == nil && fenceStr != "" {
+					var fence int64
+					if _, scanErr := fmt.Sscan(fenceStr, &fence); scanErr == nil {
+						iat, _ := claims["iat"].(float64)
+						if int64(iat) < fence {
+							c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token has been revoked"})
+							return
+						}
+					}
 				}
 			}
 		}

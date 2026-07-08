@@ -19,8 +19,8 @@ jobs:
       run:
         working-directory: backend/core-api
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.23"
           cache-dependency-path: backend/core-api/go.sum
@@ -28,7 +28,7 @@ jobs:
       - run: go mod download
       - run: go vet ./...
       - run: go test ./... -v -race -coverprofile=coverage.out
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v4
         with:
           files: backend/core-api/coverage.out
 
@@ -38,8 +38,8 @@ jobs:
       run:
         working-directory: backend/analytics-api
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
@@ -54,8 +54,8 @@ jobs:
       run:
         working-directory: frontend/dashboard
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
@@ -82,13 +82,13 @@ jobs:
           - name: dashboard
             context: frontend/dashboard
     steps:
-      - uses: actions/checkout@v5
-      - uses: docker/login-action@v4
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v7
+      - uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.context }}
           push: true
@@ -96,30 +96,23 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:latest
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
 
-  deploy:
+  deploy-gcp:
     needs: [build-and-push]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    env:
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
-      - name: Skip deploy if GCP credentials not configured
-        if: env.GCP_SA_KEY == ''
-        run: |
-          echo "GCP_SA_KEY secret is not set — skipping deploy."
-          exit 0
+      - uses: actions/checkout@v4
       - uses: google-github-actions/auth@v2
-        if: env.GCP_SA_KEY != ''
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/get-gke-credentials@v2
-        if: env.GCP_SA_KEY != ''
         with:
           cluster_name: waybill-cluster
           location: us-central1
-      - if: env.GCP_SA_KEY != ''
-        run: |
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - run: |
           kubectl set image deployment/core-api core-api=ghcr.io/${{ github.repository }}/core-api:${{ env.IMAGE_TAG }} -n waybill
           kubectl set image deployment/analytics-api analytics-api=ghcr.io/${{ github.repository }}/analytics-api:${{ env.IMAGE_TAG }} -n waybill
           kubectl set image deployment/dashboard dashboard=ghcr.io/${{ github.repository }}/dashboard:${{ env.IMAGE_TAG }} -n waybill

@@ -97,7 +97,8 @@ jobs:
   terraform-gcp:
     name: Terraform GCP
     runs-on: ubuntu-latest
-    if: secrets.GCP_SA_KEY != ''
+    env:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
     defaults:
       run:
         working-directory: infrastructure/terraform/gcp
@@ -105,11 +106,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Skip if GCP credentials not configured
+        if: env.GCP_SA_KEY == ''
+        run: |
+          echo "GCP_SA_KEY secret is not set — skipping GCP Terraform."
+          exit 0
+
       - uses: hashicorp/setup-terraform@v3
+        if: env.GCP_SA_KEY != ''
         with:
           terraform_version: "1.8.x"
 
       - name: Authenticate to GCP
+        if: env.GCP_SA_KEY != ''
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}

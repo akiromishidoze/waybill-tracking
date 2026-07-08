@@ -1,5 +1,5 @@
-import type { AxiosInstance } from 'axios'
-import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, AppSettings, Team, Attachment, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard } from '@/types/waybill'
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import type { Waybill, ScanEvent, User, DashboardStats, ExceptionCodeInfo, AuditLog, Carrier, AppSettings, Team, Attachment, EscalationRule, Escalation, DwellSegment, DwellAlert, GeofenceEvent, ReportSchedule, RegionPerformance, ErpIntegration, DriverAssignment, DriverScanEvent, CustomsShipment, CodPayment, BiIntegration, CostAnalytics, DemandForecast, CarbonFootprint, ECommerceDashboard, WhiteLabelPortalData, IotSensorDashboard, AggregatedTracking, Webhook, ReturnRequest } from '@/types/waybill'
 
 const _MOCK_USER: User = { id: 'admin-001', email: 'admin@waybilltrack.com', name: 'Admin User', role: 'ADMIN', company: 'WaybillTrack' }
 const _MOCK_TOKEN = 'mock-jwt-token-admin'
@@ -45,7 +45,19 @@ const seedCarriers: Carrier[] = [
   { id: 'car-005', name: 'J&T Express', apiEndpoint: 'https://api.jtexpress.ph', apiKey: 'jt-key-005', isActive: true, trackingUrlTemplate: 'https://www.jtexpress.ph/track/{tracking}', createdAt: ago(720) },
 ]
 
-const seedCarrierPerformance: any[] = [
+interface CarrierPerformance {
+  carrierId: string
+  carrierName: string
+  totalShipments: number
+  onTimeRate: number
+  exceptionRate: number
+  deliveredCount: number
+  slaBreaches: number
+  avgTransitHours: number
+  isActive: boolean
+}
+
+const seedCarrierPerformance: CarrierPerformance[] = [
   { carrierId: 'car-001', carrierName: 'LBC Express', totalShipments: 1520, onTimeRate: 88.2, exceptionRate: 4.8, deliveredCount: 1340, slaBreaches: 180, avgTransitHours: 22.4, isActive: true },
   { carrierId: 'car-002', carrierName: 'DHL Philippines', totalShipments: 880, onTimeRate: 94.9, exceptionRate: 2.1, deliveredCount: 835, slaBreaches: 45, avgTransitHours: 16.8, isActive: true },
   { carrierId: 'car-004', carrierName: 'GoGo Xpress', totalShipments: 650, onTimeRate: 80.0, exceptionRate: 6.5, deliveredCount: 520, slaBreaches: 130, avgTransitHours: 28.5, isActive: true },
@@ -236,7 +248,22 @@ const seedWaybills: Waybill[] = [
   },
 ]
 
-const seedReturns: any[] = [
+interface ReturnWaybill {
+  id: string
+  waybillId: string
+  trackingNumber: string
+  recipientName: string
+  origin: string
+  destination: string
+  status: string
+  returnInfo?: ReturnRequest
+  reason?: string
+  requestedAt?: string
+  carrier?: string
+  notes?: string
+}
+
+const seedReturns: ReturnWaybill[] = [
   { id: 'ret-001', waybillId: 'wb-006', trackingNumber: 'LBC-2024-1006', recipientName: 'Leticia Chua', origin: 'Manila', destination: 'Pasig City', status: 'RETURN_REQUESTED', returnInfo: { status: 'RETURN_REQUESTED', reason: 'Delivery failed — recipient not available after 3 attempts', requestedAt: ago(1), carrier: 'LBC Express', notes: 'Recipient requested re-delivery to office address, pending confirmation' }, reason: 'Delivery failed — recipient not available after 3 attempts', requestedAt: ago(1), carrier: 'LBC Express', notes: 'Recipient requested re-delivery to office address, pending confirmation' },
   { id: 'ret-002', waybillId: 'wb-013', trackingNumber: 'GOGO-2024-5013', recipientName: 'Grace Villar', origin: 'Manila', destination: 'Iloilo City', status: 'RETURN_IN_TRANSIT', returnInfo: { status: 'RETURN_IN_TRANSIT', reason: 'Wrong address provided by shipper', requestedAt: ago(2), carrier: 'GoGo Xpress', notes: 'Shipper contacted — awaiting corrected address' }, reason: 'Wrong address provided by shipper', requestedAt: ago(2), carrier: 'GoGo Xpress', notes: 'Shipper contacted — awaiting corrected address' },
 ]
@@ -280,12 +307,12 @@ const seedAuditLogs: AuditLog[] = [
   { id: 'aud-007', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'LOGIN', resourceType: 'AUTH', resourceId: 'usr-001', details: 'User logged in from admin panel', ipAddress: '10.0.0.15', createdAt: ago(24) },
 ]
 
-const seedAggregatedTracking: any[] = [
+const seedAggregatedTracking: AggregatedTracking[] = [
   { id: 'agg-001', waybillId: 'wb-004', trackingNumber: 'DHL-PH-99123', carrierId: 'car-002', carrierName: 'DHL Philippines', carrierTrackingNumber: 'DHL-800-7722-4100', status: 'IN_TRANSIT', lastEvent: 'Customs cleared at Clark Freeport', updatedAt: ago(10) },
   { id: 'agg-002', waybillId: 'wb-010', trackingNumber: 'DHL-PH-45127', carrierId: 'car-002', carrierName: 'DHL Philippines', carrierTrackingNumber: 'DHL-800-4512-7001', status: 'OUT_FOR_DELIVERY', lastEvent: 'Out for delivery in BGC area', updatedAt: ago(2) },
 ]
 
-const seedWebhooks: any[] = [
+const seedWebhooks: Webhook[] = [
   { id: 'wh-001', name: 'Slack Notifications', url: 'https://hooks.slack.com/services/T00/B00/xxx', events: ['waybill.delivered', 'exception.raised'], isActive: true, createdAt: ago(720) },
   { id: 'wh-002', name: 'SAP Order Sync', url: 'https://sap-prod.example.com/webhook/waybills', events: ['waybill.created', 'waybill.updated'], isActive: true, createdAt: ago(480) },
 ]
@@ -576,11 +603,11 @@ const db: Record<string, any[]> = {
 let dbSettings: AppSettings = { ...seedSettings }
 
 export function installMockInterceptor(api: AxiosInstance) {
-  api.interceptors.request.use(async (config: any) => {
+  api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     let url: string = (config.url || '').replace(/^\/api(?:\/v1)?/, '') || '/'
     const { method } = config
 
-    function mock(data: any, status = 200) {
+    function mock(data: unknown, status = 200) {
       config.adapter = () => Promise.resolve({ data, status, statusText: 'OK', headers: { 'content-type': 'application/json' }, config })
     }
 
@@ -698,7 +725,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     if (method === 'get' && key === 'analytics/sla') {
       const from = config.params?.from || ago(168)
       const to = config.params?.to || ago(0)
-      const rows = seedWaybills.filter(w => w.estimatedDelivery >= from && w.estimatedDelivery <= to).reduce((acc: any[], w) => {
+      const rows = seedWaybills.filter(w => w.estimatedDelivery >= from && w.estimatedDelivery <= to).reduce((acc: { date: string; total: number; onTime: number; breached: number }[], w) => {
         const date = w.estimatedDelivery.slice(0, 10)
         const existing = acc.find(r => r.date === date)
         if (existing) { existing.total++; if (!w.slaBreached) existing.onTime++; else existing.breached++ }
@@ -717,7 +744,7 @@ export function installMockInterceptor(api: AxiosInstance) {
 
     // --- Generic collection/item handlers (run after specific path handlers) ---
     if (method === 'get' && idMatch && db[collKey] && url.replace(/\/$/, '') === `/${collKey}/${itemId}`) {
-      const item = db[collKey].find((x: any) => x.id === itemId || x.waybillId === itemId)
+      const item = db[collKey].find((x: { id?: string; waybillId?: string }) => x.id === itemId || x.waybillId === itemId)
       if (item) { mock(item); return config }
     }
     if (method === 'get' && db[key]) {
@@ -738,7 +765,7 @@ export function installMockInterceptor(api: AxiosInstance) {
 
     if (method === 'post' && idMatch && url.endsWith('/acknowledge') && db[collKey]) {
       const now = new Date().toISOString()
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) {
         db[collKey][idx] = { ...db[collKey][idx], acknowledged: true, acknowledgedAt: now, acknowledgedBy: 'Admin User', updatedAt: now }
         mock(db[collKey][idx])
@@ -749,7 +776,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     if (method === 'post' && idMatch && url.endsWith('/status') && db[collKey]) {
       const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
       const now = new Date().toISOString()
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) {
         const updated = { ...db[collKey][idx], status: body.status, updatedAt: now }
         if (body.status === 'PICKED_UP') updated.pickedUpAt = now
@@ -771,7 +798,7 @@ export function installMockInterceptor(api: AxiosInstance) {
 
     if (method === 'post' && idMatch && url.endsWith('/resolve') && db[collKey]) {
       const now = new Date().toISOString()
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) {
         db[collKey][idx] = { ...db[collKey][idx], status: 'RESOLVED', resolvedAt: now, resolvedBy: 'Admin User', updatedAt: now }
         mock(db[collKey][idx])
@@ -780,18 +807,18 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
 
     if (method === 'post' && collKey === 'cod-payments' && url.includes('/settle') && db[collKey]) {
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'SETTLED', settledAt: new Date().toISOString() }; mock(db[collKey][idx]) }
       return config
     }
     if (method === 'post' && collKey === 'cod-payments' && url.includes('/dispute') && db[collKey]) {
       const body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {})
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'DISPUTED', disputeReason: body.reason || 'Flagged for dispute' }; mock(db[collKey][idx]) }
       return config
     }
     if (method === 'post' && collKey === 'cod-payments' && url.includes('/refund') && db[collKey]) {
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) { db[collKey][idx] = { ...db[collKey][idx], status: 'REFUNDED', notes: 'Refunded' }; mock(db[collKey][idx]) }
       return config
     }
@@ -808,7 +835,7 @@ export function installMockInterceptor(api: AxiosInstance) {
       }
 
       if (idMatch && db[collKey]) {
-        const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+        const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
         if (idx >= 0) {
           db[collKey][idx] = { ...db[collKey][idx], ...body, updatedAt: now }
           mock(db[collKey][idx])
@@ -829,7 +856,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
 
     if (method === 'delete' && idMatch && db[collKey]) {
-      const idx = db[collKey].findIndex((x: any) => x.id === itemId)
+      const idx = db[collKey].findIndex((x: { id?: string }) => x.id === itemId)
       if (idx >= 0) db[collKey].splice(idx, 1)
       mock({ success: true })
       return config

@@ -728,15 +728,18 @@ export interface WebhookLog {
 }
 
 export interface AggregatedTracking {
+  id?: string
   waybillId: string
   trackingNumber: string
   carrierId: string
   carrierName: string
   carrierTrackingNumber: string
   status: string
-  lastUpdated: string
-  recipientName: string
-  destination: string
+  lastUpdated?: string
+  updatedAt?: string
+  lastEvent?: string
+  recipientName?: string
+  destination?: string
   lastCarrierEvent?: {
     status: string
     location?: string
@@ -744,7 +747,9 @@ export interface AggregatedTracking {
 }
 
 export interface ReturnRequest {
+  status?: string
   reason: string
+  requestedAt?: string
   carrier?: string
   notes?: string
 }

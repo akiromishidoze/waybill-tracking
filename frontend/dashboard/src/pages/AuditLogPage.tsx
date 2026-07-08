@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { auditLogService } from '@/services/api'
 
@@ -33,6 +33,8 @@ const ACTION_LABELS: Record<string, string> = {
 
 export default function AuditLogPage() {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(20)
   const [exportFrom, setExportFrom] = useState('')
@@ -68,22 +70,22 @@ export default function AuditLogPage() {
     }
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setSearch(val)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => { setDebouncedSearch(val); setPage(1) }, 300)
+  }
+
   const { data: pageResult, isLoading } = useQuery({
-    queryKey: ['audit-logs', page],
-    queryFn: () => auditLogService.list(page, limit).then((r) => r.data),
+    queryKey: ['audit-logs', page, limit, debouncedSearch],
+    queryFn: () => auditLogService.list(page, limit, debouncedSearch).then((r) => r.data),
     refetchInterval: 15000,
   })
 
   const logs = pageResult?.data ?? []
   const total = pageResult?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / limit))
-
-  const filtered = logs.filter(
-    (l) =>
-      l.userName.toLowerCase().includes(search.toLowerCase()) ||
-      l.action.toLowerCase().includes(search.toLowerCase()) ||
-      l.details.toLowerCase().includes(search.toLowerCase()),
-  )
 
   return (
     <div>
@@ -107,7 +109,7 @@ export default function AuditLogPage() {
               type="text"
               placeholder="Search logs..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearchChange}
               style={{
                 padding: '0.5rem 0.75rem 0.5rem 2rem',
                 border: '1px solid var(--color-border-input)',
@@ -156,8 +158,8 @@ export default function AuditLogPage() {
       <div style={{ background: 'var(--color-surface)', borderRadius: 10, boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
         {isLoading ? (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}><tbody>{Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={4} />)}</tbody></table>
-        ) : filtered.length === 0 ? (
-          <EmptyState icon={ClipboardList} title="No audit logs" message={search ? 'No logs match your search.' : 'Audit log entries will appear once users perform actions.'} />
+        ) : logs.length === 0 ? (
+          <EmptyState icon={ClipboardList} title="No audit logs" message={debouncedSearch ? 'No logs match your search.' : 'Audit log entries will appear once users perform actions.'} />
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -170,7 +172,7 @@ export default function AuditLogPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((log) => (
+              {logs.map((log) => (
                 <tr key={log.id} style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                   <td style={{ padding: '0.75rem 1rem' }}>
                     <span

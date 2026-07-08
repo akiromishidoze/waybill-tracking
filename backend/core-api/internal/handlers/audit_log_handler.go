@@ -28,8 +28,9 @@ func (h *AuditLogHandler) List(c *gin.Context) {
 	}
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	search := c.Query("search")
 
-	logs, total, err := h.repo.List(c.Request.Context(), page, limit)
+	logs, total, err := h.repo.List(c.Request.Context(), page, limit, search)
 	if err != nil {
 		apierror.InternalJSON(c, err)
 		return

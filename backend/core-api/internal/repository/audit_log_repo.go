@@ -28,7 +28,7 @@ func (r *AuditLogRepository) Create(ctx context.Context, log *models.AuditLog) e
 	return err
 }
 
-func (r *AuditLogRepository) List(ctx context.Context, page, limit int) ([]models.AuditLog, int, error) {
+func (r *AuditLogRepository) List(ctx context.Context, page, limit int, search string) ([]models.AuditLog, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -36,15 +36,27 @@ func (r *AuditLogRepository) List(ctx context.Context, page, limit int) ([]model
 		limit = 50
 	}
 
+	var args []interface{}
+	whereClause := ""
+	if search != "" {
+		like := "%" + strings.ToLower(search) + "%"
+		args = append(args, like, like, like)
+		whereClause = " WHERE LOWER(user_name) LIKE $1 OR LOWER(action) LIKE $2 OR LOWER(details) LIKE $3"
+	}
+
 	var total int
-	if err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM audit_logs`).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, "SELECT COUNT(*) FROM audit_logs"+whereClause, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
 	offset := (page - 1) * limit
-	rows, err := r.db.Query(ctx, fmt.Sprintf(`
+	limitArg := len(args) + 1
+	offsetArg := len(args) + 2
+	query := fmt.Sprintf(`
 		SELECT id, user_id, user_name, user_role, action, resource_type, resource_id, details, ip_address, created_at
-		FROM audit_logs ORDER BY created_at DESC LIMIT %d OFFSET %d`, limit, offset))
+		FROM audit_logs%s ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, whereClause, limitArg, offsetArg)
+	args = append(args, limit, offset)
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}

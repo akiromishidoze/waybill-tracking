@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/waybill-tracking/core-api/internal/apierror"
 	"github.com/waybill-tracking/core-api/internal/models"
@@ -18,23 +17,10 @@ import (
 type PODHandler struct {
 	waybillRepo *repository.WaybillRepository
 	db          *pgxpool.Pool
-	jwtSecret   string
 }
 
-func NewPODHandler(waybillRepo *repository.WaybillRepository, db *pgxpool.Pool, jwtSecret string) *PODHandler {
-	return &PODHandler{waybillRepo: waybillRepo, db: db, jwtSecret: jwtSecret}
-}
-
-func (h *PODHandler) authFromRequest(c *gin.Context) bool {
-	tokenStr := extractToken(c.Request)
-	if tokenStr == "" {
-		return false
-	}
-	parser := jwt.NewParser(jwt.WithValidMethods([]string{"HS256"}))
-	token, err := parser.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-		return []byte(h.jwtSecret), nil
-	})
-	return err == nil && token.Valid
+func NewPODHandler(waybillRepo *repository.WaybillRepository, db *pgxpool.Pool) *PODHandler {
+	return &PODHandler{waybillRepo: waybillRepo, db: db}
 }
 
 type podDeliveryScan struct {
@@ -53,10 +39,6 @@ type podTemplateData struct {
 }
 
 func (h *PODHandler) GeneratePOD(c *gin.Context) {
-	if !h.authFromRequest(c) {
-		apierror.UnauthorizedJSON(c, "unauthorized")
-		return
-	}
 	if h.waybillRepo == nil || h.db == nil {
 		apierror.InternalJSON(c, errors.New("repository unavailable"))
 		return

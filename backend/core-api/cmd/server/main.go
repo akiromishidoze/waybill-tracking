@@ -72,8 +72,6 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 	db := deps.DB
 	rdb := deps.RDB
 
-	api.GET("/waybills/:id/pod", deps.PODHandler.GeneratePOD)
-
 	api.POST("/auth/login", middleware.RateLimitMiddleware(rdb, 10, 1*time.Minute), handlers.LoginHandler(cfg.JWTSecret, db, rdb, deps.AuditLogger))
 	api.POST("/auth/register", middleware.RateLimitMiddleware(rdb, 5, 1*time.Minute), handlers.RegisterHandler(cfg.JWTSecret, db))
 	api.POST("/auth/refresh", handlers.RefreshTokenHandler(cfg.JWTSecret, db))
@@ -104,6 +102,7 @@ func registerCoreAPIRoutes(api *gin.RouterGroup, deps *Dependencies) {
 		protected.POST("/waybills/batch-status", middleware.RoleMiddleware("OPS", "ADMIN"), deps.WaybillHandler.BatchUpdateStatus)
 		protected.GET("/waybills/map-data", deps.GPSHandler.ListCurrent)
 		protected.GET("/waybills/:id", deps.WaybillHandler.Get)
+		protected.GET("/waybills/:id/pod", deps.PODHandler.GeneratePOD)
 		protected.PATCH("/waybills/:id", deps.WaybillHandler.Update)
 		protected.PATCH("/waybills/:id/status", deps.WaybillHandler.UpdateStatus)
 		protected.POST("/waybills/:id/scans", deps.WaybillHandler.CreateScan)
@@ -336,7 +335,7 @@ func main() {
 	auditLogHandler := handlers.NewAuditLogHandler(auditLogRepo)
 
 	waybillRepo := repository.NewWaybillRepository(db, rdb)
-	podHandler := handlers.NewPODHandler(waybillRepo, db, cfg.JWTSecret)
+	podHandler := handlers.NewPODHandler(waybillRepo, db)
 	notificationDispatcher := notifications.NewDispatcher(cfg.AnalyticsAPIURL, cfg.InternalAPIKey)
 	waybillHandler := handlers.NewWaybillHandler(waybillRepo, kafkaProducer, wsHub, esClient, webhookDispatcher, notificationDispatcher, auditLogger)
 	teamRepo := repository.NewTeamRepository(db)

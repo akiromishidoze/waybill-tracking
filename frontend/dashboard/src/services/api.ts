@@ -157,17 +157,15 @@ export const aggregatedTrackingService = {
 }
 
 export const auditLogService = {
-  list: (page = 1, limit = 20, search = '') => {
-    const params = new URLSearchParams({ page: String(page), limit: String(limit) })
-    if (search) params.set('search', search)
-    return api.get<{ data: AuditLog[]; total: number; page: number; limit: number }>(`/audit-logs?${params.toString()}`)
-  },
-  export: (from?: string, to?: string) => {
-    const params = new URLSearchParams()
-    if (from) params.set('from', from)
-    if (to) params.set('to', to)
-    return api.get(`/audit-logs/export?${params.toString()}`, { responseType: 'blob' })
-  },
+  list: (page = 1, limit = 20, search = '') =>
+    api.get<{ data: AuditLog[]; total: number; page: number; limit: number }>('/audit-logs', {
+      params: { page, limit, ...(search ? { search } : {}) },
+    }),
+  export: (from?: string, to?: string) =>
+    api.get('/audit-logs/export', {
+      params: { ...(from ? { from } : {}), ...(to ? { to } : {}) },
+      responseType: 'blob',
+    }),
 }
 
 export const settingsService = {
@@ -228,9 +226,9 @@ export const escalationRuleService = {
 }
 
 export const dwellTimeService = {
-  listAlerts: () => api.get<DwellAlert[]>('/dwell-alerts'),
+  listAlerts: () => api.get<DwellAlert[]>('/operations/dwell-alerts'),
   getDwell: (waybillId: string) => api.get<DwellSegment[]>(`/waybills/${waybillId}/dwell`),
-  acknowledge: (id: string) => api.post(`/dwell-alerts/${id}/acknowledge`),
+  resolve: (id: string) => api.post(`/operations/dwell-alerts/${id}/resolve`),
   getThreshold: () => api.get<{ thresholdMinutes: number }>('/settings/dwell-threshold'),
   setThreshold: (thresholdMinutes: number) =>
     api.put('/settings/dwell-threshold', { thresholdMinutes }),

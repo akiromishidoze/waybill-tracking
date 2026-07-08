@@ -1,44 +1,42 @@
 import { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
-import WaybillListPage from './pages/WaybillListPage'
-import WaybillNewPage from './pages/WaybillNewPage'
-import WaybillDetailPage from './pages/WaybillDetailPage'
 import TrackingPage from './pages/TrackingPage'
-import AnalyticsPage from './pages/AnalyticsPage'
-import UsersPage from './pages/UsersPage'
-import AuditLogPage from './pages/AuditLogPage'
-import CarriersPage from './pages/CarriersPage'
-import AggregatedTrackingPage from './pages/AggregatedTrackingPage'
-import BatchStatusPage from './pages/BatchStatusPage'
-import WebhooksPage from './pages/WebhooksPage'
-import CarrierPerformancePage from './pages/CarrierPerformancePage'
-import MapViewPage from './pages/MapViewPage'
-import ReturnsPage from './pages/ReturnsPage'
-import RoadmapTrackingPage from './pages/RoadmapTrackingPage'
-import RoadmapOperationsPage from './pages/RoadmapOperationsPage'
-import RoadmapAnalyticsPage from './pages/RoadmapAnalyticsPage'
-import RoadmapIntegrationsPage from './pages/RoadmapIntegrationsPage'
-import DwellAlertsPage from './pages/DwellAlertsPage'
-import GeofenceEventsPage from './pages/GeofenceEventsPage'
-import RegionPerformancePage from './pages/RegionPerformancePage'
-import ErpIntegrationsPage from './pages/ErpIntegrationsPage'
-import CODPage from './pages/CODPage'
-import CostAnalyticsPage from './pages/CostAnalyticsPage'
-import DemandForecastingPage from './pages/DemandForecastingPage'
-import CarbonFootprintPage from './pages/CarbonFootprintPage'
-import WaybillImportPage from './pages/WaybillImportPage'
-import IotSensorPage from './pages/IotSensorPage'
-import GPSSimulatorPage from './pages/GPSSimulatorPage'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
-import UnauthorizedPage from './pages/UnauthorizedPage'
-import NotFoundPage from './pages/NotFoundPage'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const WaybillListPage = lazy(() => import('./pages/WaybillListPage'))
+const WaybillNewPage = lazy(() => import('./pages/WaybillNewPage'))
+const WaybillDetailPage = lazy(() => import('./pages/WaybillDetailPage'))
+const WaybillImportPage = lazy(() => import('./pages/WaybillImportPage'))
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
+const UsersPage = lazy(() => import('./pages/UsersPage'))
+const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
+const CarriersPage = lazy(() => import('./pages/CarriersPage'))
+const AggregatedTrackingPage = lazy(() => import('./pages/AggregatedTrackingPage'))
+const BatchStatusPage = lazy(() => import('./pages/BatchStatusPage'))
+const WebhooksPage = lazy(() => import('./pages/WebhooksPage'))
+const CarrierPerformancePage = lazy(() => import('./pages/CarrierPerformancePage'))
+const MapViewPage = lazy(() => import('./pages/MapViewPage'))
+const ReturnsPage = lazy(() => import('./pages/ReturnsPage'))
+const DwellAlertsPage = lazy(() => import('./pages/DwellAlertsPage'))
+const GeofenceEventsPage = lazy(() => import('./pages/GeofenceEventsPage'))
+const RegionPerformancePage = lazy(() => import('./pages/RegionPerformancePage'))
+const ErpIntegrationsPage = lazy(() => import('./pages/ErpIntegrationsPage'))
+const CODPage = lazy(() => import('./pages/CODPage'))
+const CostAnalyticsPage = lazy(() => import('./pages/CostAnalyticsPage'))
+const DemandForecastingPage = lazy(() => import('./pages/DemandForecastingPage'))
+const CarbonFootprintPage = lazy(() => import('./pages/CarbonFootprintPage'))
+const IotSensorPage = lazy(() => import('./pages/IotSensorPage'))
+const GPSSimulatorPage = lazy(() => import('./pages/GPSSimulatorPage'))
+const RoadmapTrackingPage = lazy(() => import('./pages/RoadmapTrackingPage'))
+const RoadmapOperationsPage = lazy(() => import('./pages/RoadmapOperationsPage'))
+const RoadmapAnalyticsPage = lazy(() => import('./pages/RoadmapAnalyticsPage'))
+const RoadmapIntegrationsPage = lazy(() => import('./pages/RoadmapIntegrationsPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const ScheduledReportsPage = lazy(() => import('./pages/ScheduledReportsPage'))
 const DriverAppPage = lazy(() => import('./pages/DriverAppPage'))
@@ -50,6 +48,8 @@ const AutoCommunicationsPage = lazy(() => import('./pages/AutoCommunicationsPage
 const DynamicReroutingPage = lazy(() => import('./pages/DynamicReroutingPage'))
 const WhiteLabelPortalPage = lazy(() => import('./pages/WhiteLabelPortalPage'))
 const DriverPWAPage = lazy(() => import('./pages/DriverPWAPage'))
+const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 const PageLoader = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-muted)' }}>

@@ -34,7 +34,7 @@ export default function DwellAlertsPage() {
   })
 
   const acknowledgeAlert = useMutation({
-    mutationFn: (id: string) => dwellTimeService.acknowledge(id),
+    mutationFn: (id: string) => dwellTimeService.resolve(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dwell-alerts'] }),
   })
 

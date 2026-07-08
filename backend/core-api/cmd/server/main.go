@@ -430,7 +430,6 @@ func main() {
 		PODHandler:               podHandler,
 	}
 
-	registerCoreAPIRoutes(r.Group("/api"), deps)
 	registerCoreAPIRoutes(r.Group("/api/v1"), deps)
 
 	r.GET("/ws", func(c *gin.Context) {

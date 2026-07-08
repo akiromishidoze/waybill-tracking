@@ -283,7 +283,7 @@ resource "aws_ecs_task_definition" "dashboard" {
       ]
       environment = [
         { name = "ENV", value = var.environment },
-        { name = "VITE_API_URL", value = "http://${aws_lb.waybill.dns_name}/api" }
+        { name = "VITE_API_URL", value = "http://${aws_lb.waybill.dns_name}/api/v1" }
       ]
       logConfiguration = {
         logDriver = "awslogs"

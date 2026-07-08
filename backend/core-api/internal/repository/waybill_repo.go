@@ -45,6 +45,8 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 	}
 
 	offset := (page - 1) * limit
+	limitArg := len(args) + 1
+	offsetArg := len(args) + 2
 	dataQuery := fmt.Sprintf(`
 		SELECT w.id, w.tracking_number, w.shipper_id, w.shipper_name, w.recipient_name,
 		       w.recipient_address, w.recipient_phone, w.origin, w.destination, w.weight,
@@ -52,8 +54,9 @@ func (r *WaybillRepository) List(ctx context.Context, search string, page, limit
 		       w.carrier_name, w.carrier_tracking_number, w.team_id, COALESCE(t.name, '') as team_name,
 		       w.is_cod, w.cod_amount, w.origin_country, w.destination_country,
 		       w.created_at, w.updated_at
-		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id%s ORDER BY w.created_at DESC LIMIT %d OFFSET %d`,
-		whereClause, limit, offset)
+		FROM waybills w LEFT JOIN teams t ON w.team_id = t.id%s ORDER BY w.created_at DESC LIMIT $%d OFFSET $%d`,
+		whereClause, limitArg, offsetArg)
+	args = append(args, limit, offset)
 
 	rows, err := r.db.Query(ctx, dataQuery, args...)
 

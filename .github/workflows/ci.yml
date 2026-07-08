@@ -96,26 +96,27 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:latest
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
 
-  deploy-gcp:
-    needs: [build-and-push]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-      - uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: waybill-cluster
-          location: us-central1
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      - run: |
-          kubectl set image deployment/core-api core-api=ghcr.io/${{ github.repository }}/core-api:${{ env.IMAGE_TAG }} -n waybill
-          kubectl set image deployment/analytics-api analytics-api=ghcr.io/${{ github.repository }}/analytics-api:${{ env.IMAGE_TAG }} -n waybill
-          kubectl set image deployment/dashboard dashboard=ghcr.io/${{ github.repository }}/dashboard:${{ env.IMAGE_TAG }} -n waybill
-          kubectl rollout status deployment/core-api -n waybill
-          kubectl rollout status deployment/analytics-api -n waybill
-          kubectl rollout status deployment/dashboard -n waybill
+  # deploy-gcp:
+  #   needs: [build-and-push]
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   permissions:
+  #     contents: read
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: google-github-actions/auth@v2
+  #       with:
+  #         credentials_json: ${{ secrets.GCP_SA_KEY }}
+  #     - uses: google-github-actions/get-gke-credentials@v2
+  #       with:
+  #         cluster_name: waybill-cluster
+  #         location: us-central1
+  #         project_id: ${{ secrets.GCP_PROJECT_ID }}
+  #     - run: |
+  #         kubectl set image deployment/core-api core-api=ghcr.io/${{ github.repository }}/core-api:${{ env.IMAGE_TAG }} -n waybill
+  #         kubectl set image deployment/analytics-api analytics-api=ghcr.io/${{ github.repository }}/analytics-api:${{ env.IMAGE_TAG }} -n waybill
+  #         kubectl set image deployment/dashboard dashboard=ghcr.io/${{ github.repository }}/dashboard:${{ env.IMAGE_TAG }} -n waybill
+  #         kubectl rollout status deployment/core-api -n waybill
+  #         kubectl rollout status deployment/analytics-api -n waybill
+  #         kubectl rollout status deployment/dashboard -n waybill
+  # Disabled: GKE requires billing. Uncomment if you enable billing and set up GCP secrets.

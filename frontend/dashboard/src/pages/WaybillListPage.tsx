@@ -40,7 +40,7 @@ export default function WaybillListPage() {
 
   const { data: dwellAlerts } = useQuery({
     queryKey: ['dwell-alerts'],
-    queryFn: () => dwellTimeService.listAlerts().then(r => r.data),
+    queryFn: () => dwellTimeService.listAlerts().then(r => r.data ?? []),
   })
 
   const waybills = useMemo(() => {
@@ -76,7 +76,7 @@ export default function WaybillListPage() {
   const displayed = filtered?.slice((page - 1) * pageSize, page * pageSize) ?? []
 
   const dweltWaybills = new Set(
-    (dwellAlerts || []).filter(a => !a.acknowledged).map(a => a.waybillId)
+    (Array.isArray(dwellAlerts) ? dwellAlerts : []).filter(a => !a.acknowledged).map(a => a.waybillId)
   )
 
   function handleSearch(v: string) { setSearchParams(prev => { prev.set('search', v); prev.set('page', '1'); return prev }) }

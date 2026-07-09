@@ -50,12 +50,16 @@ func (r *AuditLogRepository) List(ctx context.Context, page, limit int, search s
 	}
 
 	offset := (page - 1) * limit
-	limitArg := len(args) + 1
-	offsetArg := len(args) + 2
-	query := fmt.Sprintf(`
+	query := `
 		SELECT id, user_id, user_name, user_role, action, resource_type, resource_id, details, ip_address, created_at
-		FROM audit_logs%s ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, whereClause, limitArg, offsetArg)
-	args = append(args, limit, offset)
+		FROM audit_logs` + whereClause + ` ORDER BY created_at DESC`
+	if search != "" {
+		query += ` LIMIT $4 OFFSET $5`
+		args = append(args, limit, offset)
+	} else {
+		query += ` LIMIT $1 OFFSET $2`
+		args = []interface{}{limit, offset}
+	}
 	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, 0, err

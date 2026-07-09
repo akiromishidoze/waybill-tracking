@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+
 	"github.com/google/uuid"
+	"github.com/waybill-tracking/core-api/internal/logger"
 	"github.com/waybill-tracking/core-api/internal/models"
+	"go.uber.org/zap"
 )
 
 type AuditLogger struct {
@@ -15,6 +18,11 @@ func NewAuditLogger(repo *AuditLogRepository) *AuditLogger {
 }
 
 func (l *AuditLogger) Log(ctx context.Context, userID, userName, userRole, action, resourceType, resourceID, details, ipAddress string) {
+	if l.repo == nil {
+		logger.L().Warn("audit logger: repository is nil, skipping log entry",
+			zap.String("action", action), zap.String("userID", userID))
+		return
+	}
 	entry := &models.AuditLog{
 		ID:           uuid.New().String(),
 		UserID:       userID,
@@ -26,5 +34,8 @@ func (l *AuditLogger) Log(ctx context.Context, userID, userName, userRole, actio
 		Details:      details,
 		IPAddress:    ipAddress,
 	}
-	_ = l.repo.Create(ctx, entry)
+	if err := l.repo.Create(ctx, entry); err != nil {
+		logger.L().Error("audit logger: failed to write audit log entry",
+			zap.String("action", action), zap.String("userID", userID), zap.Error(err))
+	}
 }

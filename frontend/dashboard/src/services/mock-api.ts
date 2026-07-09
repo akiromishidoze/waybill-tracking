@@ -298,13 +298,16 @@ const seedEscalations: Escalation[] = [
 ]
 
 const seedAuditLogs: AuditLog[] = [
-  { id: 'aud-001', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'LOGIN', resourceType: 'AUTH', resourceId: 'usr-001', details: 'User logged in from dashboard', ipAddress: '192.168.1.100', createdAt: ago(2) },
-  { id: 'aud-002', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'UPDATE_STATUS', resourceType: 'WAYBILL', resourceId: 'wb-002', details: 'Status updated from AT_SORTING_CENTER to OUT_FOR_DELIVERY', ipAddress: '192.168.1.100', createdAt: ago(8) },
-  { id: 'aud-003', userId: 'usr-002', userName: 'Maria Santos', userRole: 'OPS', action: 'UPDATE_STATUS', resourceType: 'WAYBILL', resourceId: 'wb-003', details: 'Status updated to AT_SORTING_CENTER at Davao facility', ipAddress: '192.168.1.101', createdAt: ago(16) },
-  { id: 'aud-004', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'CREATE', resourceType: 'USER', resourceId: 'usr-007', details: 'Created new courier: Pedro Lim', ipAddress: '192.168.1.100', createdAt: ago(168) },
-  { id: 'aud-005', userId: 'usr-005', userName: 'Carlos Reyes', userRole: 'OPS', action: 'ACKNOWLEDGE', resourceType: 'ESCALATION', resourceId: 'esc-002', details: 'Acknowledged escalation for LBC-2024-1006', ipAddress: '192.168.1.102', createdAt: ago(8) },
-  { id: 'aud-006', userId: 'usr-002', userName: 'Maria Santos', userRole: 'OPS', action: 'UPDATE_STATUS', resourceType: 'WAYBILL', resourceId: 'wb-009', details: 'Status updated to DELIVERED', ipAddress: '192.168.1.101', createdAt: ago(14) },
-  { id: 'aud-007', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'LOGIN', resourceType: 'AUTH', resourceId: 'usr-001', details: 'User logged in from admin panel', ipAddress: '10.0.0.15', createdAt: ago(24) },
+  { id: 'aud-001', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_LOGIN', resourceType: 'AUTH', resourceId: 'usr-001', details: 'User logged in from dashboard', ipAddress: '192.168.1.100', createdAt: ago(2) },
+  { id: 'aud-002', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'STATUS_UPDATE', resourceType: 'WAYBILL', resourceId: 'wb-002', details: 'Status updated from AT_SORTING_CENTER to OUT_FOR_DELIVERY', ipAddress: '192.168.1.100', createdAt: ago(8) },
+  { id: 'aud-003', userId: 'usr-002', userName: 'Maria Santos', userRole: 'OPS', action: 'STATUS_UPDATE', resourceType: 'WAYBILL', resourceId: 'wb-003', details: 'Status updated to AT_SORTING_CENTER at Davao facility', ipAddress: '192.168.1.101', createdAt: ago(16) },
+  { id: 'aud-004', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'WAYBILL_CREATE', resourceType: 'WAYBILL', resourceId: 'wb-015', details: 'Waybill LBC-2024-1015 created', ipAddress: '192.168.1.100', createdAt: ago(168) },
+  { id: 'aud-005', userId: 'usr-002', userName: 'Maria Santos', userRole: 'OPS', action: 'SCAN_CREATE', resourceType: 'WAYBILL', resourceId: 'wb-009', details: 'Scan event: OUT_FOR_DELIVERY', ipAddress: '192.168.1.101', createdAt: ago(8) },
+  { id: 'aud-006', userId: 'usr-002', userName: 'Maria Santos', userRole: 'OPS', action: 'STATUS_UPDATE', resourceType: 'WAYBILL', resourceId: 'wb-009', details: 'Status changed to DELIVERED', ipAddress: '192.168.1.101', createdAt: ago(14) },
+  { id: 'aud-007', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'USER_LOGIN', resourceType: 'AUTH', resourceId: 'usr-001', details: 'User logged in from admin panel', ipAddress: '10.0.0.15', createdAt: ago(24) },
+  { id: 'aud-008', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'WAYBILL_UPDATE', resourceType: 'WAYBILL', resourceId: 'wb-004', details: 'Waybill DHL-PH-99123 updated', ipAddress: '192.168.1.100', createdAt: ago(32) },
+  { id: 'aud-009', userId: 'usr-005', userName: 'Carlos Reyes', userRole: 'OPS', action: 'USER_LOGIN_FAILED', resourceType: 'AUTH', resourceId: 'usr-005', details: 'Failed login attempt', ipAddress: '192.168.1.102', createdAt: ago(48) },
+  { id: 'aud-010', userId: 'usr-001', userName: 'Admin User', userRole: 'ADMIN', action: 'WAYBILL_IMPORT', resourceType: 'WAYBILL', resourceId: '', details: 'Imported 12 waybills', ipAddress: '192.168.1.100', createdAt: ago(72) },
 ]
 
 const seedAggregatedTracking: AggregatedTracking[] = [
@@ -622,6 +625,26 @@ export function installMockInterceptor(api: AxiosInstance) {
     const itemId = idMatch?.[2] || ''
 
     // --- Specific path handlers (must run before generic idMatch) ---
+    if (method === 'get' && key === 'audit-logs') {
+      const params = new URLSearchParams(url.split('?')[1] || '')
+      const p = parseInt(params.get('page') || '1', 10)
+      const lim = parseInt(params.get('limit') || '20', 10)
+      const s = params.get('search') || ''
+      let filtered = seedAuditLogs
+      if (s) {
+        const lower = s.toLowerCase()
+        filtered = seedAuditLogs.filter(l =>
+          l.userName.toLowerCase().includes(lower) ||
+          l.action.toLowerCase().includes(lower) ||
+          l.details.toLowerCase().includes(lower)
+        )
+      }
+      const total = filtered.length
+      const start = (p - 1) * lim
+      const data = filtered.slice(start, start + lim)
+      mock({ data, total, page: p, limit: lim })
+      return config
+    }
     if (method === 'get' && key === 'analytics/stats') {
       const wbs = seedWaybills
       const totalActive = wbs.filter(w => !['DELIVERED', 'CANCELLED', 'RETURNED'].includes(w.status)).length
@@ -737,7 +760,7 @@ export function installMockInterceptor(api: AxiosInstance) {
     }
 
     // Pass real-backend resources through without mocking
-    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'audit-logs', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings', 'analytics', 'integrations', 'erp-integrations']
+    const realBackendKeys = ['waybills', 'users', 'teams', 'scan_events', 'driver-assignments', 'driver-scans', 'carriers', 'webhooks', 'settings', 'analytics', 'integrations', 'erp-integrations']
     if (realBackendKeys.includes(key) || realBackendKeys.includes(collKey)) {
       return config
     }
